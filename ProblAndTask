@@ -1,0 +1,34 @@
+Only english! For study! For self!
+File with a problems of code and current tasks.
+Problems:
+    way_of_ray have two repeated last points in the end.
+    _reflect have strange behavior when ray(-3 -3 ,0 1) and sphere(1 2 5 1 2) have reflected in _refract.
+    choose of accuracy in all function. bug with double refraction.
+    git
+Tasks:
+    Fix all bugs!
+    Realize drawing in three dimensional space!
+    троить поверхности через матрицу поворота
+    выделить поиск нормали и пересечения в отдельную функцию
+
+    Зачем нужно t которое отрицательно
+    кват(кас плоск к поверх)
+    апертура(диаметр линзы)
+    описание лучей
+
+
+    RaysPool - динамческий массив
+
+    хранить
+    мат трансформац Т1-Т0 длина луча
+    плоскуб поверхность
+    плосткость поворачивать
+    Т0 = 0
+    т1 = 0
+    трансформировать лучи
+    сам нормирую лучи
+
+    генерация лучей
+
+Source:
+    https://matplotlib.org/mpl_toolkits/mplot3d/tutorial.html 
