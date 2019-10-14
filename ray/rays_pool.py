@@ -1,8 +1,8 @@
-from enum import Enum
+from enum import IntEnum
 import numpy as np
 
 
-class Compon(Enum):
+class Compon(IntEnum):
     """
     Component of RAY
     """
@@ -11,8 +11,8 @@ class Compon(Enum):
     T0_OFFSET = 6
     T1_OFFSET = 7
     # For future code
-    # LAM_OFFSET = 8
-    # W_OFFSET = 9
+    # LAM_OFFSET.value = 8
+    # W_OFFSET.value = 9
     RAY_OFFSET = 8
     DIM = 3
 
@@ -20,33 +20,51 @@ class Compon(Enum):
     def new_dimension(cls, dim: int):
         if dim < 1:
             raise AttributeError("Dimension too small(%s)" % (str(dim)))
-        cls.R_OFFSET = dim
-        cls.T0_OFFSET = cls.R_OFFSET + dim
-        cls.T1_OFFSET = cls.T0_OFFSET + 1
-        cls.RAY_OFFSET = cls.T1_OFFSET + 1
+        cls.R_OFFSET.value = dim
+        cls.T0_OFFSET.value = cls.R_OFFSET.value + dim
+        cls.T1_OFFSET.value = cls.T0_OFFSET.value + 1
+        cls.RAY_OFFSET.value = cls.T1_OFFSET.value + 1
         cls.DIM = dim
 
 
 class RaysPool:
 
     def __init__(self, rays: list):
-        if len(rays) // Compon.RAY_OFFSET != 0:
+        if (len(rays) % Compon.RAY_OFFSET.value) != 0:
             raise AttributeError("Invalid length of rays list(%s)" % (str(len(rays))))
+        if not all(isinstance(i, float) or isinstance(i, int) for i in rays):
+            raise TypeError("Array must consist from float")
         self.__pool = rays.copy()
-        norm_val = np.linalg.norm(rays[:Compon.R_OFFSET])
-        if abs(norm_val - 1) > np.finfo(float).eps:
-            for i in range(Compon.E_OFFSET, Compon.R_OFFSET):
-                self.__pool[i] = self.__pool[i] / norm_val
+        self.__rays_num = len(rays) // Compon.RAY_OFFSET.value
+        
+        # normalisation of direction vector
+        for i in range(self.__rays_num):
+            norm_val = np.linalg.norm(self.e(i))
+            if abs(norm_val - 1) > np.finfo(float).eps:
+                r_i = i * Compon.RAY_OFFSET.value
+                for i in range(r_i, r_i + Compon.DIM.value):
+                    self.__pool[i] /= norm_val
 
-    def e(self, i):
-        a, b = i * Compon.RAY_OFFSET*(Compon.E_OFFSET, Compon.R_OFFSET)
+    @property
+    def rays_number(self):
+        return self.__rays_num
+
+    def e(self, i: int):
+        r_i = i * Compon.RAY_OFFSET.value
+        a = r_i + Compon.E_OFFSET.value
+        b = r_i + Compon.R_OFFSET.value
         return self.__pool[a:b]
 
-    def r(self, i):
-        return self.__pool[Compon.R_OFFSET, Compon.T0_OFFSET]
+    def r(self, i: int):
+        r_i = i * Compon.RAY_OFFSET.value
+        a = r_i + Compon.R_OFFSET.value
+        b = r_i + Compon.T0_OFFSET.value
+        return self.__pool[a:b]
 
-    def t0(self, i):
-        return self.__pool[Compon.T0_OFFSET]
+    def t0(self, i: int) -> float:
+        r_i = i * Compon.RAY_OFFSET.value
+        return self.__pool[r_i + Compon.T0_OFFSET.value]
 
-    def t1(self, i):
-        return self.__pool[Compon.T1_OFFSET]
+    def t1(self, i) -> float:
+        r_i = i * Compon.RAY_OFFSET.value
+        return self.__pool[r_i + Compon.T1_OFFSET.value]
