@@ -1,7 +1,11 @@
 from ray.rays_pool import *
 
-rays_arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+rays_arr = [i for i in range(0, 24)]
 
 ra = RaysPool(rays_arr)
-print(str(ra.e(1)))
-print(ra.e(0))
+print(ra)
+ra.append_rays([i for i in range(2, 10)])
+print(ra)
+ra.erase_ray(2)
+print(ra)
+
