@@ -1,13 +1,14 @@
 from surfaces.surface import Surface
 import matplotlib.patches as pathes
 from ray.ray import Ray
+from ray.rays_pool import RaysPool
 import numpy as np
 import math as m
 
 
 class Sphere(Surface):
-    __center = []
-    __r = 0.
+    # __center = []
+    # __r = 0.
 
     def __init__(self, center: list, radius: float,
                  type_surface: Surface.types = Surface.types.REFLECTING,
@@ -25,7 +26,7 @@ class Sphere(Surface):
         self.__n1 = n1
         self.__n2 = n2
 
-    # getter and setter====================================================================
+    # =========================== getter and setter ====================================================================
 
     @property
     def center(self):
@@ -36,7 +37,7 @@ class Sphere(Surface):
 
         return self.__r
 
-    # methods of object sphere====================================================================
+    # ============================== Sphere object methods =============================================================
 
     def __str__(self):
         return "Sphere:{ center: %s, radius: %s, type: %s}" % (str(self.center), str(self.r), str(self.type))
@@ -64,43 +65,6 @@ class Sphere(Surface):
 
         raise AttributeError("Defined only dor dimension 2 and 3")
 
-    def find_intersection_with_surface(self, ray: Ray):
-        # реализация без переноса центра сферы в центр координат(на это нужен только сдвиг)
-        r0_p0 = np.subtract(self.center, ray.start)
-        r0_p0e = np.dot(r0_p0, ray.dir)
-        # ищем дискриминант
-        disc = r0_p0e ** 2 - np.dot(r0_p0, r0_p0) + self.r ** 2
-        if (abs(disc) < np.finfo(float).eps):
-            disc = 0
-
-        if disc < 0:
-            print('no points of intersection ray %s with the sphere %s' % (str(ray), self.__str__()))
-            return
-        # ищем корни/корень
-        t = None
-        if (disc != 0):
-            sqrt_disc = m.sqrt(disc)
-            t = [r0_p0e - sqrt_disc, r0_p0e + sqrt_disc]
-        else:
-            t = [r0_p0e]
-
-        # проверки
-        if all([i < 0 for i in t]):
-            print('no points of intersection ray %s with the sphere %s' % (str(ray), self.__str__()))
-            return
-        # массив положительных корней
-        positive_t = []
-        for i in t:
-            if i > np.finfo(float).eps:
-                positive_t.append(i)
-        if len(positive_t) > 0:
-            return [ray.calc_point_of_ray(length) for length in positive_t]
-
-    def find_nearest_point_intersection(self, ray: Ray):
-        l = self.find_intersection_with_surface(ray)
-        if l != None and len(l) > 0:
-            return l[0]
-
     def is_point_belong(self, point: list) -> bool:
         if len(point) != self.dim:
             raise AttributeError("The point %s have different dimension than sphere(%s)" % (str(point), str(self.dim)))
@@ -110,8 +74,8 @@ class Sphere(Surface):
             return True
 
     def norm_vec(self, point):
-        if not self.is_point_belong(point):
-            raise AttributeError("The point %s is not belong surface %s" % (str(point), str(self)))
+        # if not self.is_point_belong(point):
+        #     raise AttributeError("The point %s is not belong surface %s" % (str(point), str(self)))
 
         n = []
         for i in range(self.dim):
@@ -132,3 +96,54 @@ class Sphere(Surface):
         if np.linalg.norm(rad_vec) - self.r > 10 * np.finfo(float).eps:
             return self.__n1, self.__n2
         return self.__n2, self.__n1
+
+    # ======================================= methods for Ray ==========================================================
+    def _ray_surface_intersection(self, e: list, r: list):
+        r0_p0 = np.subtract(self.center, r)
+        r0_p0e = np.dot(r0_p0, e)
+        # ищем дискриминант
+        disc = r0_p0e ** 2 - np.dot(r0_p0, r0_p0) + self.r ** 2
+        if (abs(disc) < np.finfo(float).eps):
+            disc = 0
+
+        if disc < 0:
+            return
+        # ищем корни/корень
+        t = None
+        if (disc != 0):
+            sqrt_disc = m.sqrt(disc)
+            t = [r0_p0e - sqrt_disc, r0_p0e + sqrt_disc]
+        else:
+            t = [r0_p0e]
+
+        # проверки
+        if all([i < 0 for i in t]):
+            return
+        # массив положительных корней
+        positive_t = []
+        for i in t:
+            if i > np.finfo(float).eps:
+                positive_t.append(i)
+        if len(positive_t) > 0:
+            return positive_t
+
+    def find_intersection_with_surface(self, ray: Ray):
+        positive_t = Sphere._ray_surface_intersection(self, ray.dir, ray.start)
+        if positive_t != None:
+            return [ray.calc_point_of_ray(t) for t in positive_t]
+
+    # реализация без переноса центра сферы в центр координат(на это нужен только сдвиг)
+
+    def find_nearest_point_intersection(self, ray: Ray):
+        l = self.find_intersection_with_surface(ray)
+        if l != None and len(l) > 0:
+            return l[0]
+
+    # ======================================== methods for Ray_pool ====================================================
+    def find_intersection_pool_with_surface(self, pool: RaysPool, index: int):
+        return Sphere._ray_surface_intersection(self, pool.e(index), pool.r(index))
+
+    def find_nearest_intersection_pool_with_surface(self, pool, index: int):
+        l = self.find_intersection_pool_with_surface(pool, index)
+        if l != None and len(l) > 0:
+            return l[0]

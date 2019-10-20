@@ -26,20 +26,12 @@ class Surface:
     def dim(self):
         return self.__dim
 
-    def norm_vec(self, point):
-        return
-
-    def draw_surface(self, axes) -> bool:
-        return False
-
-    def find_intersection_with_surface(self, ray):
-        pass
-
-    def find_nearest_point_intersection(self, ray):
-        pass
-
+    # =================================== Surface object  methods ======================================================
     def is_point_belong(self, point: list) -> bool:
         pass
+
+    def norm_vec(self, point):
+        return
 
     def get_refractive_indexes(self, point: list):
         """
@@ -53,6 +45,23 @@ class Surface:
         :param point:
         :return:
         """
+        pass
+
+    def draw_surface(self, axes) -> bool:
+        return False
+
+    # ======================================= methods for Ray ==========================================================
+    def find_intersection_with_surface(self, ray):
+        pass
+
+    def find_nearest_point_intersection(self, ray):
+        pass
+
+    # ======================================== methods for Ray_pool ====================================================
+    def find_intersection_pool_with_surface(self, pool, index: int):
+        pass
+
+    def find_nearest_intersection_pool_with_surface(self, pool, index: int):
         pass
 
     @classmethod
