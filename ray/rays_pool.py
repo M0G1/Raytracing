@@ -138,3 +138,5 @@ class RaysPool:
     def t1(self, i) -> float:
         r_i = i * Compon.RAY_OFFSET.value
         return self.__pool[r_i + Compon.T1_OFFSET.value]
+
+

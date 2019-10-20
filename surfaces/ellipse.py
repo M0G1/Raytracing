@@ -33,7 +33,8 @@ class Ellipse(Surface):
         self.__abc = ellipse_coefficients.copy()
         self.__n1 = n1
         self.__n2 = n2
-        # getter and setter====================================================================
+
+    # =========================== getter and setter ====================================================================
 
     @property
     def center(self):
@@ -43,7 +44,7 @@ class Ellipse(Surface):
     def abc(self):
         return self.__abc
 
-    # methods of object ellipse====================================================================
+    # ============================== Ellipse object methods ============================================================
 
     def __str__(self):
         return "Ellipse{ center: %s, coef: %s, type: %s}" % (str(self.center), str(self.abc), str(self.type))
@@ -67,56 +68,6 @@ class Ellipse(Surface):
 
         raise AttributeError("Defined only dor dimension 2 and 3")
 
-    def find_intersection_with_surface(self, ray: Ray):
-        r_p0 = np.subtract(ray.start, self.center)
-        mat = []
-        abc = 0
-        if len(ray.start) == 3:
-            mat = [[self.abc[1] * self.abc[2], 0, 0],
-                   [0, self.abc[0] * self.abc[2], 0],
-                   [0, 0, self.abc[0] * self.abc[1]]]
-
-            abc = mat[0][0] * mat[1][1] * mat[2][2]
-        elif len(ray.start) == 2:
-            mat = [[self.abc[1], 0],
-                   [0, self.abc[0]]]
-            abc = self.abc[1] ** 2 * self.abc[0] ** 2
-        mr_p0 = np.dot(mat, r_p0)
-        me = np.dot(mat, ray.dir)
-
-        a = np.dot(me, me)
-        b = np.dot(me, mr_p0)
-        c = np.dot(mr_p0, mr_p0) - abc
-        # ищем дискриминант
-        disc_on4 = b ** 2 - a * c
-        if abs(disc_on4) < np.finfo(float).eps:
-            disc_on4 = 0
-        if disc_on4 < 0:
-            print("no intersection points ray %s with ellipse %s" % (str(ray), self.__str__()))
-            return
-        sqrt_disc_on4 = m.sqrt(disc_on4)
-        # ищем корни/корень
-        if disc_on4 == 0:
-            t = [-b / a]
-        else:
-            t = [(-b - sqrt_disc_on4) / a, (-b + sqrt_disc_on4) / a]
-        # пр    оверки
-        if all([i < 0 for i in t]):
-            print('no intersection points ray %s with ellipse %s' % (str(ray), self.__str__()))
-            return
-        # массив положительных корней
-        positive_t = []
-        for i in t:
-            if i > np.finfo(float).eps:
-                positive_t.append(i)
-        if len(positive_t) > 0:
-            return [ray.calc_point_of_ray(length) for length in positive_t]
-
-    def find_nearest_point_intersection(self, ray: Ray):
-        l = self.find_intersection_with_surface(ray)
-        if l != None and len(l) > 0:
-            return l[0]
-
     def is_point_belong(self, point: list) -> bool:
         if len(point) != self.dim:
             raise AttributeError("The point %s have different dimension than ellipse(%s)" % (str(point), str(self.dim)))
@@ -129,10 +80,8 @@ class Ellipse(Surface):
             return True
 
     def norm_vec(self, point: list):
-
-        if not self.is_point_belong(point):
-            raise AttributeError("The point %s is not belong surface %s" % (str(point), str(self)))
-
+        # if not self.is_point_belong(point):
+        #     raise AttributeError("The point %s is not belong surface %s" % (str(point), str(self)))
         n = []
         for i in range(self.dim):
             n.append((2 * (point[i] - self.center[i])) / (self.abc[i] ** 2))
@@ -154,3 +103,66 @@ class Ellipse(Surface):
         if sum - 1 > 10 * np.finfo(float).eps:
             return self.__n1, self.__n2
         return self.__n2, self.__n1
+
+    # ======================================= methods for Ray ==========================================================
+    def _ray_surface_intersection(self, e: list, r: list):
+        r_p0 = np.subtract(r, self.center)
+        mat = []
+        abc = 0
+        if len(r) == 3:
+            mat = [[self.abc[1] * self.abc[2], 0, 0],
+                   [0, self.abc[0] * self.abc[2], 0],
+                   [0, 0, self.abc[0] * self.abc[1]]]
+
+            abc = mat[0][0] * mat[1][1] * mat[2][2]
+        elif len(r) == 2:
+            mat = [[self.abc[1], 0],
+                   [0, self.abc[0]]]
+            abc = self.abc[1] ** 2 * self.abc[0] ** 2
+        mr_p0 = np.dot(mat, r_p0)
+        me = np.dot(mat, e)
+
+        a = np.dot(me, me)
+        b = np.dot(me, mr_p0)
+        c = np.dot(mr_p0, mr_p0) - abc
+        # ищем дискриминант
+        disc_on4 = b ** 2 - a * c
+        if abs(disc_on4) < np.finfo(float).eps:
+            disc_on4 = 0
+        if disc_on4 < 0:
+            return
+        sqrt_disc_on4 = m.sqrt(disc_on4)
+        # ищем корни/корень
+        if disc_on4 == 0:
+            t = [-b / a]
+        else:
+            t = [(-b - sqrt_disc_on4) / a, (-b + sqrt_disc_on4) / a]
+        # пр    оверки
+        if all([i < 0 for i in t]):
+            return
+        # массив положительных корней
+        positive_t = []
+        for i in t:
+            if i > np.finfo(float).eps:
+                positive_t.append(i)
+        if len(positive_t) > 0:
+            return positive_t
+
+    def find_intersection_with_surface(self, ray: Ray):
+        positive_t = Ellipse._ray_surface_intersection(self, ray.dir, ray.start)
+        if positive_t != None:
+            return [ray.calc_point_of_ray(t) for t in positive_t]
+
+    def find_nearest_point_intersection(self, ray: Ray):
+        l = self.find_intersection_with_surface(ray)
+        if l != None and len(l) > 0:
+            return l[0]
+
+    # ======================================== methods for Ray_pool ====================================================
+    def find_intersection_pool_with_surface(self, pool, index: int):
+        return Ellipse._ray_surface_intersection(self, pool.e(index), pool.r(index))
+
+    def find_nearest_intersection_pool_with_surface(self, pool, index: int):
+        l = self.find_intersection_pool_with_surface(pool, index)
+        if l != None and len(l) > 0:
+            return l[0]

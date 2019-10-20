@@ -1,13 +1,14 @@
 from surfaces.surface import Surface
 from ray.ray import Ray
+from ray.rays_pool import RaysPool
 import numpy as np
 import pylab
 import matplotlib.lines as mlines
 
 
 class Plane(Surface):
-    __rad = ()
-    __norm = ()
+    # __rad = ()
+    # __norm = ()
 
     def __init__(self, radius_vector: list, normal_vector: list,
                  type_surface: Surface.types = Surface.types.REFLECTING,
@@ -37,13 +38,13 @@ class Plane(Surface):
         self.__n1 = n1
         self.__n2 = n2
 
-    # getter and setter====================================================================
+    # ==============================getter and setter===================================================================
 
     @property
     def rad(self) -> list:
         return self.__rad
 
-    # methods of object plane====================================================================
+    # ==========================methods of object plane=================================================================
 
     def __str__(self):
         return "Plane{ radius_vector: %s, normal_vector: %s, type: %s}" % (
@@ -73,31 +74,13 @@ class Plane(Surface):
             return False
         raise AttributeError("Defined only dor dimension 2 and 3")
 
-    def find_intersection_with_surface(self, ray: Ray):
-        ne = np.dot(ray.dir, self.__norm)
-        if abs(ne) < np.finfo(float).eps:
-            # here
-            equal = True
-            for i in range(3):
-                if abs(ray.start[i] - self.rad[i]) > np.finfo(float).eps:
-                    equal = False
-                    break
-            if equal:
-                print("The beam %s lies on a plane %s " % (str(ray), self.__str__()))
-            else:
-                print("The beam %s is parallel to the plane %s" % (str(ray), self.__str__()))
-            return
-        t = (np.dot(self.__norm, np.subtract(self.__rad, ray.start))) / ne
-        # проверка на пересечение плоскостью в нужном направлении???
-        if t < 0:
-            print("no intersection points ray %s with the plane %s " % (str(ray), self.__str__()))
-            return
-        return ray.calc_point_of_ray(t)
-
-    def find_nearest_point_intersection(self, ray: Ray):
-        return self.find_intersection_with_surface(ray)
-
+    # =================================== Plane objects methods ========================================================
     def is_point_belong(self, point: list) -> bool:
+        """
+        Not usable
+        :param point:
+        :return:
+        """
         if len(point) != self.dim:
             raise AttributeError("The point %s have different dimension than plane(%s)" % (str(point), str(self.dim)))
 
@@ -106,8 +89,8 @@ class Plane(Surface):
             return True
 
     def norm_vec(self, point: list):
-        if not self.is_point_belong(point):
-            raise AttributeError("The point %s is not belong surface %s" % (str(point), str(self)))
+        # if not self.is_point_belong(point):
+        #     raise AttributeError("The point %s is not belong surface %s" % (str(point), str(self)))
         return self.__norm
 
     def get_refractive_indexes(self, point: list):
@@ -124,3 +107,30 @@ class Plane(Surface):
         if cos_angle < -10 * np.finfo(float).eps:
             return self.__n1, self.__n2
         return self.__n2, self.__n1
+
+    # ======================================= methods for Ray ==========================================================
+    def _ray_surface_intersection(self, e: list, r: list):
+        ne = np.dot(e, self.__norm)
+        if abs(ne) < np.finfo(float).eps:
+            return
+        t = (np.dot(self.__norm, np.subtract(self.__rad, r))) / ne
+        # проверка на пересечение плоскостью в нужном направлении не нужна
+        if t < 0:
+            return
+        return t
+
+    def find_nearest_point_intersection(self, ray: Ray):
+        return self.find_intersection_with_surface(ray)
+
+    def find_intersection_with_surface(self, ray: Ray):
+        t = Plane._ray_surface_intersection(self, ray.dir, ray.start)
+        if t != None:
+            ray.calc_point_of_ray(t)
+
+    # ======================================== methods for Ray_pool ====================================================
+    def find_intersection_pool_with_surface(self, pool: RaysPool, index: int):
+        # они все еще не приведены друг к другу(координатно)
+        return Plane._ray_surface_intersection(self, pool.e(index), pool.r(index))
+
+    def find_nearest_intersection_pool_with_surface(self, pool, index: int):
+        return self.find_intersection_pool_with_surface(pool, index)
