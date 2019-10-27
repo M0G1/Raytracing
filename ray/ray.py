@@ -3,13 +3,13 @@ import pylab
 
 from surfaces.surface import Surface
 import math as m
+from utility.binarytree import Tree
 
 
 class Ray:
     __dir = []
     __dim = 0
     __start = []
-    __path_of_ray = []
 
     # путь луча
 
@@ -25,6 +25,7 @@ class Ray:
                 self.__dir = np.dot(1 / norm_val, self.dir)
             self.__dim = len(direction)
             self.__start = start.copy()
+            self.__path_of_ray = []
         else:
             raise AttributeError("""Iterables objects have different length. 
         len(start): %d,
@@ -195,9 +196,70 @@ class Ray:
         self.__append_point_to_path(ans, self.calc_point_of_ray(100_000))
         return ans
 
+    def deep_modeling(self, surfaces: list, deep: int):
+        if not all(isinstance(some, Surface) for some in surfaces):
+            raise AttributeError(
+                "Not all elements in surfaces is instance of class Surface %s" % (
+                    str([type(some) for some in surfaces]))
+            )
+        if deep < 1:
+            raise AttributeError(
+                "Invalid deep value(%s)" % (
+                    str(deep))
+            )
+
+        def fill_ray_tree(tree: Tree, surfaces: list, deep: int):
+            if deep < 0:
+                return
+            ray = tree.value
+
+            min_p = float(np.finfo(float).max)
+            # index of nearest surface and intersection point
+            index, i_point = -1, None
+            # ищем ближайшую поверхность
+            for i in range(len(surfaces)):
+                point = None
+                point = surfaces[i].find_nearest_point_intersection(ray)
+                if point == None:
+                    continue
+                norm_val = np.linalg.norm(np.subtract(ray.start, point))
+                if norm_val < min_p:
+                    min_p = norm_val
+                    index = i
+                    i_point = point
+            if i_point == None:
+                tree.left = None
+                tree.right = None
+                return
+
+            ray.__append_point_to_path(ray.__path_of_ray, i_point)
+            refract_ray = Ray._refract(ray, surfaces[index])
+            is_full_self_refraction = np.dot(refract_ray.dir, ray.dir)
+            if is_full_self_refraction <= 0:
+                tree.left = Tree(refract_ray)
+            elif is_full_self_refraction > 0:
+                tree.right = Tree(refract_ray)
+                reflect_ray = Ray._reflect(ray, surfaces[index])
+                tree.left = Tree(reflect_ray)
+            if tree.left is not None:
+                fill_ray_tree(tree.left, surfaces, deep - 1)
+            if tree.right is not None:
+                fill_ray_tree(tree.right, surfaces, deep - 1)
+
+        tree = Tree(self)
+        fill_ray_tree(tree, surfaces, deep)
+        return tree
+
+    def draw_deep_ray_modeling(tree: Tree, axes):
+        for i, val in enumerate(tree):
+            if isinstance(val, Ray):
+                line = pylab.Line2D(val.__path_of_ray[0], val.__path_of_ray[1])
+                line.set_label(str(i + 1))
+                axes.add_line(line)
+
     def draw_ray(self, axes, way_points_of_ray: list, color="green"):
         if len(way_points_of_ray) == 2:
-            axes.add_line(pylab.Line2D(way_points_of_ray[0], way_points_of_ray[1], color=color))
+            axes.add_line(pylab.Line2D(way_points_of_ray[0], way_points_of_ray[1], color=color, marker=''))
         if len(way_points_of_ray) == 3:
             axes.plot(
                 way_points_of_ray[0],

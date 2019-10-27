@@ -1,5 +1,6 @@
 from ray.rays_pool import *
-from tools.generators import Generator
+from utility.generators import Generator
+import binarytree as btr
 
 
 def ray_pool_test():
@@ -22,7 +23,14 @@ def generator_test():
     vector3D = [1, 1, 0]
     print("vector = " + str(vector3D))
     vector3D.append(0)
-    print("new vector " + str(np.dot( mat,vector3D)))
+    print("new vector " + str(np.dot(mat, vector3D)))
+
+def binary_tree_test():
+    btr.tree()
+    tree = btr.Node()
 
 
-generator_test()
+file = open("pic.txt")
+print(file.readlines())
+
+#generator_test()
