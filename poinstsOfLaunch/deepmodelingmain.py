@@ -1,8 +1,10 @@
 import numpy as np
 from ray.ray import Ray
 from surfaces.plane import Plane
+from surfaces.limited_surface import LimitedSurface
 from utility import help as h
 import pylab
+from surfaces.surface import Surface
 
 
 def is_correct_angle(angle) -> bool:
@@ -55,7 +57,9 @@ def read_param():
         angle = float(file.readline())
         length = float(file.readline())
         refr_coef = file.readline()
+        print(refr_coef)
         refr_coef = [float(val) for val in refr_coef.split(' ')]
+        print(refr_coef)
         raystr = file.readline()
         rayarr = [float(s) for s in raystr.split(' ')]
         if not is_correct_angle(angle):
@@ -78,17 +82,23 @@ def read_param():
     m = [[0, -1],
          [1, 0]]
     norm = list(np.dot(dir_vec, m))
-    print(norm)
-    line1 = Plane([0, 0], norm, refr_coef[0], refr_coef[1])
+    print(refr_coef)
+    line1 = Plane([0, 0], norm, Surface.types.REFRACTING, n1=refr_coef[0], n2=refr_coef[1])
     line2 = None
     if isosceles:
         norm2 = norm.copy()
         norm2[1] *= -1
-        line2 = Plane([0, 0], norm2, refr_coef[1], refr_coef[0])
+        line2 = Plane([0, 0], norm2, Surface.types.REFRACTING, n1=refr_coef[1], n2=refr_coef[0])
     else:
-        line2 = Plane([0, 0], [0, 1], refr_coef[1], refr_coef[0])
+        line2 = Plane([0, 0], [0, 1], Surface.types.REFRACTING, n1=refr_coef[1], n2=refr_coef[0])
+    limits1 = [[x, 0],
+               [0, y]]
+    limits2 = [[x, 0],
+               [-y, 0]]
     ray = Ray(rayarr[:2], rayarr[2:4])
-    return [ray, line1, line2]
+    line1 = LimitedSurface(line1, limits1)
+    line2 = LimitedSurface(line2, limits2)
+    return [ray, line1, line2, [x, y], isosceles]
 
 
 arg = read_param()
@@ -99,15 +109,28 @@ if arg is not None:
         print(str(i))
 
     size = 5
-    pylab.xlim(-size, size)
-    pylab.ylim(-size, size)
+    pylab.xlim(arg[3][0] - 1, 1)
+    pylab.ylim(-(arg[3][1] + 1), arg[3][1] + 1)
     pylab.grid()
     axes = pylab.gca()
     tree = ray.deep_modeling(surfaces, 3)
     Ray.draw_deep_ray_modeling(tree=tree, axes=axes)
-    line = pylab.Line2D([-1, 0], [0, 0], color='green',label="lllllllllllllline")
-    axes.add_line(line)
-    pylab.set_cmap()
-    for sur in surfaces:
-        print(str(sur.__class__) + " " + str(sur.draw_surface(axes)))
+    for node in tree:
+        print(str(node.value._Ray__path_of_ray))
+
+    # line = pylab.Line2D([-1, 1], [1, 1], color='green',label="lllllllllllllline")
+    # axes.add_line(line)
+    l1 = pylab.Line2D([arg[3][0], 0], [arg[3][1], 0])
+    l2 = None
+    l3 = None
+    if arg[4]:
+        l2 = pylab.Line2D([arg[3][0], 0], [-arg[3][1], 0])
+        l3 = pylab.Line2D([arg[3][0], arg[3][0]], [arg[3][1], -arg[3][1]])
+    else:
+        l3 = pylab.Line2D([arg[3][0], arg[3][0]], [arg[3][1], 0])
+        l2 = pylab.Line2D([arg[3][0], 0], [0, 0])
+    axes.add_line(l3)
+    axes.add_line(l2)
+    axes.add_line(l1)
+
     pylab.show()

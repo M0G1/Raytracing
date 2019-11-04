@@ -110,9 +110,9 @@ class Ray:
         # ШАГ-3 отражаем луч
         e = self.dir - np.dot(2 * np.dot(self.dir, nrm), nrm)
         e = np.dot(1 / np.linalg.norm(e), e)
-        print("surf" + str(surface))
-        print("nrm" + str(nrm))
-        print("e" + str(e))
+        # print("surf" + str(surface))
+        # print("nrm" + str(nrm))
+        # print("e" + str(e))
         return Ray(point, list(e))
 
     def _refract(self, surface: Surface):
@@ -227,12 +227,17 @@ class Ray:
                     min_p = norm_val
                     index = i
                     i_point = point
+
+            exit = False
             if i_point == None:
                 tree.left = None
                 tree.right = None
-                return
+                exit = True
+                i_point = ray.calc_point_of_ray(1)
 
             ray.__append_point_to_path(ray.__path_of_ray, i_point)
+            if exit:
+                return
             refract_ray = Ray._refract(ray, surfaces[index])
             is_full_self_refraction = np.dot(refract_ray.dir, ray.dir)
             if is_full_self_refraction <= 0:
@@ -251,9 +256,10 @@ class Ray:
         return tree
 
     def draw_deep_ray_modeling(tree: Tree, axes):
-        for i, val in enumerate(tree):
-            if isinstance(val, Ray):
-                line = pylab.Line2D(val.__path_of_ray[0], val.__path_of_ray[1])
+        for i, subtree in enumerate(tree):
+            if isinstance(subtree.value, Ray):
+                val = subtree.value
+                line = pylab.Line2D(val.__path_of_ray[0], val.__path_of_ray[1],color='g')
                 line.set_label(str(i + 1))
                 axes.add_line(line)
 
