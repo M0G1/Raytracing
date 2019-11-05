@@ -47,8 +47,8 @@ class Plane(Surface):
     # ==========================methods of object plane=================================================================
 
     def __str__(self):
-        return "Plane{ radius_vector: %s, normal_vector: %s, type: %s}" % (
-            str(self.rad), str(self.__norm), str(self.type))
+        return "Plane{ radius_vector: %s, normal_vector: %s, type: %s, n1: %f,n2: %f}" % (
+            str(self.rad), str(self.__norm), str(self.type),self.__n1,self.__n2)
 
     def draw_surface(self, axes: type(pylab.gca())) -> bool:
         if self.dim == 2:
@@ -125,7 +125,7 @@ class Plane(Surface):
     def find_intersection_with_surface(self, ray: Ray):
         t = Plane._ray_surface_intersection(self, ray.dir, ray.start)
         if t != None:
-            ray.calc_point_of_ray(t)
+            return ray.calc_point_of_ray(t)
 
     # ======================================== methods for Ray_pool ====================================================
     def find_intersection_pool_with_surface(self, pool: RaysPool, index: int):
