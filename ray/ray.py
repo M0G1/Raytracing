@@ -108,7 +108,8 @@ class Ray:
         # if (np.dot(nrm, e__1) < 0):
         #     nrm = np.dot(-1.0, nrm)
         # ШАГ-3 отражаем луч
-        e = self.dir - np.dot(2 * np.dot(self.dir, nrm), nrm)
+        e_n = 2 * np.dot(self.dir, nrm)
+        e = np.subtract(self.dir, np.dot(e_n, nrm))
         e = np.dot(1 / np.linalg.norm(e), e)
         # print("surf" + str(surface))
         # print("nrm" + str(nrm))
@@ -132,7 +133,6 @@ class Ray:
         if (np.dot(nrm, e__1) < 0):
             nrm = np.dot(-1.0, nrm)
         # ШАГ-3 преломляем луч
-        # ЗДЕСЬ НЕПРАВИЛЬНО НАХОДИЛИСЬ КОЭЙИЦИЕНТЫ И ОТРАЖЕНИЕ ПОЧЕМУ ТО НЕПРАВИЛЬНО РАБОТАЛО self.start стало, а было  point
         n1, n2 = surface.get_refractive_indexes(self.start)
         # calc the formula of refraction
         v1 = np.dot(n1, self.dir)
@@ -149,6 +149,30 @@ class Ray:
         e = np.dot(1 / n2, v1 + np.dot(k, nrm))
 
         return Ray(point, list(e))
+
+    def is_total_returnal_refruction(self, surface: Surface) -> bool:
+        point = surface.find_nearest_point_intersection(self)
+        if point == None:
+            return False
+        # ШАГ-2 ищем вектор нормали к поверхности
+        nrm = None
+        # если точки пересечения две найдем два вектора нормали, а если одна то одну
+        nrm = surface.norm_vec(point)
+        # проверяем на на нужное направление нормального вектора
+        e__1 = np.dot(-1.0, self.dir)
+        if (np.dot(nrm, e__1) < 0):
+            nrm = np.dot(-1.0, nrm)
+        # ШАГ-3 преломляем луч
+        n1, n2 = surface.get_refractive_indexes(self.start)
+        # calc the formula of refraction
+        v1 = np.dot(n1, self.dir)
+        v1n = np.dot(v1, nrm)
+        # print("n1,n2 = %d,%d" %(n1, n2))
+        # print("nrm = %s" %(str(nrm)))
+        # print("v1 = %s" %(str(v1)))
+        # print("v1n = %s" %(str(v1n)))
+        expression = 1 + (n2 ** 2 - n1 ** 2) / (v1n ** 2)
+        return expression < 0
 
     def _model_path(self, surfaces: list) -> list:
         way_point_of_ray = []
@@ -209,8 +233,6 @@ class Ray:
             )
 
         def fill_ray_tree(tree: Tree, surfaces: list, deep: int):
-            if deep < 0:
-                return
             ray = tree.value
 
             min_p = float(np.finfo(float).max)
@@ -236,13 +258,16 @@ class Ray:
                 i_point = ray.calc_point_of_ray(1)
 
             ray.__append_point_to_path(ray.__path_of_ray, i_point)
+            if deep < 0:
+                return
+
             if exit:
                 return
-            refract_ray = Ray._refract(ray, surfaces[index])
-            is_full_self_refraction = np.dot(refract_ray.dir, ray.dir)
-            if is_full_self_refraction <= 0:
-                tree.left = Tree(refract_ray)
-            elif is_full_self_refraction > 0:
+            if Ray.is_total_returnal_refruction(ray, surfaces[index]):
+                reflect_ray = Ray._reflect(ray, surfaces[index])
+                tree.left = Tree(reflect_ray)
+            else:
+                refract_ray = Ray._refract(ray, surfaces[index])
                 tree.right = Tree(refract_ray)
                 reflect_ray = Ray._reflect(ray, surfaces[index])
                 tree.left = Tree(reflect_ray)
@@ -255,11 +280,41 @@ class Ray:
         fill_ray_tree(tree, surfaces, deep)
         return tree
 
-    def draw_deep_ray_modeling(tree: Tree, axes):
+    def draw_deep_ray_modeling(tree: Tree, axes, color='r'):
+        count_of_rays = len(tree)
         for i, subtree in enumerate(tree):
             if isinstance(subtree.value, Ray):
                 val = subtree.value
-                line = pylab.Line2D(val.__path_of_ray[0], val.__path_of_ray[1],color='g')
+                # ,linewidth=count_of_rays - i
+                line = pylab.Line2D(val.__path_of_ray[0], val.__path_of_ray[1], color=color,
+                                    alpha=(count_of_rays - i) / count_of_rays)
+                x_dir_of_text = [1, 0]
+                y_dir_of_text = [0, 1]
+                # для определения направления надписи относительно уже известного
+                dir_of_ray = [coordinate[1] - coordinate[0] for coordinate in val.__path_of_ray]
+                dir_of_ray_norm = np.linalg.norm(dir_of_ray)
+                x_scalar_mul = np.dot(x_dir_of_text, dir_of_ray) / dir_of_ray_norm
+                y_scalar_mul = np.dot(y_dir_of_text, dir_of_ray) / dir_of_ray_norm
+                x_angle_of_rotation = int((np.arccos(x_scalar_mul) * 360 / 2 * np.pi))
+                y_angle_of_rotation = int((np.arccos(y_scalar_mul) * 360 / 2 * np.pi))
+                angle_of_rotation = None
+                if y_angle_of_rotation <= 90:
+                    angle_of_rotation = x_angle_of_rotation
+                else:
+                    angle_of_rotation = 360 - x_angle_of_rotation
+
+                point_label = [np.average(coor) for coor in val.__path_of_ray]
+                x_point_label = np.average(val.__path_of_ray[0])
+                y_point_label = np.average(val.__path_of_ray[1])
+                m = [[0, 1],
+                     [-1, 0]]
+                norm_dir_of_ray = np.linalg.norm(dir_of_ray)
+                norm_to_ray = np.dot(np.dot(dir_of_ray, m), 1 / norm_dir_of_ray)
+
+
+                point_label = np.add(point_label, norm_to_ray * 0.05 )
+                axes.text(point_label[0], point_label[1], str(i + 1), va='center')
+
                 line.set_label(str(i + 1))
                 axes.add_line(line)
 

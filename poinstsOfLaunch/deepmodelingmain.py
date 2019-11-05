@@ -25,6 +25,8 @@ def read_param():
     isosceles = input("Is it isosceles triangle(y/n)?")
     if isosceles is 'y' or isosceles is 'Y':
         isosceles = True
+    else:
+        isosceles = False
     ans = input("Do you want to enter param in console or use file(c - console/f - file)?")
     angle = None
     length = None
@@ -88,9 +90,9 @@ def read_param():
     if isosceles:
         norm2 = norm.copy()
         norm2[1] *= -1
-        line2 = Plane([0, 0], norm2, Surface.types.REFRACTING, n1=refr_coef[1], n2=refr_coef[0])
+        line2 = Plane([0, 0], norm2, Surface.types.REFRACTING, n1=refr_coef[0], n2=refr_coef[1])
     else:
-        line2 = Plane([0, 0], [0, 1], Surface.types.REFRACTING, n1=refr_coef[1], n2=refr_coef[0])
+        line2 = Plane([0, 0], [0, -1], Surface.types.REFRACTING, n1=refr_coef[0], n2=refr_coef[1])
     limits1 = [[x, 0],
                [0, y]]
     limits2 = [[x, 0],
@@ -108,15 +110,19 @@ if arg is not None:
     for i in arg:
         print(str(i))
 
-    size = 5
-    pylab.xlim(arg[3][0] - 1, 1)
-    pylab.ylim(-(arg[3][1] + 1), arg[3][1] + 1)
+    # size = 5
+    # pylab.xlim(arg[3][0] - 1, 1)
+    # pylab.ylim(-(arg[3][1] + 1), arg[3][1] + 1)
+    pylab.xlim(-3, 3)
+    pylab.ylim(-3, 3)
+
     pylab.grid()
     axes = pylab.gca()
-    tree = ray.deep_modeling(surfaces, 3)
-    Ray.draw_deep_ray_modeling(tree=tree, axes=axes)
+    tree = ray.deep_modeling(surfaces, 4)
     for node in tree:
-        print(str(node.value._Ray__path_of_ray))
+
+        print(str(node.value) + str(node.value._Ray__path_of_ray))
+    Ray.draw_deep_ray_modeling(tree=tree, axes=axes, color='g')
 
     # line = pylab.Line2D([-1, 1], [1, 1], color='green',label="lllllllllllllline")
     # axes.add_line(line)
@@ -132,5 +138,6 @@ if arg is not None:
     axes.add_line(l3)
     axes.add_line(l2)
     axes.add_line(l1)
+    axes.legend()
 
     pylab.show()

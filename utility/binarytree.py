@@ -35,6 +35,7 @@ class Tree:
                     next_vertex.append(vertex.right)
                     length += 1
             cur_vertex = next_vertex
+        return length
 
     @property
     def height(self):
