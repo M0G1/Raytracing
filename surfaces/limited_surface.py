@@ -48,7 +48,6 @@ class LimitedSurface(Surface):
 
     # """реализация для Плоскоти. Не обощено на все поверности"""
     def find_intersection_with_surface(self, ray):
-        print("aaa")
         point = self.__surface.find_nearest_point_intersection(ray)
 
         if point is None or not all(
