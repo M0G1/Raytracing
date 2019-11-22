@@ -79,11 +79,8 @@ class RaysPool:
         for num_ray in range(old_size, self.rays_number):
             self.normalise_e(num_ray)
 
-    def refresh_rays_number(self, increase: int = 0):
-        if increase == 0:
-            self.__rays_num = len(self.__pool) // Compon.RAY_OFFSET.value
-        else:
-            self.__rays_num += increase
+    def refresh_rays_number(self):
+        self.__rays_num = len(self.__pool) // Compon.RAY_OFFSET.value
 
     def erase_ray(self, index: int):
         RaysPool.check_index(self, index)
@@ -119,7 +116,7 @@ class RaysPool:
     def rays_number(self):
         return self.__rays_num
 
-    def e(self, i: int):
+    def e(self, i: int) -> list:
         r_i = i * Compon.RAY_OFFSET.value
         a = r_i + Compon.E_OFFSET.value
         b = r_i + Compon.R_OFFSET.value
@@ -138,5 +135,3 @@ class RaysPool:
     def t1(self, i) -> float:
         r_i = i * Compon.RAY_OFFSET.value
         return self.__pool[r_i + Compon.T1_OFFSET.value]
-
-
