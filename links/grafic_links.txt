@@ -1,0 +1,30 @@
+https://jenyay.net/Programming/Python3d
+https://matplotlib.awesome-programming.com/en/awesome/matplotlib-01/book
+info: https://python-scripts.com/matplotlib
+examples: 
+tool: https://matplotlib.org/mpl_toolkits/mplot3d/tutorial.html
+tool: https://matplotlib.org/mpl_toolkits/mplot3d/api.html#mpl_toolkits.mplot3d.art3d.Poly3DCollection
+https://stackoverflow.com/questions/9170838/surface-plots-in-matplotlib
+http://qaru.site/questions/1606154/python-matplotlib-drawing-3d-sphere-with-circumferences
+scale: https://exceptionshub.com/matplotlib-mplot3d-how-to-increase-the-size-of-an-axis-stretch-in-a-3d-plot.html
+intersect surface: https://vike.io/ru/148900/
+
+ploty:
+ https://proglib.io/p/plotly/
+ https://habr.com/ru/post/456282/
+ https://pythondigest.ru/view/6130/
+ 
+Pandas:
+ https://plot.ly/pandas/3d-line-plots/
+ 
+Functions:
+ https://indianaiproduction.com/numpy-array-size/
+ https://docs.scipy.org/doc/numpy/reference/generated/numpy.ones.html
+ https://docs.scipy.org/doc/numpy/reference/generated/numpy.outer.html
+
+PyOpenGL:
+ https://habr.com/ru/post/246625/                       -example on python
+ https://www.rupython.com/opengl-python-3-62928.html    -just little about ray tracing
+ https://habr.com/ru/post/467599/                       -c++ and openGL example
+
+ 

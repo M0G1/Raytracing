@@ -11,7 +11,7 @@ class Types(Enum):
 class Surface:
     types = Types
     __type_of_surface = types.REFLECTING
-    __dim = 0
+    # __dim = 0
 
     #  Don't usable in logic of program
     # def __init__(self, type_of_surface: bool, dimension: int):
@@ -30,7 +30,7 @@ class Surface:
     def is_point_belong(self, point: list) -> bool:
         pass
 
-    def norm_vec(self, point):
+    def norm_vec(self, point)->list:
         return
 
     def get_refractive_indexes(self, point: list):
@@ -58,28 +58,8 @@ class Surface:
         pass
 
     # ======================================== methods for Ray_pool ====================================================
-    def find_intersection_pool_with_surface(self, pool, index: int):
+    def find_intersection_pool_with_surface(self, pool, index: int) -> list:
         pass
 
-    def find_nearest_intersection_pool_with_surface(self, pool, index: int):
+    def find_nearest_intersection_pool_with_surface(self, pool, index: int)->list:
         pass
-
-    @classmethod
-    def _decor_for_read_param_from_file(func_of_reading_surf_from_str):
-        """
-        Don't work
-        :param func_of_reading_surf_from_str:
-        function must return rays and surfaces from list of strings. return rays, surfaces
-        :return: rays, surfaces
-        """
-
-        def f(file, dimension: int):
-            strings = file.readlines()
-            rays, surfaces = func_of_reading_surf_from_str(strings, dimension)
-            if len(surfaces) == 1:
-                surfaces = surfaces[0]
-            if len(rays) == 1:
-                rays = rays[0]
-            return rays, surfaces
-
-        return f

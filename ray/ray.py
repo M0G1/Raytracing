@@ -7,12 +7,8 @@ from utility.binarytree import Tree
 
 
 class Ray:
-    __dir = []
-    __dim = 0
-    __start = []
-
-    # путь луча
-
+    #  онструктор класса Ray, создает объекты лучей из двух массивов вещественных числел
+    # начала луча(start) и направление(dirrection)
     def __init__(self, start: list, direction: list):
         if len(direction) == len(start):
             if not all(isinstance(i, float or int) and isinstance(j, float or int) for i, j in zip(start, direction)):
@@ -68,7 +64,7 @@ class Ray:
 
     # methods of object ray====================================================================
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "ray:{ start: %s, direction: %s}" % (self.__start.__str__(), self.__dir.__str__())
 
     def __append_point_to_path(self, way_points_of_ray: list, point: list):
@@ -86,7 +82,7 @@ class Ray:
         for j in range(self.__dim):
             way_points_of_ray[j].append(point[j])
 
-    def calc_point_of_ray(self, t: float):
+    def calc_point_of_ray(self, t: float) -> list:
         if not t > 10 * np.finfo(float).eps:
             return
         point = []
@@ -209,7 +205,7 @@ class Ray:
                 del new_ray
         return way_point_of_ray
 
-    def path_ray(self, surfaces: list):
+    def path_ray(self, surfaces: list) -> list:
         if not all(isinstance(some, Surface) for some in surfaces):
             raise AttributeError(
                 "Not all elements in surfaces is instance of class Surface %s" % (
@@ -311,8 +307,7 @@ class Ray:
                 norm_dir_of_ray = np.linalg.norm(dir_of_ray)
                 norm_to_ray = np.dot(np.dot(dir_of_ray, m), 1 / norm_dir_of_ray)
 
-
-                point_label = np.add(point_label, norm_to_ray * 0.05 )
+                point_label = np.add(point_label, norm_to_ray * 0.05)
                 axes.text(point_label[0], point_label[1], str(i + 1), va='center')
 
                 line.set_label(str(i + 1))
@@ -326,9 +321,8 @@ class Ray:
                 way_points_of_ray[0],
                 way_points_of_ray[1],
                 way_points_of_ray[2],
-                label='LINE', color=color)
-            axes.scatter(
-                way_points_of_ray[0],
-                way_points_of_ray[1],
-                way_points_of_ray[2],
-                c='b', marker='o')
+                label='LINE', color=color);
+            axes.scatter(way_points_of_ray[0],
+                         way_points_of_ray[1],
+                         way_points_of_ray[2],
+                         c='b', marker='o')

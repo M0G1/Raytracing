@@ -3,7 +3,7 @@ class Tree:
         if left is not None:
             if not isinstance(left, Tree):
                 raise TypeError("Left subtree is not a class tree")
-        if left is not None:
+        if right is not None:
             if not isinstance(right, Tree):
                 raise TypeError("Right subtree is not a class tree")
         self.value = value
@@ -38,7 +38,7 @@ class Tree:
         return length
 
     @property
-    def height(self):
+    def height(self) ->int:
         height = 0
         cur_vertex = [self]
         while len(cur_vertex) > 0:
