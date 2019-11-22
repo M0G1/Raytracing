@@ -41,27 +41,6 @@ class Ray:
     def start(self) -> list:
         return self.__start.copy()
 
-    # @dir.setter
-    # def set_dir(self, value):
-    #     if len(value) == self.__dim:
-    #         if all(isinstance(i, float or int) for i in value):
-    #             self.__dir = value.copy()
-    #         else:
-    #             raise AttributeError("Some element in %s is not a digit" % (value.__name__))
-    #     else:
-    #         raise AttributeError("""Dimension of iterable object and ray are different.
-    #         len(%s): %d,
-    #         ray dimension: %d""" % (value.__name__, len(value), self.__dim))
-
-    # @start.setter
-    # def set_start(self, value):
-    #     if len(value) == self.__dim:
-    #         self.__start = value.copy()
-    #     else:
-    #         raise AttributeError("""Dimension of iterable object and ray are different.
-    #             len(%s): %d,
-    #             ray dimension: %d""" % (value.__name__, len(value), self.__dim))
-
     # methods of object ray====================================================================
 
     def __str__(self) -> str:
@@ -216,102 +195,6 @@ class Ray:
         self.__append_point_to_path(ans, self.calc_point_of_ray(100_000))
         return ans
 
-    def deep_modeling(self, surfaces: list, deep: int):
-        if not all(isinstance(some, Surface) for some in surfaces):
-            raise AttributeError(
-                "Not all elements in surfaces is instance of class Surface %s" % (
-                    str([type(some) for some in surfaces]))
-            )
-        if deep < 1:
-            raise AttributeError(
-                "Invalid deep value(%s)" % (
-                    str(deep))
-            )
-
-        def fill_ray_tree(tree: Tree, surfaces: list, deep: int):
-            ray = tree.value
-
-            min_p = float(np.finfo(float).max)
-            # index of nearest surface and intersection point
-            index, i_point = -1, None
-            # ищем ближайшую поверхность
-            for i in range(len(surfaces)):
-                point = None
-                point = surfaces[i].find_nearest_point_intersection(ray)
-                if point == None:
-                    continue
-                norm_val = np.linalg.norm(np.subtract(ray.start, point))
-                if norm_val < min_p:
-                    min_p = norm_val
-                    index = i
-                    i_point = point
-
-            exit = False
-            if i_point == None:
-                tree.left = None
-                tree.right = None
-                exit = True
-                i_point = ray.calc_point_of_ray(1)
-
-            ray.__append_point_to_path(ray.__path_of_ray, i_point)
-            if deep < 0:
-                return
-
-            if exit:
-                return
-            if Ray.is_total_returnal_refruction(ray, surfaces[index]):
-                reflect_ray = Ray._reflect(ray, surfaces[index])
-                tree.left = Tree(reflect_ray)
-            else:
-                refract_ray = Ray._refract(ray, surfaces[index])
-                tree.right = Tree(refract_ray)
-                reflect_ray = Ray._reflect(ray, surfaces[index])
-                tree.left = Tree(reflect_ray)
-            if tree.left is not None:
-                fill_ray_tree(tree.left, surfaces, deep - 1)
-            if tree.right is not None:
-                fill_ray_tree(tree.right, surfaces, deep - 1)
-
-        tree = Tree(self)
-        fill_ray_tree(tree, surfaces, deep)
-        return tree
-
-    def draw_deep_ray_modeling(tree: Tree, axes, color='r'):
-        count_of_rays = len(tree)
-        for i, subtree in enumerate(tree):
-            if isinstance(subtree.value, Ray):
-                val = subtree.value
-                # ,linewidth=count_of_rays - i
-                line = pylab.Line2D(val.__path_of_ray[0], val.__path_of_ray[1], color=color,
-                                    alpha=(count_of_rays - i) / count_of_rays)
-                x_dir_of_text = [1, 0]
-                y_dir_of_text = [0, 1]
-                # для определения направления надписи относительно уже известного
-                dir_of_ray = [coordinate[1] - coordinate[0] for coordinate in val.__path_of_ray]
-                dir_of_ray_norm = np.linalg.norm(dir_of_ray)
-                x_scalar_mul = np.dot(x_dir_of_text, dir_of_ray) / dir_of_ray_norm
-                y_scalar_mul = np.dot(y_dir_of_text, dir_of_ray) / dir_of_ray_norm
-                x_angle_of_rotation = int((np.arccos(x_scalar_mul) * 360 / 2 * np.pi))
-                y_angle_of_rotation = int((np.arccos(y_scalar_mul) * 360 / 2 * np.pi))
-                angle_of_rotation = None
-                if y_angle_of_rotation <= 90:
-                    angle_of_rotation = x_angle_of_rotation
-                else:
-                    angle_of_rotation = 360 - x_angle_of_rotation
-
-                point_label = [np.average(coor) for coor in val.__path_of_ray]
-                x_point_label = np.average(val.__path_of_ray[0])
-                y_point_label = np.average(val.__path_of_ray[1])
-                m = [[0, 1],
-                     [-1, 0]]
-                norm_dir_of_ray = np.linalg.norm(dir_of_ray)
-                norm_to_ray = np.dot(np.dot(dir_of_ray, m), 1 / norm_dir_of_ray)
-
-                point_label = np.add(point_label, norm_to_ray * 0.05)
-                axes.text(point_label[0], point_label[1], str(i + 1), va='center')
-
-                line.set_label(str(i + 1))
-                axes.add_line(line)
 
     def draw_ray(self, axes, way_points_of_ray: list, color="green"):
         if len(way_points_of_ray) == 2:
