@@ -105,7 +105,7 @@ class Ellipse(Surface):
         return self.__n2, self.__n1
 
     # ======================================= methods for Ray ==========================================================
-    def _ray_surface_intersection(self, e: list, r: list):
+    def _ray_surface_intersection(self, e: list, r: list) -> list:
         r_p0 = np.subtract(r, self.center)
         mat = []
         abc = 0
@@ -125,22 +125,22 @@ class Ellipse(Surface):
         a = np.dot(me, me)
         b = np.dot(me, mr_p0)
         c = np.dot(mr_p0, mr_p0) - abc
-        # ищем дискриминант
+        # РёС‰РµРј РґРёСЃРєСЂРёРјРёРЅР°РЅС‚
         disc_on4 = b ** 2 - a * c
         if abs(disc_on4) < np.finfo(float).eps:
             disc_on4 = 0
         if disc_on4 < 0:
-            return
+            return []
         sqrt_disc_on4 = m.sqrt(disc_on4)
-        # ищем корни/корень
+        # РёС‰РµРј РєРѕСЂРЅРё/РєРѕСЂРµРЅСЊ
         if disc_on4 == 0:
             t = [-b / a]
         else:
             t = [(-b - sqrt_disc_on4) / a, (-b + sqrt_disc_on4) / a]
-        # пр    оверки
+        # РїСЂ    РѕРІРµСЂРєРё
         if all([i < 0 for i in t]):
-            return
-        # массив положительных корней
+            return []
+        # РјР°СЃСЃРёРІ РїРѕР»РѕР¶РёС‚РµР»СЊРЅС‹С… РєРѕСЂРЅРµР№
         positive_t = []
         for i in t:
             if i > np.finfo(float).eps:
@@ -148,14 +148,16 @@ class Ellipse(Surface):
         if len(positive_t) > 0:
             return positive_t
 
-    def find_intersection_with_surface(self, ray: Ray):
+    def find_intersection_with_surface(self, ray: Ray) -> list:
         positive_t = Ellipse._ray_surface_intersection(self, ray.dir, ray.start)
-        if positive_t != None:
+        if len(positive_t) > 0:
+            ray.t0 = [positive_t[0], self]
             return [ray.calc_point_of_ray(t) for t in positive_t]
+        return []
 
     def find_nearest_point_intersection(self, ray: Ray):
         l = self.find_intersection_with_surface(ray)
-        if l != None and len(l) > 0:
+        if l is not None and len(l) > 0:
             return l[0]
 
     # ======================================== methods for Ray_pool ====================================================

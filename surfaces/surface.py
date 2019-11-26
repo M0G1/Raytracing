@@ -11,6 +11,7 @@ class Types(Enum):
 class Surface:
     types = Types
     __type_of_surface = types.REFLECTING
+
     # __dim = 0
 
     #  Don't usable in logic of program
@@ -30,7 +31,7 @@ class Surface:
     def is_point_belong(self, point: list) -> bool:
         pass
 
-    def norm_vec(self, point)->list:
+    def norm_vec(self, point) -> list:
         return
 
     def get_refractive_indexes(self, point: list):
@@ -51,6 +52,10 @@ class Surface:
         return False
 
     # ======================================= methods for Ray ==========================================================
+
+    def _ray_surface_intersection(self, e: list, r: list) -> list:
+        pass
+
     def find_intersection_with_surface(self, ray):
         pass
 
@@ -61,5 +66,5 @@ class Surface:
     def find_intersection_pool_with_surface(self, pool, index: int) -> list:
         pass
 
-    def find_nearest_intersection_pool_with_surface(self, pool, index: int)->list:
+    def find_nearest_intersection_pool_with_surface(self, pool, index: int) -> list:
         pass

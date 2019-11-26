@@ -14,49 +14,77 @@ class LimitedSurface(Surface):
     """
 
     def __init__(self, surface: Surface, limits: list):
+        if len(limits) != surface.dim:
+            raise AttributeError("Limits(%d) and surface(dim: %d) have different size" % (len(limits), surface.dim))
+        if not all(coor[0] < coor[1] for coor in limits):
+            raise AttributeError("Invalid limits " + str(limits))
         self.__limits = limits
         self.__surface = surface
         self._Surface__dim = surface.dim
 
+    # ==========================methods of object=================================================================
+
+    def __str__(self):
+        return "Limited " + str(self.__surface) + " limits: " + str(self.__limits)
+
+    # =================================== Plane objects methods ========================================================
+
     def norm_vec(self, point):
-        return self.__surface.norm_vec(point)
+        if self._is_point_in_limits(point):
+            return self.__surface.norm_vec(point)
+        return None
 
     def get_refractive_indexes(self, point: list):
         return self.__surface.get_refractive_indexes(point)
 
     def draw_surface(self, axes) -> bool:
-        m = [[0, -1],
-             [1, 0]]
-        # direction vector
-        r = np.dot(m, self.norm_vec([0, 0]))
-        point1 = np.dot(self.__limits[0][0], r)
-        point2 = np.dot(self.__limits[0][1], r)
-        points = [point1, point2]
+        if isinstance(self.__surface, Plane):
+            m = [[0, -1],
+                 [1, 0]]
+            # direction vector
+            r = np.dot(m, self.norm_vec([0, 0]))
+            point1 = np.dot(self.__limits[0][0], r)
+            point2 = np.dot(self.__limits[0][1], r)
+            points = [point1, point2]
+            line = mlines.Line2D([val[0] for val in points], [val[1] for val in points])
+            axes.add_line(line)
+            return True
+        return False
 
-        print("points")
-        print(points)
-
-        def calc_point(start: list, dir, leng):
-            poin = []
-            for i in range(len(start)):
-                poin.append(start[i] + dir[i] * leng)
-            return poin
-
-        line = mlines.Line2D([val[0] for val in points], [val[1] for val in points])
-        axes.add_line(line)
-        return True
-
-    # """реализация для Плоскоти. Не обощено на все поверности"""
-    def find_intersection_with_surface(self, ray):
-        point = self.__surface.find_nearest_point_intersection(ray)
-
+    def _is_point_in_limits(self, point: list):
         if point is None or not all(
                 bounds[0] <= coor and coor <= bounds[1] for coor, bounds in zip(point, self.__limits)):
-            return None
+            return False
+        else:
+            return True
+
+    def _bounds_filter(self, e: list, r: list, t: float):
+        mul = np.multiply(t, e)
+        point = list(np.add(mul, r))
+        if not self._is_point_in_limits(point):
+            return []
         return point
 
-    def find_nearest_point_intersection(self, ray):
-        return self.find_intersection_with_surface(ray)
+    # ======================================= methods for Ray ==========================================================
 
-    def __str__(self):
-        return "Limited " + str(self.__surface) + " limits: " + str(self.__limits)
+    def _ray_surface_intersection(self, e: list, r: list) -> list:
+        t = self.__surface._ray_surface_intersection(e, r)
+        ans_t = []
+        for i in range(len(t)):
+            checked_t = self._bounds_filter(e, r, t[i])
+            if len(checked_t) != 0:
+                ans_t.append(t[i])
+        return ans_t
+
+    # """СЂРµР°Р»РёР·Р°С†РёСЏ РґР»СЏ РџР»РѕСЃРєРѕС‚Рё. РќРµ РѕР±РѕС‰РµРЅРѕ РЅР° РІСЃРµ РїРѕРІРµСЂРЅРѕСЃС‚Рё"""
+    def find_intersection_with_surface(self, ray):
+        positive_t = LimitedSurface._ray_surface_intersection(self, ray.dir, ray.start)
+        if len(positive_t) > 0:
+            ray.t1 = [positive_t[0], self]
+            return [ray.calc_point_of_ray(t) for t in positive_t]
+        return []
+
+    def find_nearest_point_intersection(self, ray):
+        l = self.find_intersection_with_surface(ray)
+        if l != None and len(l) > 0:
+            return l[0]

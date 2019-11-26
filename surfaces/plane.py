@@ -48,7 +48,7 @@ class Plane(Surface):
 
     def __str__(self):
         return "Plane{ radius_vector: %s, normal_vector: %s, type: %s, n1: %f,n2: %f}" % (
-            str(self.rad), str(self.__norm), str(self.type),self.__n1,self.__n2)
+            str(self.rad), str(self.__norm), str(self.type), self.__n1, self.__n2)
 
     def draw_surface(self, axes: type(pylab.gca())) -> bool:
         if self.dim == 2:
@@ -109,23 +109,24 @@ class Plane(Surface):
         return self.__n2, self.__n1
 
     # ======================================= methods for Ray ==========================================================
-    def _ray_surface_intersection(self, e: list, r: list):
+    def _ray_surface_intersection(self, e: list, r: list) -> list:
         ne = np.dot(e, self.__norm)
         if abs(ne) < np.finfo(float).eps:
-            return
+            return []
         t = (np.dot(self.__norm, np.subtract(self.__rad, r))) / ne
         # проверка на пересечение плоскостью в нужном направлении не нужна
         if t < 0:
-            return
-        return t
+            return []
+        return [t]
 
     def find_nearest_point_intersection(self, ray: Ray):
         return self.find_intersection_with_surface(ray)
 
     def find_intersection_with_surface(self, ray: Ray):
         t = Plane._ray_surface_intersection(self, ray.dir, ray.start)
-        if t != None:
-            return ray.calc_point_of_ray(t)
+        if len(t) != 0:
+            ray.t0 = [t[0], self]
+            return ray.calc_point_of_ray(t[0])
 
     # ======================================== methods for Ray_pool ====================================================
     def find_intersection_pool_with_surface(self, pool: RaysPool, index: int):

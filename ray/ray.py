@@ -7,8 +7,8 @@ from utility.binarytree import Tree
 
 
 class Ray:
-    # Конструктор класса Ray, создает объекты лучей из двух массивов вещественных числел
-    # начала луча(start) и направление(dirrection)
+    # РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РєР»Р°СЃСЃР° Ray, СЃРѕР·РґР°РµС‚ РѕР±СЉРµРєС‚С‹ Р»СѓС‡РµР№ РёР· РґРІСѓС… РјР°СЃСЃРёРІРѕРІ РІРµС‰РµСЃС‚РІРµРЅРЅС‹С… С‡РёСЃР»РµР»
+    # РЅР°С‡Р°Р»Р° Р»СѓС‡Р°(start) Рё РЅР°РїСЂР°РІР»РµРЅРёРµ(dirrection)
     def __init__(self, start: list, direction: list):
         if len(direction) == len(start):
             if not all(isinstance(i, float or int) and isinstance(j, float or int) for i, j in zip(start, direction)):
@@ -22,6 +22,7 @@ class Ray:
             self.__dim = len(direction)
             self.__start = start.copy()
             self.__path_of_ray = []
+            self.__t1 = [np.iinfo(int).max, None]
         else:
             raise AttributeError("""Iterables objects have different length. 
         len(start): %d,
@@ -41,7 +42,65 @@ class Ray:
     def start(self) -> list:
         return self.__start.copy()
 
-    # methods of object ray====================================================================
+    @property
+    def t1(self) -> list:
+        return self.__t1
+
+    @t1.setter
+    def t1(self, t1_: list):
+        if len(t1_) != 2:
+            raise AttributeError("t1 must be list from 2 object(%d)" % (len(t1_)))
+        if self.__t1[0] > t1_[0]:
+            self.__t1 = t1_
+
+    # static methods of ray====================================================================
+
+    @staticmethod
+    def calc_point_of_ray_(e: list, r: list, t: float) -> list:
+        return list(np.add(np.multiply(t, e), r))
+
+    @staticmethod
+    def _find_norm_vec_and_point(e: list, r: list, surface: Surface):
+        # РЁР°Рі-1 РёС‰РµРј С‚РѕС‡РєСѓ РїРµСЂРµСЃРµС‡РµРЅРёСЏ
+        t = surface._ray_surface_intersection(e, r)
+        if len(t) == 0:
+            return [], [], None
+        point = Ray.calc_point_of_ray_(e, r, t[0])
+        # РЁРђР“-2 РёС‰РµРј РІРµРєС‚РѕСЂ РЅРѕСЂРјР°Р»Рё Рє РїРѕРІРµСЂС…РЅРѕСЃС‚Рё
+        nrm = surface.norm_vec(point)
+        if nrm is None:
+            return [], [], None
+        return point, nrm, t
+
+    @staticmethod
+    def _refract(e: list, r: list, surface: Surface):
+        point, nrm, t = Ray._find_norm_vec_and_point(e, r, surface)
+        if len(point) == 0 and len(nrm) == 0 and t is None:
+            return [], [], None
+        # РЁРђР“-3 РїСЂРµР»РѕРјР»СЏРµРј Р»СѓС‡
+        n1, n2 = surface.get_refractive_indexes(r)
+        # calc the formula of refraction
+        v1 = np.dot(n1, e)
+        v1n = np.dot(v1, nrm)
+        expression = 1 + (n2 ** 2 - n1 ** 2) / (v1n ** 2)
+        if expression < 0:
+            return Ray._reflect(e, r, surface)
+        k = (m.sqrt(expression) - 1) * v1n
+        e = np.dot(1 / n2, v1 + np.dot(k, nrm))
+        return list(point), list(e), t[0]
+
+    @staticmethod
+    def _reflect(e: list, r: list, surface: Surface):
+        point, nrm, t = Ray._find_norm_vec_and_point(e, r, surface)
+        if len(point) == 0 and len(nrm) == 0 and t is None:
+            return [], [], None
+        # РЁРђР“-3 РѕС‚СЂР°Р¶Р°РµРј Р»СѓС‡
+        e_n = 2 * np.dot(e, nrm)
+        e = np.subtract(e, np.dot(e_n, nrm))
+        e = np.dot(1 / np.linalg.norm(e), e)
+        return list(point), list(e), t[0]
+
+    # methods of object ray=============================================================================================
 
     def __str__(self) -> str:
         return "ray:{ start: %s, direction: %s}" % (self.__start.__str__(), self.__dir.__str__())
@@ -61,91 +120,41 @@ class Ray:
         for j in range(self.__dim):
             way_points_of_ray[j].append(point[j])
 
+    def reflect(self, surface: Surface):
+        if self.__dim != surface.dim:
+            raise AttributeError("Different dimension of ray(%d) and of surface(%d)" % (self.__dim, surface.dim))
+        point, e, t_1 = Ray._reflect(e=self.dir, r=self.start, surface=surface)
+        if len(point) == 0 or len(e) == 0 or t_1 is None:
+            return None
+        self.t1 = [t_1, surface]
+        return Ray(point, e)
+
+    def refract(self, surface: Surface):
+        if self.__dim != surface.dim:
+            raise AttributeError("Different dimension of ray(%d) and of surface(%d)" % (self.__dim, surface.dim))
+        # list, list, float
+        point, e, t_1 = Ray._refract(e=self.dir, r=self.start, surface=surface)
+        if len(point) == 0 or len(e) == 0 or t_1 is None:
+            return None
+        self.t1 = [t_1, surface]
+        return Ray(point, e)
+
     def calc_point_of_ray(self, t: float) -> list:
         if not t > 10 * np.finfo(float).eps:
-            return
-        point = []
-        for i in range(self.__dim):
-            point.append(self.__start[i] + self.__dir[i] * t)
-        return point
+            return []
+        return Ray.calc_point_of_ray_(self.dir, self.start, t)
 
-    def _reflect(self, surface: Surface):
-        if self.__dim != surface.dim:
-            raise AttributeError("Different dimension of ray(%d) and of surface(%d)" % (self.__dim, surface.dim))
-        # ШАГ-1 ищем точку
-        point = surface.find_nearest_point_intersection(self)
-        if point == None:
-            return
-        # ШАГ-2 ищем вектор нормали к поверхности
-        nrm = surface.norm_vec(point)
-        # проверяем на на нужное направление нормального вектора
-        # e__1 = np.dot(-1.0, self.dir)
-        # if (np.dot(nrm, e__1) < 0):
-        #     nrm = np.dot(-1.0, nrm)
-        # ШАГ-3 отражаем луч
-        e_n = 2 * np.dot(self.dir, nrm)
-        e = np.subtract(self.dir, np.dot(e_n, nrm))
-        e = np.dot(1 / np.linalg.norm(e), e)
-        # print("surf" + str(surface))
-        # print("nrm" + str(nrm))
-        # print("e" + str(e))
-        return Ray(point, list(e))
-
-    def _refract(self, surface: Surface):
-        if self.__dim != surface.dim:
-            raise AttributeError("Different dimension of ray(%d) and of surface(%d)" % (self.__dim, surface.dim))
-        point = surface.find_nearest_point_intersection(self)
-
-        if point == None:
-            return
-
-        # ШАГ-2 ищем вектор нормали к поверхности
-        nrm = None
-        # если точки пересечения две найдем два вектора нормали, а если одна то одну
-        nrm = surface.norm_vec(point)
-        # проверяем на на нужное направление нормального вектора
-        e__1 = np.dot(-1.0, self.dir)
-        if (np.dot(nrm, e__1) < 0):
-            nrm = np.dot(-1.0, nrm)
-        # ШАГ-3 преломляем луч
-        n1, n2 = surface.get_refractive_indexes(self.start)
-        # calc the formula of refraction
-        v1 = np.dot(n1, self.dir)
-        v1n = np.dot(v1, nrm)
-        # print("n1,n2 = %d,%d" %(n1, n2))
-        # print("nrm = %s" %(str(nrm)))
-        # print("v1 = %s" %(str(v1)))
-        # print("v1n = %s" %(str(v1n)))
-        expression = 1 + (n2 ** 2 - n1 ** 2) / (v1n ** 2)
-        # print('expression' + str(expression))
-        if expression < 0:
-            return self._reflect(surface)
-        k = (m.sqrt(expression) - 1) * v1n
-        e = np.dot(1 / n2, v1 + np.dot(k, nrm))
-
-        return Ray(point, list(e))
-
-    def is_total_returnal_refruction(self, surface: Surface) -> bool:
-        point = surface.find_nearest_point_intersection(self)
-        if point == None:
+    def is_total_returnal_refraction(self, surface: Surface) -> bool:
+        # list, list, float
+        point, nrm, t_1 = Ray._find_norm_vec_and_point(self.dir, self.start, surface)
+        if len(point) == 0 and len(nrm) == 0 and t_1 is None:
             return False
-        # ШАГ-2 ищем вектор нормали к поверхности
-        nrm = None
-        # если точки пересечения две найдем два вектора нормали, а если одна то одну
-        nrm = surface.norm_vec(point)
-        # проверяем на на нужное направление нормального вектора
-        e__1 = np.dot(-1.0, self.dir)
-        if (np.dot(nrm, e__1) < 0):
-            nrm = np.dot(-1.0, nrm)
-        # ШАГ-3 преломляем луч
+        self.t1 = [t_1, surface]
+        # РЁРђР“-3 РїСЂРµР»РѕРјР»СЏРµРј Р»СѓС‡
         n1, n2 = surface.get_refractive_indexes(self.start)
         # calc the formula of refraction
         v1 = np.dot(n1, self.dir)
         v1n = np.dot(v1, nrm)
-        # print("n1,n2 = %d,%d" %(n1, n2))
-        # print("nrm = %s" %(str(nrm)))
-        # print("v1 = %s" %(str(v1)))
-        # print("v1n = %s" %(str(v1n)))
         expression = 1 + (n2 ** 2 - n1 ** 2) / (v1n ** 2)
         return expression < 0
 
@@ -155,13 +164,13 @@ class Ray:
             min_p = float(np.finfo(float).max)
             # index of nearest surface and intersection point
             index, i_point = -1, None
-            # ищем ближайшую поверхность
+            # РёС‰РµРј Р±Р»РёР¶Р°Р№С€СѓСЋ РїРѕРІРµСЂС…РЅРѕСЃС‚СЊ
             for i in range(len(surfaces)):
                 point = None
                 point = surfaces[i].find_nearest_point_intersection(self)
                 if point == None:
                     continue
-                print("point in m_p" + str(point))
+                # print("point in m_p" + str(point))
                 norm_val = np.linalg.norm(np.subtract(self.start, point))
                 if norm_val < min_p:
                     min_p = norm_val
@@ -170,12 +179,11 @@ class Ray:
             if i_point == None:
                 break
             new_ray = None
-            # смотрим характер поверхности t - True пропускает через себя свет, f - False не пропускает
-            print("Surf  " + str(surfaces[index]))
+            # print("Surf  " + str(surfaces[index]))
             if surfaces[index].type == Surface.types.REFLECTING:
-                new_ray = self._reflect(surfaces[index])
+                new_ray = self.reflect(surfaces[index])
             elif surfaces[index].type == Surface.types.REFRACTING:
-                new_ray = self._refract(surfaces[index])
+                new_ray = self.refract(surfaces[index])
 
             if new_ray != None:
                 self.__append_point_to_path(way_point_of_ray, new_ray.start)
@@ -194,7 +202,6 @@ class Ray:
         ans = self.__path_of_ray.copy()
         self.__append_point_to_path(ans, self.calc_point_of_ray(100_000))
         return ans
-
 
     def draw_ray(self, axes, way_points_of_ray: list, color="green"):
         if len(way_points_of_ray) == 2:

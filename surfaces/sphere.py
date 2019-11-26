@@ -98,17 +98,17 @@ class Sphere(Surface):
         return self.__n2, self.__n1
 
     # ======================================= methods for Ray ==========================================================
-    def _ray_surface_intersection(self, e: list, r: list):
+    def _ray_surface_intersection(self, e: list, r: list) -> list:
         r0_p0 = np.subtract(self.center, r)
         r0_p0e = np.dot(r0_p0, e)
-        # ищем дискриминант
+        # РёС‰РµРј РґРёСЃРєСЂРёРјРёРЅР°РЅС‚
         disc = r0_p0e ** 2 - np.dot(r0_p0, r0_p0) + self.r ** 2
         if (abs(disc) < np.finfo(float).eps):
             disc = 0
 
         if disc < 0:
             return
-        # ищем корни/корень
+        # РёС‰РµРј РєРѕСЂРЅРё/РєРѕСЂРµРЅСЊ
         t = None
         if (disc != 0):
             sqrt_disc = m.sqrt(disc)
@@ -116,10 +116,10 @@ class Sphere(Surface):
         else:
             t = [r0_p0e]
 
-        # проверки
+        # РїСЂРѕРІРµСЂРєРё
         if all([i < 0 for i in t]):
             return
-        # массив положительных корней
+        # РјР°СЃСЃРёРІ РїРѕР»РѕР¶РёС‚РµР»СЊРЅС‹С… РєРѕСЂРЅРµР№
         positive_t = []
         for i in t:
             if i > np.finfo(float).eps:
@@ -127,12 +127,14 @@ class Sphere(Surface):
         if len(positive_t) > 0:
             return positive_t
 
-    def find_intersection_with_surface(self, ray: Ray):
+    def find_intersection_with_surface(self, ray: Ray) -> list:
         positive_t = Sphere._ray_surface_intersection(self, ray.dir, ray.start)
-        if positive_t != None:
+        if len(positive_t) > 0:
+            ray.t0 = [positive_t[0], self]
             return [ray.calc_point_of_ray(t) for t in positive_t]
+        return []
 
-    # реализация без переноса центра сферы в центр координат(на это нужен только сдвиг)
+    # СЂРµР°Р»РёР·Р°С†РёСЏ Р±РµР· РїРµСЂРµРЅРѕСЃР° С†РµРЅС‚СЂР° СЃС„РµСЂС‹ РІ С†РµРЅС‚СЂ РєРѕРѕСЂРґРёРЅР°С‚(РЅР° СЌС‚Рѕ РЅСѓР¶РµРЅ С‚РѕР»СЊРєРѕ СЃРґРІРёРі)
 
     def find_nearest_point_intersection(self, ray: Ray):
         l = self.find_intersection_with_surface(ray)

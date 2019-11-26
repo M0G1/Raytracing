@@ -1,6 +1,9 @@
 from enum import IntEnum
 import numpy as np
 
+from ray.ray import Ray
+from surfaces.surface import Surface
+
 
 class Compon(IntEnum):
     """
@@ -31,7 +34,7 @@ class RaysPool:
 
     @staticmethod
     def check_list(lst: list):
-        if (len(lst) == 0) or (len(lst) % Compon.RAY_OFFSET.value) != 0:
+        if (len(lst) % Compon.RAY_OFFSET.value) != 0:
             raise AttributeError("Invalid length of rays list(%s)" % (str(len(lst))))
         if not all(isinstance(i, float) or isinstance(i, int) for i in lst):
             raise TypeError("Array must consist from float or integer number")
@@ -110,11 +113,10 @@ class RaysPool:
                   )
         return s
 
-    # ================================================Getters=================================================
-
-    @property
-    def rays_number(self):
+    def __len__(self):
         return self.__rays_num
+
+    # ================================================Getters=================================================
 
     def e(self, i: int) -> list:
         r_i = i * Compon.RAY_OFFSET.value
@@ -135,3 +137,25 @@ class RaysPool:
     def t1(self, i) -> float:
         r_i = i * Compon.RAY_OFFSET.value
         return self.__pool[r_i + Compon.T1_OFFSET.value]
+
+    # ================================================Setters=================================================
+
+    def t1(self, i: int, t1: float):
+        if t1 < 0:
+            raise AttributeError("Negative lenght(%f)"%(t1))
+        r_i = i * Compon.RAY_OFFSET.value
+        self.__pool[r_i + Compon.T1_OFFSET.value] = t1
+
+    # methods of object RaysPool========================================================================================
+    def reflect(self, surface: Surface):
+        rays = []
+        for i in range(len(self)):
+            e, r, t1 = Ray._reflect(self.e(i), self.r(i), surface)
+            # t1 may be None
+            self.t1(i,t1[0])
+            if len(e) == 0 or len(r) == 0:
+                continue
+            rays.append(e)
+            rays.append(r)
+            rays.append(0)
+            rays.append(0)

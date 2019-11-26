@@ -5,15 +5,13 @@ from ray.ray import Ray
 from utility.binarytree import Tree
 
 
-
 def _not_sequence_modeling(ray: Ray, surfaces: list):
     min_p = float(np.finfo(float).max)
     # index of nearest surface and intersection point
     index, i_point = -1, None
     for i in range(len(surfaces)):
-        point = None
         point = surfaces[i].find_nearest_point_intersection(ray)
-        if point == None:
+        if point is None or len(point) == 0:
             continue
         norm_val = np.linalg.norm(np.subtract(ray.start, point))
         if norm_val < min_p:
@@ -39,7 +37,7 @@ def deep_modeling(ray: Ray, surfaces: list, deep: int):
         ray_ = tree.value
 
         # index of nearest surface and intersection point
-        index, i_point = _not_sequence_modeling(ray_,surfaces)
+        index, i_point = _not_sequence_modeling(ray_, surfaces)
 
         exit = False
         if i_point == None:
@@ -54,13 +52,13 @@ def deep_modeling(ray: Ray, surfaces: list, deep: int):
 
         if exit:
             return
-        if Ray.is_total_returnal_refruction(ray_, surfaces[index]):
-            reflect_ray = Ray._reflect(ray_, surfaces[index])
+        if Ray.is_total_returnal_refraction(ray_, surfaces[index]):
+            reflect_ray = Ray.reflect(ray_, surfaces[index])
             tree.left = Tree(reflect_ray)
         else:
-            refract_ray = Ray._refract(ray_, surfaces[index])
+            refract_ray = Ray.refract(ray_, surfaces[index])
             tree.right = Tree(refract_ray)
-            reflect_ray = Ray._reflect(ray_, surfaces[index])
+            reflect_ray = Ray.reflect(ray_, surfaces[index])
             tree.left = Tree(reflect_ray)
         if tree.left is not None:
             fill_ray_tree(tree.left, surfaces, deep - 1)
