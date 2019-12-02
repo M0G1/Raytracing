@@ -7,8 +7,13 @@ import matplotlib.lines as mlines
 
 
 class Plane(Surface):
-    # __rad = ()
-    # __norm = ()
+    """
+        (r-p0,n) = 0 - canonical equation of plane
+        :argument radius_vector - p0 in canonical equation of plane
+        :argument normal_vector - n in canonical equation of plane
+        :argument type_surface - reflecting or refracting surface
+        :argument n1,n2 - refractive indexes of space. watch method get_refractive_indexes in class Surface
+    """
 
     def __init__(self, radius_vector: list, normal_vector: list,
                  type_surface: Surface.types = Surface.types.REFLECTING,

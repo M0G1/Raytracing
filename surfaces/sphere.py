@@ -7,9 +7,13 @@ import math as m
 
 
 class Sphere(Surface):
-    # __center = []
-    # __r = 0.
-
+    """
+        (r-p0,r-p0) = R^2 - canonical equation of sphere
+        :argument center - сооrdinate of sphere center
+        :argument radius - radius of sphere
+        :argument type_surface - reflecting or refracting surface
+        :argument n1,n2 - refractive indexes of space. watch method get_refractive_indexes in class Surface
+    """
     def __init__(self, center: list, radius: float,
                  type_surface: Surface.types = Surface.types.REFLECTING,
                  n1: float = 1,

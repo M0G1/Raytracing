@@ -8,7 +8,13 @@ import math as m
 class Ellipse(Surface):
     __center = []
     __abc = []
-
+    """
+    (x-x0)^2/a^2 + (y - y0)^2/b^2 + (z - z0)^2/c^2 = 1 - canonical equation of ellipse
+    :argument center - сооrdinate of ellipse center  
+    :argument ellipse_coefficients - a,b,c in canonical equation of ellipse
+    :argument type_surface - reflecting or refracting surface
+    :argument n1,n2 - refractive indexes of space. watch method get_refractive_indexes in class Surface
+    """
     def __init__(self, center: list, ellipse_coefficients: list,
                  type_surface: Surface.types = Surface.types.REFLECTING,
                  n1: float = 1,

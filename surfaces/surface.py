@@ -38,11 +38,11 @@ class Surface:
         """
         Any surface divides the space into 2 parts.
 
-        Coefficient n1 corresponds to an external(for space-bounding surfaces)
-        or lower(opposite to the direction of most normal vectors to this surface).
+        Coefficient n1 corresponds to the external one (for surfaces bounding the space)
+        or on the opposite side relative to the normal plane vector
 
-        Coefficient 2 corresponds to the inside(for the surfaces bounding the space)
-        or the top (co-directional in the direction of most normal vectors to this surface).
+        Coefficient n2 corresponds to the inside (for surfaces bounding the space)
+        or on the same side relative to the normal plane vector
         :param point:
         :return:
         """
