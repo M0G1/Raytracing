@@ -2,7 +2,9 @@ import pylab
 import numpy as np
 
 from ray.ray import Ray
+import ray.rays_pool as rays_pool
 from utility.binarytree import Tree
+
 
 def draw_deep_ray_modeling(tree: Tree, axes, color='r'):
     count_of_rays = len(tree)
@@ -40,3 +42,24 @@ def draw_deep_ray_modeling(tree: Tree, axes, color='r'):
 
             line.set_label(str(i + 1))
             axes.add_line(line)
+
+
+def draw_ray_pool(pool: rays_pool.RaysPool):
+    if rays_pool.Compon.DIM.value != 2:
+        raise AttributeError("NON-two-dimensional ray pool")
+    for i in range(len(pool)):
+        x_coor = []
+        y_coor = []
+
+        begin = Ray.calc_point_of_ray_(pool.e(i), pool.r(i), pool.t0(i))
+        t1 = 1
+        if pool.t1(i) is not None:
+            t1 = pool.t1(i)
+        end = Ray.calc_point_of_ray_(pool.e(i), pool.r(i), t1)
+
+        x_coor.append([begin[0], end[0]])
+        y_coor.append([begin[1], end[1]])
+
+        line = pylab.Line2D(x_coor, y_coor)
+        axes = pylab.gca()
+        axes.add_line(line)

@@ -6,7 +6,7 @@ from surfaces.plane import Plane
 from surfaces.limited_surface import LimitedSurface
 from surfaces.surface import Surface
 import controllers.modelingController as modelCtrl
-import view.rayView as vray
+import view.MatlabRayView2D as vray
 
 
 def is_correct_angle(angle) -> bool:
@@ -120,9 +120,8 @@ if arg is not None:
 
     pylab.grid()
     axes = pylab.gca()
-    tree = modelCtrl.deep_modeling(ray,surfaces, 4)
+    tree = modelCtrl.deep_modeling(ray, surfaces, 4)
     for node in tree:
-
         print(str(node.value) + str(node.value._Ray__path_of_ray))
     vray.draw_deep_ray_modeling(tree=tree, axes=axes, color='g')
 
