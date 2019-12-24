@@ -34,7 +34,7 @@ class Ellipse(Surface):
             raise AttributeError(
                 """Some element in %s or %s is not a digit.""" % (str(center), str(ellipse_coefficients)))
         self._Surface__dim = len(center)
-        self._Surface____type_of_surface = type_surface
+        self._Surface__type_of_surface = type_surface
         self.__center = center.copy()
         self.__abc = ellipse_coefficients.copy()
         self.__n1 = n1

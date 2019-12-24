@@ -133,7 +133,7 @@ class Sphere(Surface):
 
     def find_intersection_with_surface(self, ray: Ray) -> list:
         positive_t = Sphere._ray_surface_intersection(self, ray.dir, ray.start)
-        if len(positive_t) > 0:
+        if (positive_t is not None) and (len(positive_t) > 0):
             ray.t0 = [positive_t[0], self]
             return [ray.calc_point_of_ray(t) for t in positive_t]
         return []

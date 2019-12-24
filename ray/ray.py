@@ -168,9 +168,11 @@ class Ray:
             for i in range(len(surfaces)):
                 point = None
                 point = surfaces[i].find_nearest_point_intersection(self)
-                if point == None:
+                print("point in m_p" + str(point))
+                if (point == None) or (len(point) == 0):
                     continue
-                # print("point in m_p" + str(point))
+                print('point is not null '+ str(point == None))
+                print('start of ray' + str(self.start))
                 norm_val = np.linalg.norm(np.subtract(self.start, point))
                 if norm_val < min_p:
                     min_p = norm_val

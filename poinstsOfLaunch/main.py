@@ -39,7 +39,7 @@ def double_function(a):
 
 # ======main===========================================================================
 
-file = open("input1.txt")
+file = open("input_data.txt")
 rays, surfaces = h.read_param_from_file(file, 2)
 file.close()
 
@@ -71,7 +71,7 @@ pylab.grid()
 axes = pylab.gca()
 axes.set_aspect("equal")
 # максимальный размер осей
-size = 15
+size = 5.5
 pylab.xlim(-size, size)
 pylab.ylim(-size, size)
 
@@ -82,7 +82,7 @@ for sur in surfaces:
 way_points_of_ray = rays.path_ray(surfaces)
 way_on_point = [[i, j] for i, j in zip(way_points_of_ray[0], way_points_of_ray[1])]
 print("way of ray " + str(way_on_point))
-rays.draw_ray(axes, way_points_of_ray)
+rays.draw_ray(axes, way_points_of_ray, color='green')
 pylab.show()
 # Some problems with path_of_ray
 #

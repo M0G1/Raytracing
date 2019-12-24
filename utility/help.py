@@ -13,23 +13,28 @@ def func_of_reading_surf_ray_from_strings(strings, dimension):
     for s in strings:
         nums = np.fromstring(s[3:], dtype=float, count=-1, sep=' ')
         # p = plane s = sphere e = ellipse
+        print("nums ", nums)
         if s[0] == 'r':
             rays.append(Ray(nums[:d], nums[d:2 * d]))
+            print('\tSUCCESS ' + str(rays[0]))
         else:
             surface = None
             if s[0] == 'p':
                 if s[1] == 't':
-                    surface = Plane(nums[:d], nums[d:2 * d], Surface.types.REFRACTING, nums[len(nums) - 2], nums[len(nums) - 1])
+                    surface = Plane(nums[:d], nums[d:2 * d], Surface.types.REFRACTING, nums[len(nums) - 2],
+                                    nums[len(nums) - 1])
                 else:
                     surface = Plane(nums[:d], nums[d:2 * d])
             elif s[0] == 's':
                 if s[1] == 't':
-                    surface = Sphere(nums[:d], nums[d], Surface.types.REFRACTING, nums[len(nums) - 2], nums[len(nums) - 1])
+                    surface = Sphere(nums[:d], nums[d], Surface.types.REFRACTING, nums[len(nums) - 2],
+                                     nums[len(nums) - 1])
                 else:
                     surface = Sphere(nums[:d], nums[d])
             elif s[0] == 'e':
                 if s[1] == 't':
-                    surface = Ellipse(nums[:d], nums[d:2 * d], Surface.types.REFRACTING, nums[len(nums) - 2], nums[len(nums) - 1])
+                    surface = Ellipse(nums[:d], nums[d:2 * d], Surface.types.REFRACTING, nums[len(nums) - 2],
+                                      nums[len(nums) - 1])
                 else:
                     surface = Ellipse(nums[:d], nums[d:2 * d])
             if (surface != None):

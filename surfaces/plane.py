@@ -34,7 +34,7 @@ class Plane(Surface):
                     str(radius_vector), str(normal_vector)))
 
         self._Surface__dim = len(radius_vector)
-        self._Surface____type_of_surface = type_surface
+        self._Surface__type_of_surface = type_surface
         self.__rad = radius_vector
         self.__norm = normal_vector
         norm_val = np.linalg.norm(self.__norm)

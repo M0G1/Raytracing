@@ -68,3 +68,4 @@ def deep_modeling(ray: Ray, surfaces: list, deep: int):
     tree = Tree(ray)
     fill_ray_tree(tree, surfaces, deep)
     return tree
+

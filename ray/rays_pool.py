@@ -184,7 +184,6 @@ class RaysPool:
                     rays.extend(r)
                     rays.append(0)
                     rays.extend(empty_list)
-
             return RaysPool(rays)
 
         return f
