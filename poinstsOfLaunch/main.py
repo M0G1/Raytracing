@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
-from utility import help as h
 import pylab
+
+from utility import help as h
+import controllers.modelingController as mCTRL
+import view.MatlabRayView2D as view
 
 
 def log(func):
@@ -38,56 +41,35 @@ def double_function(a):
 
 
 # ======main===========================================================================
+if __name__ == '__main__':
 
-file = open("input_data.txt")
-rays, surfaces = h.read_param_from_file(file, 2)
-file.close()
+    file = open("input_data.txt")
+    rays, surfaces = h.read_param_from_file(file, 2)
+    file.close()
 
-if isinstance(rays, list):
-    for i in rays:
-        print(str(i))
-else:
-    print(str(rays))
+    pylab.grid()
+    # Получим текущие оси
+    axes = pylab.gca()
+    axes.set_aspect("equal")
+    # максимальный размер осей
+    size = 5.5
+    pylab.xlim(-size, size)
+    pylab.ylim(-size, size)
 
-if not isinstance(surfaces, list):
-    temp = [surfaces]
-    surfaces = temp
+    print("\n\tsurfaces draw:")
+    for sur in surfaces:
+        print(str(sur.__class__) + " " + str(sur.draw_surface(axes)))
 
-for i in surfaces:
-    print(str(i))
+    way_points_of_ray =  mCTRL.path_ray_for_drawing(rays, surfaces,is_have_ray_in_infinity=True)
+    way_on_point = [[i, j] for i, j in zip(way_points_of_ray[0], way_points_of_ray[1])]
+    print("way of ray " + str(way_on_point))
+    view.draw_ray(axes, way_points_of_ray, color='green')
 
-print()
-
-for i in range(len(surfaces)):
-    arr_char = "intersection of " + str(surfaces[i]) \
-               + " and " + str(rays) + ": "
-    arr_char += str(surfaces[i].find_nearest_point_intersection(rays))
-    print(arr_char)
-
-# test
-
-pylab.grid()
-# Получим текущие оси
-axes = pylab.gca()
-axes.set_aspect("equal")
-# максимальный размер осей
-size = 5.5
-pylab.xlim(-size, size)
-pylab.ylim(-size, size)
-
-print("\n\tsurfaces draw:")
-for sur in surfaces:
-    print(str(sur.__class__) + " " + str(sur.draw_surface(axes)))
-
-way_points_of_ray = rays.path_ray(surfaces)
-way_on_point = [[i, j] for i, j in zip(way_points_of_ray[0], way_points_of_ray[1])]
-print("way of ray " + str(way_on_point))
-rays.draw_ray(axes, way_points_of_ray, color='green')
-pylab.show()
-# Some problems with path_of_ray
-#
-# except ...:
-#     print("SOME WENT WRONG")
-# finally:
-#     file.close()
-#     print("END OF PROGRAM")
+    pylab.show()
+    # Some problems with path_of_ray
+    #
+    # except ...:
+    #     print("SOME WENT WRONG")
+    # finally:
+    #     file.close()
+    #     print("END OF PROGRAM")

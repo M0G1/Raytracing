@@ -80,7 +80,7 @@ class LimitedSurface(Surface):
     def find_intersection_with_surface(self, ray):
         positive_t = LimitedSurface._ray_surface_intersection(self, ray.dir, ray.start)
         if len(positive_t) > 0:
-            ray.t1 = [positive_t[0], self]
+            ray.t1 = positive_t[0]
             return [ray.calc_point_of_ray(t) for t in positive_t]
         return []
 

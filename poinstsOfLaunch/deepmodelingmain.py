@@ -115,8 +115,9 @@ if arg is not None:
     # size = 5
     # pylab.xlim(arg[3][0] - 1, 1)
     # pylab.ylim(-(arg[3][1] + 1), arg[3][1] + 1)
-    pylab.xlim(-3, 3)
-    pylab.ylim(-3, 3)
+    pylab.xlim(-1.6, 0.4)
+    pylab.ylim(-1, 1)
+
 
     pylab.grid()
     axes = pylab.gca()
