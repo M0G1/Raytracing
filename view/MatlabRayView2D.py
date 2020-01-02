@@ -4,7 +4,7 @@ import numpy as np
 from ray.ray import Ray
 import ray.rays_pool as rays_pool
 from utility.binarytree import Tree
-import controllers.raySurfaceController as rsc
+import controllers.rayController as rsc
 
 
 def draw_ray(axes, way_points_of_ray: list, color="green"):

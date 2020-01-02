@@ -4,7 +4,7 @@ import pylab
 from surfaces.surface import Surface
 from ray.ray import Ray
 from utility.binarytree import Tree
-import controllers.raySurfaceController as rsc
+import controllers.rayController as rsc
 
 
 def _not_sequence_modeling(ray: Ray, surfaces: list):

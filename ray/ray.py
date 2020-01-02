@@ -2,7 +2,7 @@ import numpy as np
 import pylab
 
 from surfaces.surface import Surface
-import controllers.raySurfaceController as rsc
+import controllers.rayController as rsc
 import math as m
 from utility.binarytree import Tree
 
@@ -10,7 +10,7 @@ from utility.binarytree import Tree
 class Ray:
     # Конструктор класса Ray, создает объекты лучей из двух массивов вещественных числел
     # начала луча(start) и направление(dirrection)
-    def __init__(self, start: list, direction: list):
+    def __init__(self, start: list, direction: list, amplitude: float = 1):
         if len(direction) == len(start):
             if not all(isinstance(i, float or int) and isinstance(j, float or int) for i, j in zip(start, direction)):
                 raise AttributeError(
@@ -22,6 +22,7 @@ class Ray:
                 self.__dir = np.dot(1 / norm_val, self.dir)
             self.__dim = len(direction)
             self.__start = start.copy()
+            self.__amplitude = amplitude
             self.__path_of_ray = []
             self.__t1 = np.iinfo(int).max
         else:
@@ -46,6 +47,15 @@ class Ray:
     @property
     def t1(self) -> float:
         return self.__t1
+
+    @property
+    def A(self) -> float:
+        return self.__amplitude
+
+    @A.setter
+    def A(self, amplitude: (float, int)):
+        if amplitude > 0:
+            self.__amplitude = amplitude
 
     @t1.setter
     def t1(self, t1_: (float, int)):
