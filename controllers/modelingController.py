@@ -5,6 +5,7 @@ from surfaces.surface import Surface
 from ray.ray import Ray
 from utility.binarytree import Tree
 import controllers.rayController as rsc
+import controllers.rayStaticController as rsCTRL
 
 
 def _not_sequence_modeling(ray: Ray, surfaces: list):
@@ -40,8 +41,10 @@ def deep_modeling(ray: Ray, surfaces: list, deep: int):
 
         # index of nearest surface and intersection point
         index, i_point = _not_sequence_modeling(ray_, surfaces)
-
+        reflect_ray = None
+        refract_ray = None
         exit = False
+
         if i_point == None:
             tree.left = None
             tree.right = None
@@ -54,6 +57,7 @@ def deep_modeling(ray: Ray, surfaces: list, deep: int):
 
         if exit:
             return
+
         if rsc.is_total_returnal_refraction(ray_, surfaces[index]):
             reflect_ray = Ray.reflect(ray_, surfaces[index])
             tree.left = Tree(reflect_ray)
@@ -62,6 +66,12 @@ def deep_modeling(ray: Ray, surfaces: list, deep: int):
             tree.right = Tree(refract_ray)
             reflect_ray = Ray.reflect(ray_, surfaces[index])
             tree.left = Tree(reflect_ray)
+
+        point, norm, t = rsCTRL.find_norm_vec_and_point(ray_.dir, ray_.start, surfaces[index])
+        # n1, n2 = surfaces[index].get_refractive_indexes(ray_.start)
+        # , n1, n2
+        rsc.set_brightness('s', ray_, refract_ray, reflect_ray, norm)
+
         if tree.left is not None:
             fill_ray_tree(tree.left, surfaces, deep - 1)
         if tree.right is not None:
@@ -96,7 +106,7 @@ def model_path(ray: Ray, surfaces: list, is_return_ray_list: bool = False, is_ha
             ray_list.append(temp)
         new_ray = temp
     if is_have_ray_in_infinity:
-        _append_point_to_path(new_ray, way_point_of_ray, rsc.calc_point_of_ray_(new_ray.dir, new_ray.start, 10000))
+        _append_point_to_path(new_ray, way_point_of_ray, rsCTRL.calc_point_of_ray_(new_ray.dir, new_ray.start, 10000))
     if is_return_ray_list:
         return way_point_of_ray, ray_list
     return way_point_of_ray

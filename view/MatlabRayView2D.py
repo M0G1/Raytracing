@@ -28,8 +28,14 @@ def draw_deep_ray_modeling(tree: Tree, axes, color='r'):
         if isinstance(subtree.value, Ray):
             val = subtree.value
             # ,linewidth=count_of_rays - i
-            line = pylab.Line2D(val._Ray__path_of_ray[0], val._Ray__path_of_ray[1], color=color,
-                                alpha=(count_of_rays - i) / count_of_rays)
+
+            line = None
+            if val.bright > 0.01:
+                line = pylab.Line2D(val._Ray__path_of_ray[0], val._Ray__path_of_ray[1], color=color,
+                                    alpha=val.bright)
+            else:
+                line = pylab.Line2D(val._Ray__path_of_ray[0], val._Ray__path_of_ray[1], color=color,
+                                    alpha=0.01)
             x_dir_of_text = [1, 0]
             y_dir_of_text = [0, 1]
             # для определения направления надписи относительно уже известного
@@ -60,7 +66,8 @@ def draw_deep_ray_modeling(tree: Tree, axes, color='r'):
             line.set_label(str(i + 1))
             axes.add_line(line)
             print('dir of ray', dir_of_ray)
-            print('line', line)
+            print("A", val.A)
+            print("brightness", val.bright)
             print('val._Ray__path_of_ray', val._Ray__path_of_ray)
             print('line ', i + 1, ' drawed')
             print()

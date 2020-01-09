@@ -24,60 +24,64 @@ def is_correct_length(len) -> bool:
 
 
 def read_param():
-    isosceles = input("Is it isosceles triangle(y/n)?")
-    if isosceles is 'y' or isosceles is 'Y':
-        isosceles = True
-    else:
-        isosceles = False
-    ans = input("Do you want to enter param in console or use file(c - console/f - file)?")
+    auto_run = True
+    isosceles = True
+    if not auto_run:
+        isosceles = input("Is it isosceles triangle(y/n)?")
+        if isosceles is 'y' or isosceles is 'Y':
+            isosceles = True
+        else:
+            isosceles = False
+    # ans = input("Do you want to enter param in console or use file(c - console/f - file)?")
     angle = None
     length = None
     rayarr = None
     refr_coef = None
-    if ans[0] is 'c' or ans[0] is 'C':
-        angle = float(input("Enter the angle of line( 0 < angle < 90).\n"))
-        if not is_correct_angle(angle):
-            return
-
-        length = float(input("Enter the length of hypotenuse(length > 0)\n"))
-        if not is_correct_length(length):
-            return
-        refr_coef = input("Enter refraction coefficients. N1 - inside triangle. N2 - outside('n1 n2')\n")
-        refr_coef = [float(s) for s in refr_coef.split(' ')]
-        if len(refr_coef) is not 2:
-            print("Oops. You should be thoughtful")
-            return
-        raystr = input("And most difficult. Enter the ray(begin of ray and direction \'x1 y1 x2 y2\')\n")
-        rayarr = [float(s) for s in raystr.split(' ')]
-        if len(rayarr) is not 4:
-            print("Oops. You should read carefully. And think about it. I sad you that it is difficult.")
-            return
-    elif ans[0] is 'f' or ans[0] is 'F':
-        filename = input(
-            "Enter path to file('filename.txt') or enter the 'd' to use default file('pic.txt')")
-        if filename is 'd':
-            filename = "pic.txt"
-        file = open(filename)
-        angle = float(file.readline())
-        length = float(file.readline())
-        refr_coef = file.readline()
-        print(refr_coef)
-        refr_coef = [float(val) for val in refr_coef.split(' ')]
-        print(refr_coef)
-        raystr = file.readline()
-        rayarr = [float(s) for s in raystr.split(' ')]
-        if not is_correct_angle(angle):
-            return
-        if not is_correct_length(length):
-            return
-        if len(refr_coef) is not 2:
-            print("Oops. You should read carefully. And think about it. I sad you that it is difficult.")
-            return
-        if len(rayarr) is not 4:
-            print("Oops. You should read carefully. And think about it. I sad you that it is difficult.")
-            return
-    else:
+    filename = None
+    # if ans[0] is 'c' or ans[0] is 'C':
+    #     angle = float(input("Enter the angle of line( 0 < angle < 90).\n"))
+    #     if not is_correct_angle(angle):
+    #         return
+    #
+    #     length = float(input("Enter the length of hypotenuse(length > 0)\n"))
+    #     if not is_correct_length(length):
+    #         return
+    #     refr_coef = input("Enter refraction coefficients. N1 - inside triangle. N2 - outside('n1 n2')\n")
+    #     refr_coef = [float(s) for s in refr_coef.split(' ')]
+    #     if len(refr_coef) is not 2:
+    #         print("Oops. You should be thoughtful")
+    #         return
+    #     raystr = input("And most difficult. Enter the ray(begin of ray and direction \'x1 y1 x2 y2\')\n")
+    #     rayarr = [float(s) for s in raystr.split(' ')]
+    #     if len(rayarr) is not 4:
+    #         print("Oops. You should read carefully. And think about it. I sad you that it is difficult.")
+    #         return
+    # elif ans[0] is 'f' or ans[0] is 'F':
+    # filename = input(
+    #     "Enter path to file('filename.txt') or enter the 'd' to use default file('pic.txt')")
+    # if filename is 'd':
+    filename = "pic.txt"
+    file = open(filename)
+    angle = float(file.readline())
+    length = float(file.readline())
+    refr_coef = file.readline()
+    print(refr_coef)
+    refr_coef = [float(val) for val in refr_coef.split(' ')]
+    print(refr_coef)
+    raystr = file.readline()
+    rayarr = [float(s) for s in raystr.split(' ')]
+    if not is_correct_angle(angle):
         return
+    if not is_correct_length(length):
+        return
+    if len(refr_coef) is not 2:
+        print("Oops. You should read carefully. And think about it. I sad you that it is difficult.")
+        return
+    if len(rayarr) is not 4:
+        print("Oops. You should read carefully. And think about it. I sad you that it is difficult.")
+        return
+    # else:
+    #     return
     angle = angle * np.pi / 180
     sinA = np.sin(angle)
     cosA = -np.cos(angle)
@@ -118,12 +122,14 @@ if arg is not None:
     pylab.xlim(-1.6, 0.4)
     pylab.ylim(-1, 1)
 
-
     pylab.grid()
     axes = pylab.gca()
     tree = modelCtrl.deep_modeling(ray, surfaces, 4)
     for node in tree:
         print(str(node.value) + str(node.value._Ray__path_of_ray))
+
+    for node in tree:
+        print(str(node.value))
     vray.draw_deep_ray_modeling(tree=tree, axes=axes, color='g')
 
     # line = pylab.Line2D([-1, 1], [1, 1], color='green',label="lllllllllllllline")
