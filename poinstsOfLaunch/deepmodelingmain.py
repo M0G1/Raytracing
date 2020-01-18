@@ -4,6 +4,7 @@ from ray.ray import Ray
 import controllers.modelingController as modelCtrl
 import view.MatlabRayView2D as vray
 import opticalObjects.axicon2D as axicon
+import time
 
 
 def is_correct_angle(angle) -> bool:
@@ -85,6 +86,7 @@ def read_param():
     return [ray, axic[0], axic[1], isosceles, angle]
 
 
+start = time.time()
 arg = read_param()
 if arg is not None:
     ray = arg[0]
@@ -111,8 +113,11 @@ if arg is not None:
     vray.draw_deep_ray_modeling(tree=tree, axes=axes, color='g')
     axicon.draw_axicon2D(surfaces, axes, arg[3])
     refr_index = surfaces[0].get_refractive_indexes([-1, 0])
-    pylab.title("Axicon\nhalf angle: =%f \nrefractive indexs: inside: %f, outside: %f" % (arg[4], refr_index[0], refr_index[1]),
-                alpha=0.7)
+    pylab.title(
+        "Axicon\nhalf angle: =%f \nrefractive indexs: inside: %f, outside: %f" % (arg[4], refr_index[0], refr_index[1]),
+        alpha=0.7)
 
     axes.legend()
+
+    print("Worked time:", time.time() - start, " sec")
     pylab.show()

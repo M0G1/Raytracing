@@ -1,5 +1,6 @@
 import pylab
 import numpy as np
+import time
 
 import opticalObjects.axicon2D as axic
 from ray.ray import Ray
@@ -7,6 +8,7 @@ import view.MatlabRayView2D as rayView
 import controllers.modelingController as modelCtrl
 
 if __name__ == '__main__':
+    start = time.time()
     half_angle = 18
     is_isosceles = True
     lenght_of_side_ribs = 3
@@ -31,17 +33,8 @@ if __name__ == '__main__':
         [from_refr_coef, to_refr_coef], step
     )
 
-    reflection = pylab.Line2D(func[0][0], func[0][1], color='black')
-    transmittance = pylab.Line2D(func[1][0], func[1][1], color='blue')
 
-    reflection.set_label("R(n)")
-    transmittance.set_label("T(n)")
-
-    # pylab.figure(1)
-    # axes = pylab.gca()
-    # axic.draw_axicon2D(axicon, axes)
-    # tree = modelCtrl.deep_modeling(type_polarization, ray, axicon, ray_index + 1)
-    # rayView.draw_deep_ray_modeling(tree,axes)
+    print("\nCalculated time:", time.time() - start, " sec")
 
     pylab.figure(1)
     pylab.subplot(2, 1, 1)
@@ -80,4 +73,5 @@ if __name__ == '__main__':
     pylab.legend()
     pylab.grid(True)
 
+    print("Worked time:", time.time() - start, " sec")
     pylab.show()
