@@ -1,12 +1,9 @@
-import numpy as np
 import pylab
 
 from ray.ray import Ray
-from surfaces.plane import Plane
-from surfaces.limited_surface import LimitedSurface
-from surfaces.surface import Surface
 import controllers.modelingController as modelCtrl
 import view.MatlabRayView2D as vray
+import opticalObjects.axicon2D as axicon
 
 
 def is_correct_angle(angle) -> bool:
@@ -82,31 +79,10 @@ def read_param():
         return
     # else:
     #     return
-    angle = angle * np.pi / 180
-    sinA = np.sin(angle)
-    cosA = -np.cos(angle)
-    dir_vec = [cosA, sinA]
-    x, y = [val * length for val in dir_vec]
-    m = [[0, -1],
-         [1, 0]]
-    norm = list(np.dot(dir_vec, m))
-    print(refr_coef)
-    line1 = Plane([0, 0], norm, Surface.types.REFRACTING, n1=refr_coef[0], n2=refr_coef[1])
-    line2 = None
-    if isosceles:
-        norm2 = norm.copy()
-        norm2[1] *= -1
-        line2 = Plane([0, 0], norm2, Surface.types.REFRACTING, n1=refr_coef[0], n2=refr_coef[1])
-    else:
-        line2 = Plane([0, 0], [0, -1], Surface.types.REFRACTING, n1=refr_coef[0], n2=refr_coef[1])
-    limits1 = [[x, 0],
-               [0, y]]
-    limits2 = [[x, 0],
-               [-y, 0]]
+
     ray = Ray(rayarr[:2], rayarr[2:4])
-    line1 = LimitedSurface(line1, limits1)
-    line2 = LimitedSurface(line2, limits2)
-    return [ray, line1, line2, [x, y], isosceles]
+    axic = axicon.create_axicon(angle, isosceles, length, False, refr_coef[0], refr_coef[1])
+    return [ray, axic[0], axic[1], isosceles, angle]
 
 
 arg = read_param()
@@ -119,33 +95,24 @@ if arg is not None:
     # size = 5
     # pylab.xlim(arg[3][0] - 1, 1)
     # pylab.ylim(-(arg[3][1] + 1), arg[3][1] + 1)
+    # pylab.xlim(-3, 0.4)
     pylab.xlim(-1.6, 0.4)
     pylab.ylim(-1, 1)
 
     pylab.grid()
     axes = pylab.gca()
-    tree = modelCtrl.deep_modeling(ray, surfaces, 4)
+    tree = modelCtrl.deep_modeling('p', ray, surfaces, 4)
     for node in tree:
         print(str(node.value) + str(node.value._Ray__path_of_ray))
 
     for node in tree:
         print(str(node.value))
+
     vray.draw_deep_ray_modeling(tree=tree, axes=axes, color='g')
+    axicon.draw_axicon2D(surfaces, axes, arg[3])
+    refr_index = surfaces[0].get_refractive_indexes([-1, 0])
+    pylab.title("Axicon\nhalf angle: =%f \nrefractive indexs: inside: %f, outside: %f" % (arg[4], refr_index[0], refr_index[1]),
+                alpha=0.7)
 
-    # line = pylab.Line2D([-1, 1], [1, 1], color='green',label="lllllllllllllline")
-    # axes.add_line(line)
-    l1 = pylab.Line2D([arg[3][0], 0], [arg[3][1], 0])
-    l2 = None
-    l3 = None
-    if arg[4]:
-        l2 = pylab.Line2D([arg[3][0], 0], [-arg[3][1], 0])
-        l3 = pylab.Line2D([arg[3][0], arg[3][0]], [arg[3][1], -arg[3][1]])
-    else:
-        l3 = pylab.Line2D([arg[3][0], arg[3][0]], [arg[3][1], 0])
-        l2 = pylab.Line2D([arg[3][0], 0], [0, 0])
-    axes.add_line(l3)
-    axes.add_line(l2)
-    axes.add_line(l1)
     axes.legend()
-
     pylab.show()

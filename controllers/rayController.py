@@ -23,8 +23,11 @@ def is_total_returnal_refraction(ray: Ray, surface: Surface) -> bool:
 
 def get_angle_between_vec(vec1: (list, np.ndarray), vec2: (list, np.ndarray)) -> float:
     cos_val = np.dot(vec1, vec2)
-    if (abs(1 - cos_val) <= np.finfo(float).eps * 2):
+    eps = np.finfo(float).eps * 2
+    if (abs(1 - cos_val) <= eps):
         return 0
+    if (abs(1 + cos_val) <= eps):
+        return np.pi
     return np.arccos(cos_val)
 
 

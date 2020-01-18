@@ -40,8 +40,8 @@ class Plane(Surface):
         norm_val = np.linalg.norm(self.__norm)
         if abs(norm_val - 1.0) > np.finfo(float).eps:
             self.__norm = np.dot(1 / norm_val, self.__norm)
-        self.__n1 = n1
-        self.__n2 = n2
+        self._Surface__n1 = n1
+        self._Surface__n2 = n2
 
     # ==============================getter and setter===================================================================
 
@@ -49,11 +49,12 @@ class Plane(Surface):
     def rad(self) -> list:
         return self.__rad
 
+
     # ==========================methods of object plane=================================================================
 
     def __str__(self):
         return "Plane{ radius_vector: %s, normal_vector: %s, type: %s, n1: %f,n2: %f}" % (
-            str(self.rad), str(self.__norm), str(self.type), self.__n1, self.__n2)
+            str(self.rad), str(self.__norm), str(self.type), self._Surface__n1, self._Surface__n2)
 
     def draw_surface(self, axes: type(pylab.gca())) -> bool:
         if self.dim == 2:
@@ -109,9 +110,9 @@ class Plane(Surface):
         Any point returning n2 has an angle with a normal vector less than 90 degrees(for angle zero to).(Same direction)"""
         rad_vec = np.subtract(point, self.rad)
         cos_angle = np.dot(rad_vec, self.__norm)
-        if cos_angle < -10 * np.finfo(float).eps:
-            return self.__n1, self.__n2
-        return self.__n2, self.__n1
+        if cos_angle < 10 * np.finfo(float).eps:
+            return self._Surface__n1, self._Surface__n2
+        return self._Surface__n2, self._Surface__n1
 
     # ======================================= methods for Ray ==========================================================
     def _ray_surface_intersection(self, e: list, r: list) -> list:

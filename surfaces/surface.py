@@ -48,6 +48,12 @@ class Surface:
         """
         pass
 
+    def set_refractive_indexes(self, n1: float = 1, n2: float = 1):
+        if n1 < 1 or n2 < 1:
+            raise AttributeError("Refractive indices less than unity. n1: {}, n2: {}".format(n1, n2))
+        self.__n1 = n1
+        self.__n2 = n2
+
     def draw_surface(self, axes) -> bool:
         return False
 

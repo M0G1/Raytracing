@@ -27,8 +27,8 @@ class Sphere(Surface):
         self._Surface__type_of_surface = type_surface
         self.__center = center.copy()
         self.__r = radius
-        self.__n1 = n1
-        self.__n2 = n2
+        self._Surface__n1 = n1
+        self._Surface__n2 = n2
 
     # =========================== getter and setter ====================================================================
 
@@ -38,8 +38,8 @@ class Sphere(Surface):
 
     @property
     def r(self):
-
         return self.__r
+
 
     # ============================== Sphere object methods =============================================================
 
@@ -98,8 +98,8 @@ class Sphere(Surface):
         n2 - on sphere and inside sphere"""
         rad_vec = np.subtract(point, self.center)
         if np.linalg.norm(rad_vec) - self.r > 10 * np.finfo(float).eps:
-            return self.__n1, self.__n2
-        return self.__n2, self.__n1
+            return self._Surface__n1, self._Surface__n2
+        return self._Surface__n2, self._Surface__n1
 
     # ======================================= methods for Ray ==========================================================
     def _ray_surface_intersection(self, e: list, r: list) -> list:

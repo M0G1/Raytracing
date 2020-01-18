@@ -59,7 +59,8 @@ def draw_deep_ray_modeling(tree: Tree, axes, color='r'):
                  [-1, 0]]
             norm_dir_of_ray = np.linalg.norm(dir_of_ray)
             norm_to_ray = np.dot(np.dot(dir_of_ray, m), 1 / norm_dir_of_ray)
-            point_label = np.add(point_label, norm_to_ray * norm_dir_of_ray / 50)
+            const = 0.05
+            point_label = np.add(point_label, norm_to_ray * const)  # norm_to_ray * norm_dir_of_ray / 50)
             print("norm_dir_of_ray", norm_dir_of_ray)
             axes.text(point_label[0], point_label[1], str(i + 1), va='center', size=8)
 

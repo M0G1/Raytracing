@@ -37,8 +37,8 @@ class Ellipse(Surface):
         self._Surface__type_of_surface = type_surface
         self.__center = center.copy()
         self.__abc = ellipse_coefficients.copy()
-        self.__n1 = n1
-        self.__n2 = n2
+        self._Surface__n1 = n1
+        self._Surface__n2 = n2
 
     # =========================== getter and setter ====================================================================
 
@@ -49,6 +49,7 @@ class Ellipse(Surface):
     @property
     def abc(self):
         return self.__abc
+
 
     # ============================== Ellipse object methods ============================================================
 
@@ -107,8 +108,8 @@ class Ellipse(Surface):
             sum += ((point[i] - self.center[i]) ** 2) / (self.abc[i] ** 2)
 
         if sum - 1 > 10 * np.finfo(float).eps:
-            return self.__n1, self.__n2
-        return self.__n2, self.__n1
+            return self._Surface__n1, self._Surface__n2
+        return self._Surface__n2, self._Surface__n1
 
     # ======================================= methods for Ray ==========================================================
     def _ray_surface_intersection(self, e: list, r: list) -> list:

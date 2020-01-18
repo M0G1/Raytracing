@@ -16,7 +16,7 @@ class Ray:
     # начала луча(start) и направление(dirrection)
     def __init__(self, start: list, direction: list, amplitude: float = 1, brightness: float = 1):
         if len(direction) == len(start):
-            if not all(isinstance(i, float or int) and isinstance(j, float or int) for i, j in zip(start, direction)):
+            if not all(isinstance(i, (float, int)) and isinstance(j, (float, int)) for i, j in zip(start, direction)):
                 raise AttributeError(
                     """Some element in %s or %s is not a float number..""" % (str(start), str(direction)))
             if amplitude <= 0:

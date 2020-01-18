@@ -4,7 +4,7 @@ import pylab
 from surfaces.surface import Surface
 from ray.ray import Ray
 from utility.binarytree import Tree
-import controllers.rayController as rsc
+import controllers.rayController as rc
 import controllers.rayStaticController as rsCTRL
 
 
@@ -24,7 +24,7 @@ def _not_sequence_modeling(ray: Ray, surfaces: list):
     return index, i_point
 
 
-def deep_modeling(ray: Ray, surfaces: list, deep: int):
+def deep_modeling(type_polarization:str,ray: Ray, surfaces: list, deep: int) ->Tree:
     if not all(isinstance(some, Surface) for some in surfaces):
         raise AttributeError(
             "Not all elements in surfaces is instance of class Surface %s" % (
@@ -34,6 +34,12 @@ def deep_modeling(ray: Ray, surfaces: list, deep: int):
         raise AttributeError(
             "Invalid deep value(%s)" % (
                 str(deep))
+        )
+
+    if type_polarization != 's' and type_polarization != 'p':
+        raise AttributeError(
+            "Enter correct value of type polarization (s or p). You enter: %s" % (
+                type_polarization)
         )
 
     def fill_ray_tree(tree: Tree, surfaces: list, deep: int):
@@ -58,7 +64,7 @@ def deep_modeling(ray: Ray, surfaces: list, deep: int):
         if exit:
             return
 
-        if rsc.is_total_returnal_refraction(ray_, surfaces[index]):
+        if rc.is_total_returnal_refraction(ray_, surfaces[index]):
             reflect_ray = Ray.reflect(ray_, surfaces[index])
             tree.left = Tree(reflect_ray)
         else:
@@ -70,7 +76,7 @@ def deep_modeling(ray: Ray, surfaces: list, deep: int):
         point, norm, t = rsCTRL.find_norm_vec_and_point(ray_.dir, ray_.start, surfaces[index])
         # n1, n2 = surfaces[index].get_refractive_indexes(ray_.start)
         # , n1, n2
-        rsc.set_brightness('s', ray_, refract_ray, reflect_ray, norm)
+        rc.set_brightness(type_polarization, ray_, refract_ray, reflect_ray, norm)
 
         if tree.left is not None:
             fill_ray_tree(tree.left, surfaces, deep - 1)

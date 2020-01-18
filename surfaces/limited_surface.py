@@ -22,6 +22,15 @@ class LimitedSurface(Surface):
         self.__surface = surface
         self._Surface__dim = surface.dim
 
+    # =========================== getter and setter ====================================================================
+
+    @property
+    def limits(self) -> list:
+        return self.__limits
+
+    def set_refractive_indexes(self, n1: float = 1, n2: float = 1):
+        self.__surface.set_refractive_indexes(n1, n2)
+
     # ==========================methods of object=================================================================
 
     def __str__(self):
@@ -39,14 +48,7 @@ class LimitedSurface(Surface):
 
     def draw_surface(self, axes) -> bool:
         if isinstance(self.__surface, Plane):
-            m = [[0, -1],
-                 [1, 0]]
-            # direction vector
-            r = np.dot(m, self.norm_vec([0, 0]))
-            point1 = np.dot(self.__limits[0][0], r)
-            point2 = np.dot(self.__limits[0][1], r)
-            points = [point1, point2]
-            line = mlines.Line2D([val[0] for val in points], [val[1] for val in points])
+            line = mlines.Line2D(self.limits[0], self.limits[1])
             axes.add_line(line)
             return True
         return False
