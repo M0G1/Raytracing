@@ -154,6 +154,13 @@ def calc_frenel_coef(type_polarisation: str, fall_ray_amplitude: float, alpha: f
     return None
 
 
+def calc_norm_brightness(n1: float, n2: float):
+    n2_plus_n1 = n1 + n2
+    R = abs((n2 - n1) / n2_plus_n1) ** 2
+    T = 4 * n1 * n2 / n2_plus_n1 ** 2
+    return (R, T)
+
+
 def set_amplitude(type_polarisation: str, fall_ray: Ray, refract_ray: Ray, reflect_ray: Ray,
                   norm_vec: list):  # , n1: float, n2: float):
     if (fall_ray is None) or (refract_ray is None and reflect_ray is None):
@@ -191,7 +198,7 @@ def set_amplitude(type_polarisation: str, fall_ray: Ray, refract_ray: Ray, refle
 
 
 def set_brightness(type_polarisation: str, fall_ray: Ray, refract_ray: Ray, reflect_ray: Ray,
-                   norm_vec: list, is_amlitude_calculate: bool = False):
+                   norm_vec: list, n1: float, n2: float, is_amlitude_calculate: bool = False):
     if (fall_ray is None) or (refract_ray is None and reflect_ray is None):
         return
     if (refract_ray is None) and (reflect_ray is not None):
@@ -225,8 +232,9 @@ def set_brightness(type_polarisation: str, fall_ray: Ray, refract_ray: Ray, refl
         # digit calculation have mistakes in angle to close to 90 degree.
         # And is created two rays with different in coordinates  on machine epsilon
         if all(i == 0 for i in a_b):
-            refract_ray.bright = fall_ray.bright - np.finfo(float).eps
-            reflect_ray.bright = np.finfo(float).eps
+            reflect_brightness, refract_brightness = calc_norm_brightness(n1, n2)
+            refract_ray.bright = refract_brightness*fall_ray.bright
+            reflect_ray.bright = reflect_brightness*fall_ray.bright
             return
 
         a_plus_b = a_b[0] + a_b[1]

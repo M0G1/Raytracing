@@ -74,9 +74,9 @@ def deep_modeling(type_polarization:str,ray: Ray, surfaces: list, deep: int) ->T
             tree.left = Tree(reflect_ray)
 
         point, norm, t = rsCTRL.find_norm_vec_and_point(ray_.dir, ray_.start, surfaces[index])
-        # n1, n2 = surfaces[index].get_refractive_indexes(ray_.start)
+        n1, n2 = surfaces[index].get_refractive_indexes(ray_.start)
         # , n1, n2
-        rc.set_brightness(type_polarization, ray_, refract_ray, reflect_ray, norm)
+        rc.set_brightness(type_polarization, ray_, refract_ray, reflect_ray, norm,n1,n2)
 
         if tree.left is not None:
             fill_ray_tree(tree.left, surfaces, deep - 1)
