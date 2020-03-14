@@ -25,12 +25,24 @@ def generator_test():
     vector3D.append(0)
     print("new vector " + str(np.dot(mat, vector3D)))
 
+
 def binary_tree_test():
     btr.tree()
     tree = btr.Node()
 
 
-file = open("pic.txt")
-print(file.readlines())
+if __name__ == '__main__':
+    # file = open("pic.txt")
+    # print(file.readlines())
+    print(Compon3D.T1_OFFSET == 7)
+    print(Compon2D.T1_OFFSET == 5)
+    print()
 
-#generator_test()
+    print(Compon3D.DIM == 3)
+    print(Compon2D.DIM == 2)
+    print()
+
+    print(issubclass(Compon3D, IntEnum))
+    print(issubclass(Compon3D, Compon_Interface))
+
+# generator_test()

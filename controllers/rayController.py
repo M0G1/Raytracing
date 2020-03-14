@@ -1,14 +1,13 @@
 import numpy as np
-import math as m
 
 from surfaces.surface import Surface
 from ray.ray import Ray
-import controllers.rayStaticController as rsCTRL
+from ray.abstract_ray import ARay
 
 
 def is_total_returnal_refraction(ray: Ray, surface: Surface) -> bool:
     # list, list, float
-    point, nrm, t_1 = rsCTRL.find_norm_vec_and_point(ray.dir, ray.start, surface)
+    point, nrm, t_1 = ARay.find_norm_vec_and_point(ray.dir, ray.start, surface)
     if len(point) == 0 and len(nrm) == 0 and t_1 is None:
         return False
     ray.t1 = t_1[0]

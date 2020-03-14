@@ -15,6 +15,7 @@ class Ellipse(Surface):
     :argument type_surface - reflecting or refracting surface
     :argument n1,n2 - refractive indexes of space. watch method get_refractive_indexes in class Surface
     """
+
     def __init__(self, center: list, ellipse_coefficients: list,
                  type_surface: Surface.types = Surface.types.REFLECTING,
                  n1: float = 1,
@@ -49,7 +50,6 @@ class Ellipse(Surface):
     @property
     def abc(self):
         return self.__abc
-
 
     # ============================== Ellipse object methods ============================================================
 
@@ -150,7 +150,7 @@ class Ellipse(Surface):
         # массив положительных корней
         positive_t = []
         for i in t:
-            if i > np.finfo(float).eps:
+            if i > 10 * np.finfo(float).eps:
                 positive_t.append(i)
         if len(positive_t) > 0:
             return positive_t

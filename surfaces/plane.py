@@ -1,10 +1,9 @@
+import numpy as np
+import pylab
+
 from surfaces.surface import Surface
 from ray.ray import Ray
 from ray.rays_pool import RaysPool
-import numpy as np
-import pylab
-import matplotlib.lines as mlines
-
 
 class Plane(Surface):
     """
@@ -56,30 +55,6 @@ class Plane(Surface):
         return "Plane{ radius_vector: %s, normal_vector: %s, type: %s, n1: %f,n2: %f}" % (
             str(self.rad), str(self.__norm), str(self.type), self._Surface__n1, self._Surface__n2)
 
-    def draw_surface(self, axes: type(pylab.gca())) -> bool:
-        if self.dim == 2:
-            # matrix of rotation
-            m = [[0, -1],
-                 [1, 0]]
-            # direction vector
-            r = np.dot(m, self.__norm)
-
-            def calc_point(start: list, dir, leng):
-                poin = []
-                for i in range(len(start)):
-                    poin.append(start[i] + dir[i] * leng)
-                return poin
-
-            point = [calc_point(self.rad, r, 10_000),
-                     calc_point(self.rad, r, -10_000)]
-            line = mlines.Line2D([point[i][0] for i in range(2)],
-                                 [point[i][1] for i in range(2)])
-            axes.add_line(line)
-            return True
-        elif self.dim == 3:
-            return False
-        raise AttributeError("Defined only dor dimension 2 and 3")
-
     # =================================== Plane objects methods ========================================================
     def is_point_belong(self, point: list) -> bool:
         """
@@ -121,7 +96,7 @@ class Plane(Surface):
             return []
         t = (np.dot(self.__norm, np.subtract(self.__rad, r))) / ne
         # проверка на пересечение плоскостью в нужном направлении не нужна
-        if t < 0:
+        if t < 10*np.finfo(float).eps:
             return []
         return [t]
 

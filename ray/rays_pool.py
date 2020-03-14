@@ -1,13 +1,34 @@
 from enum import IntEnum
 import numpy as np
 
-from ray.ray import Ray
+from ray.abstract_ray import ARay
+
 from surfaces.surface import Surface
 
 
-class Compon(IntEnum):
+class Compon_Interface(IntEnum):
+    pass
+
+
+class Compon2D(Compon_Interface):
     """
-    Component of RAY
+        Component of 2 dimension RAY
+    """
+
+    E_OFFSET = 0
+    R_OFFSET = 2
+    T0_OFFSET = 4
+    T1_OFFSET = 5
+    # For future code
+    # LAM_OFFSET.value = 6
+    # W_OFFSET.value = 7
+    RAY_OFFSET = 6
+    DIM = 2
+
+
+class Compon3D(Compon_Interface):
+    """
+        Component of  3 dimension  RAY
     """
     E_OFFSET = 0
     R_OFFSET = 3
@@ -19,34 +40,33 @@ class Compon(IntEnum):
     RAY_OFFSET = 8
     DIM = 3
 
-    @classmethod
-    def new_dimension(cls, dim: int):
-        if dim < 1:
-            raise AttributeError("Dimension too small(%s)" % (str(dim)))
-        inequality = dim - cls.DIM
-        cls.R_OFFSET.value += inequality
-        cls.T0_OFFSET.value += inequality
-        cls.T1_OFFSET.value += inequality
-        cls.RAY_OFFSET.value += inequality
-        cls.DIM = dim
 
-
-class RaysPool:
-
-    @staticmethod
-    def __check_list(lst: list):
-        if (len(lst) % Compon.RAY_OFFSET.value) != 0:
-            raise AttributeError("Invalid length of rays list(%s)" % (str(len(lst))))
-        RaysPool.__check_type(lst)
+class RaysPool(ARay):
+    """
+        Class of set of rays. It have access methods: e,r,t0,t1
+         and some data manipulating ones: reflect,refract.
+    """
 
     @staticmethod
     def __check_type(lst):
         if not all(isinstance(i, (float, int)) or (i is None) for i in lst):
             raise TypeError("vector of direction and radius vector must consist from float or integer number")
 
+    @staticmethod
+    def __check_comIndex(componentIndexes):
+        if not issubclass(componentIndexes, (Compon2D, Compon3D)):
+            raise AttributeError("componentIndexes must be the class Compon2D or Compon3D." +
+                                 " And you take %s" % str(componentIndexes))
+
     def __check_index(self, index: int):
         if index < 0 or index >= self.__rays_num:
             raise IndexError("Incorrect index(%s)" % (str(index)))
+
+    def __check_list(self, lst: list):
+        if (len(lst) % self.__ComIndex.RAY_OFFSET) != 0:
+            raise AttributeError("Invalid length of rays list(%d). It must be multiplied  by %d" % (
+                len(lst), self.__ComIndex.RAY_OFFSET))
+        RaysPool.__check_type(lst)
 
     # @staticmethod
     # def _calc_new_length(length: int) -> int:
@@ -61,10 +81,19 @@ class RaysPool:
 
     # ================================================Object's=================================================
 
-    def __init__(self, rays: list):
+    def __init__(self, rays: (list, iter), componentIndexes):
+        """
+        :param rays: iterable object with Numeric values. It is lenght must be a multiple value of RAY_OFFSET
+         of class Compon2D or Compon3D
+        :param componentIndexes: class Compon2D or Compon3D with needed dimension space
+        """
+
+        self.__check_comIndex(componentIndexes)
+        self.__ComIndex = componentIndexes
+
         self.__check_list(rays)
         self.__pool = list(rays.copy())
-        self.__rays_num = len(rays) // Compon.RAY_OFFSET.value
+        self.__rays_num = len(rays) // self.__ComIndex.RAY_OFFSET
 
         # normalisation of direction vector
         for i in range(self.__rays_num):
@@ -73,12 +102,12 @@ class RaysPool:
     def normalise_e(self, index: int):
         norm_val = np.linalg.norm(self.e(index))
         if abs(norm_val - 1) > np.finfo(float).eps:
-            r_i = index * Compon.RAY_OFFSET.value
-            for i in range(r_i, r_i + Compon.DIM.value):
+            r_i = index * self.__ComIndex.RAY_OFFSET
+            for i in range(r_i, r_i + self.__ComIndex.DIM):
                 self.__pool[i] /= norm_val
 
     def append_rays(self, rays: list):
-        RaysPool.__check_list(rays)
+        self.__check_list(rays)
         # extends list, appending at end of list all element from current list
         self.__pool.extend(rays)
 
@@ -88,7 +117,7 @@ class RaysPool:
             self.normalise_e(num_ray)
 
     def refresh___rays_num(self):
-        val = len(self.__pool) / Compon.RAY_OFFSET.value
+        val = len(self.__pool) / self.__ComIndex.RAY_OFFSET
         if not isinstance(val, int):
             raise ValueError("ray number is not instance of integer(%s)".format(str(val.__class__.__name__)))
         self.__rays_num = val
@@ -96,14 +125,14 @@ class RaysPool:
     def erase_ray(self, index: int):
         RaysPool.__check_index(self, index)
 
-        from_index = index * Compon.RAY_OFFSET.value
+        from_index = index * self.__ComIndex.RAY_OFFSET
         # part of ray will shift to the left
-        until_index = (self.__rays_num - 1) * Compon.RAY_OFFSET.value
+        until_index = (self.__rays_num - 1) * self.__ComIndex.RAY_OFFSET
         # shift on the deleting ray
         for i in range(from_index, until_index):
-            self.__pool[i] = self.__pool[i + Compon.RAY_OFFSET.value]
+            self.__pool[i] = self.__pool[i + self.__ComIndex.RAY_OFFSET]
         # delete last ray
-        for i in range(Compon.RAY_OFFSET.value):
+        for i in range(self.__ComIndex.RAY_OFFSET):
             # delete element at the end of list or on index - list.pop(index)
             self.__pool.pop()
         RaysPool.refresh___rays_num(self)
@@ -116,10 +145,10 @@ class RaysPool:
         for i in range(self.__rays_num):
             s += ('%s- %s: %-60s, %s: %-60s, %s: %-18s, %s: %-18s\n'
                   % (str(i),
-                     str(Compon.E_OFFSET), str(self.e(i)),
-                     str(Compon.R_OFFSET), str(self.r(i)),
-                     str(Compon.T0_OFFSET), str(self.t0(i)),
-                     str(Compon.T1_OFFSET), str(self.t1(i)))
+                     str(self.__ComIndex.E_OFFSET), str(self.e(i)),
+                     str(self.__ComIndex.R_OFFSET), str(self.r(i)),
+                     str(self.__ComIndex.T0_OFFSET), str(self.t0(i)),
+                     str(self.__ComIndex.T1_OFFSET), str(self.t1(i)))
                   )
         return s
 
@@ -129,24 +158,28 @@ class RaysPool:
     # ================================================Getters=================================================
 
     def e(self, i: int) -> list:
-        r_i = i * Compon.RAY_OFFSET.value
-        a = r_i + Compon.E_OFFSET.value
-        b = r_i + Compon.R_OFFSET.value
+        r_i = i * self.__ComIndex.RAY_OFFSET
+        a = r_i + self.__ComIndex.E_OFFSET
+        b = r_i + self.__ComIndex.R_OFFSET
         return self.__pool[a:b]
 
     def r(self, i: int):
-        r_i = i * Compon.RAY_OFFSET.value
-        a = r_i + Compon.R_OFFSET.value
-        b = r_i + Compon.T0_OFFSET.value
+        r_i = i * self.__ComIndex.RAY_OFFSET
+        a = r_i + self.__ComIndex.R_OFFSET
+        b = r_i + self.__ComIndex.T0_OFFSET
         return self.__pool[a:b]
 
     def t0(self, i: int) -> float:
-        r_i = i * Compon.RAY_OFFSET.value
-        return self.__pool[r_i + Compon.T0_OFFSET.value]
+        r_i = i * self.__ComIndex.RAY_OFFSET
+        return self.__pool[r_i + self.__ComIndex.T0_OFFSET]
 
     def t1(self, i) -> float:
-        r_i = i * Compon.RAY_OFFSET.value
-        return self.__pool[r_i + Compon.T1_OFFSET.value]
+        r_i = i * self.__ComIndex.RAY_OFFSET
+        return self.__pool[r_i + self.__ComIndex.T1_OFFSET]
+
+    @property
+    def componentIndexes(self):
+        return self.__ComIndex
 
     # ================================================Setters=================================================
 
@@ -156,42 +189,43 @@ class RaysPool:
             raise AttributeError("Negative lenght(%f)" % (t1))
         if t1 < self.t0(i):
             raise AttributeError("Length less than begin of ray t0(%f), t1(%f)" % (self.t0(i), t1))
-        r_i = i * Compon.RAY_OFFSET.value
-        self.__pool[r_i + Compon.T1_OFFSET.value] = t1
+        r_i = i * self.__ComIndex.RAY_OFFSET
+        self.__pool[r_i + self.__ComIndex.T1_OFFSET] = t1
 
     # methods of object RaysPool========================================================================================
     @staticmethod
     def __reflect_refract(func):
         # обертываем функцию
-        def f(self, surface: Surface, push_non_reflected_ray: bool = True):
+        def f(self, surface: Surface, push_non_reflected_ray: bool = False):
             rays = []
             # для заполения ячеек, куда мы не можем положить информацию (вычитаем два вектора e и r и начало)
-            remain_len = Compon.RAY_OFFSET.value - (2 * Compon.DIM.value + 1)
+            remain_len = self.__ComIndex.RAY_OFFSET - (2 * self.__ComIndex.DIM + 2)
             empty_list = [None for i in range(remain_len)]
             # моделируем отражние
             for i in range(len(self)):
-                e, r, t1 = func(self.e(i), self.r(i), surface)
+                r, e, t1 = func(self.e(i), self.r(i), surface)
                 if len(e) == 0 or len(r) == 0 or t1 is None:
                     if push_non_reflected_ray:
-                        from_index = i * Compon.RAY_OFFSET.value
-                        to_index = from_index + Compon.RAY_OFFSET.value
+                        from_index = i * self.__ComIndex.RAY_OFFSET
+                        to_index = from_index + self.__ComIndex.RAY_OFFSET
                         rays.extend(self.__pool[from_index:to_index])
                     else:
                         continue
                 else:
-                    self.set_t1(i, t1[0])
+                    self.set_t1(i, t1)
                     rays.extend(e)
                     rays.extend(r)
                     rays.append(0)
+                    rays.append(-1)
                     rays.extend(empty_list)
-            return RaysPool(rays)
+            return RaysPool(rays, self.__ComIndex)
 
         return f
 
-    def reflect(self, surface: Surface, push_non_reflected_ray: bool = True):
-        ray_pool_reflect = RaysPool.__reflect_refract(Ray._reflect)
+    def reflect(self, surface: Surface, push_non_reflected_ray: bool = False):
+        ray_pool_reflect = RaysPool.__reflect_refract(ARay.reflect_)
         return ray_pool_reflect(self, surface, push_non_reflected_ray)
 
-    def refract(self, surface: Surface, push_non_refracted_ray: bool = True):
-        ray_pool_reflect = RaysPool.__reflect_refract(Ray._refract)
+    def refract(self, surface: Surface, push_non_refracted_ray: bool = False):
+        ray_pool_reflect = RaysPool.__reflect_refract(ARay.refract_)
         return ray_pool_reflect(self, surface, push_non_refracted_ray)

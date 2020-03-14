@@ -1,13 +1,10 @@
 import numpy as np
-import pylab
 
 from surfaces.surface import Surface
-import controllers.rayStaticController as rsCTRL
-import math as m
-from utility.binarytree import Tree
+from ray.abstract_ray import ARay
 
 
-class Ray:
+class Ray(ARay):
     EPS0 = 1 / (4 * np.pi * 9 * 10 ** 9)
     nu0 = 4 * np.pi * 10 ** -7
     SQRT_EPS0_ON_NU0 = (EPS0 / nu0) ** 0.5
@@ -34,7 +31,7 @@ class Ray:
             self.__amplitude = amplitude
             self.__brightness = brightness
             self.__path_of_ray = []
-            self.__t1 = np.iinfo(int).max
+            self.__t1 = -1
         else:
             raise AttributeError("""Iterables objects have different length. 
         len(start): %d,
@@ -88,12 +85,12 @@ class Ray:
 
     def __str__(self) -> str:
         return "ray:{ start: %s, direction: %s, A: %s, B:%s}" % (
-        self.__start.__str__(), self.__dir.__str__(), str(self.A), str(self.bright))
+            self.__start.__str__(), self.__dir.__str__(), str(self.A), str(self.bright))
 
     def reflect(self, surface: Surface):
         if self.__dim != surface.dim:
             raise AttributeError("Different dimension of ray(%d) and of surface(%d)" % (self.__dim, surface.dim))
-        point, e, t_1 = rsCTRL.reflect(e=self.dir, r=self.start, surface=surface)
+        point, e, t_1 = ARay.reflect_(e=self.dir, r=self.start, surface=surface)
         if len(point) == 0 or len(e) == 0 or t_1 is None:
             return None
         self.t1 = t_1
@@ -103,7 +100,7 @@ class Ray:
         if self.__dim != surface.dim:
             raise AttributeError("Different dimension of ray(%d) and of surface(%d)" % (self.__dim, surface.dim))
         # list, list, float
-        point, e, t_1 = rsCTRL.refract(e=self.dir, r=self.start, surface=surface)
+        point, e, t_1 = ARay.refract_(e=self.dir, r=self.start, surface=surface)
         if len(point) == 0 or len(e) == 0 or t_1 is None:
             return None
         self.t1 = t_1
@@ -112,7 +109,7 @@ class Ray:
     def calc_point_of_ray(self, t: float) -> list:
         if not t > 10 * np.finfo(float).eps:
             return []
-        return rsCTRL.calc_point_of_ray_(self.dir, self.start, t)
+        return ARay.calc_point_of_ray_(self.dir, self.start, t)
 
     def calc_I(self, n: float):
         return Ray.SQRT_EPS0_ON_NU0 * self.A ** 2

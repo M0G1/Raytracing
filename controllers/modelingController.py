@@ -1,11 +1,10 @@
 import numpy as np
-import pylab
 
 from surfaces.surface import Surface
 from ray.ray import Ray
 from utility.binarytree import Tree
 import controllers.rayController as rc
-import controllers.rayStaticController as rsCTRL
+from ray.abstract_ray import ARay
 
 
 def _not_sequence_modeling(ray: Ray, surfaces: list):
@@ -24,7 +23,8 @@ def _not_sequence_modeling(ray: Ray, surfaces: list):
     return index, i_point
 
 
-def deep_modeling(type_polarization:str,ray: Ray, surfaces: list, deep: int) ->Tree:
+def deep_modeling(type_polarization: str, ray: Ray, surfaces: list, deep: int,
+                  ray_const_length: float = 1) -> Tree:
     if not all(isinstance(some, Surface) for some in surfaces):
         raise AttributeError(
             "Not all elements in surfaces is instance of class Surface %s" % (
@@ -55,9 +55,9 @@ def deep_modeling(type_polarization:str,ray: Ray, surfaces: list, deep: int) ->T
             tree.left = None
             tree.right = None
             exit = True
-            i_point = ray_.calc_point_of_ray(1)
+            # i_point = ray_.calc_point_of_ray(ray_const_length)
 
-        _append_point_to_path(ray_, ray_._Ray__path_of_ray, i_point)
+        # _append_point_to_path(ray_, ray_._Ray__path_of_ray, i_point)
         if deep < 0:
             return
 
@@ -73,10 +73,10 @@ def deep_modeling(type_polarization:str,ray: Ray, surfaces: list, deep: int) ->T
             reflect_ray = Ray.reflect(ray_, surfaces[index])
             tree.left = Tree(reflect_ray)
 
-        point, norm, t = rsCTRL.find_norm_vec_and_point(ray_.dir, ray_.start, surfaces[index])
+        point, norm, t = ARay.find_norm_vec_and_point(ray_.dir, ray_.start, surfaces[index])
         n1, n2 = surfaces[index].get_refractive_indexes(ray_.start)
         # , n1, n2
-        rc.set_brightness(type_polarization, ray_, refract_ray, reflect_ray, norm,n1,n2)
+        rc.set_brightness(type_polarization, ray_, refract_ray, reflect_ray, norm, n1, n2)
 
         if tree.left is not None:
             fill_ray_tree(tree.left, surfaces, deep - 1)
@@ -112,7 +112,7 @@ def model_path(ray: Ray, surfaces: list, is_return_ray_list: bool = False, is_ha
             ray_list.append(temp)
         new_ray = temp
     if is_have_ray_in_infinity:
-        _append_point_to_path(new_ray, way_point_of_ray, rsCTRL.calc_point_of_ray_(new_ray.dir, new_ray.start, 10000))
+        _append_point_to_path(new_ray, way_point_of_ray, ARay.calc_point_of_ray_(new_ray.dir, new_ray.start, 10000))
     if is_return_ray_list:
         return way_point_of_ray, ray_list
     return way_point_of_ray

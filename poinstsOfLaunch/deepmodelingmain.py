@@ -5,6 +5,7 @@ import controllers.modelingController as modelCtrl
 import view.MatlabRayView2D as vray
 import opticalObjects.axicon2D as axicon
 import time
+import numpy as np
 
 
 def is_correct_angle(angle) -> bool:
@@ -98,25 +99,34 @@ if arg is not None:
     # pylab.xlim(arg[3][0] - 1, 1)
     # pylab.ylim(-(arg[3][1] + 1), arg[3][1] + 1)
     # pylab.xlim(-3, 0.4)
-    pylab.xlim(-1.6, 0.4)
-    pylab.ylim(-1, 1)
+    xlim = [-1.6, 0.4]
+    ylim = [-1, 1]
+    ray_const_lenght = ((xlim[0] - xlim[1])**2 + (ylim[0] - ylim[1])**2)**0.5
+    # ray_const_lenght = ray_const_lenght/2
+
+    pylab.xlim(xlim[0], xlim[1])
+    pylab.ylim(ylim[0], ylim[1])
 
     pylab.grid()
     axes = pylab.gca()
-    tree = modelCtrl.deep_modeling('p', ray, surfaces, 4)
+
+    tree = modelCtrl.deep_modeling('p', ray, surfaces, 4, ray_const_length=ray_const_lenght)
     for node in tree:
         print(str(node.value) + str(node.value._Ray__path_of_ray))
 
     for node in tree:
         print(str(node.value))
 
-    vray.draw_deep_ray_modeling(tree=tree, axes=axes, color='g')
+    vray.draw_deep_ray_modeling(tree=tree, axes=axes, color='g', lower_limit_brightness=0.07)
     axicon.draw_axicon2D(surfaces, axes, arg[3])
     refr_index = surfaces[0].get_refractive_indexes([-1, 0])
-    pylab.title(
-        "Axicon\nhalf angle: =%f \nrefractive indexs: inside: %f, outside: %f" % (arg[4], refr_index[0], refr_index[1]),
-        alpha=0.7)
+    # pylab.title(
+    #     "Axicon\nhalf angle: =%f \nrefractive indexs: inside: %f, outside: %f" % (arg[4], refr_index[0], refr_index[1]),
+    #     alpha=0.7)
 
+    pylab.title(
+        "Axicon \nrefractive indexs inside: %.4f\nrefractive indexs outside: %.4f" % (refr_index[0], refr_index[1]),
+        alpha=0.7)
     axes.legend()
 
     print("Worked time:", time.time() - start, " sec")

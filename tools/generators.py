@@ -1,5 +1,6 @@
 import numpy as np
 import ray.rays_pool as rays_pool
+from ray.abstract_ray import ARay
 
 
 class Generator:
@@ -41,7 +42,7 @@ class Generator:
         # return rot_mat
 
     @staticmethod
-    def generate_rays_2d(point1: list, point2: list, intensity: int) -> rays_pool.RaysPool:
+    def generate_rays_2d(point1: list, point2: list, intensity: float) -> rays_pool.RaysPool:
         if len(point1) != 2 or len(point2) != 2:
             raise AttributeError("Point dimension is not 2. point1: " + str(point1) + " point2: " + str(point2))
         if (not all(isinstance(coor, (float, int)) for coor in point1)) or \
@@ -49,6 +50,7 @@ class Generator:
             raise AttributeError("Lists of point1 or list of point2 not contained type float or int")
         if intensity < np.finfo(float).eps:
             raise AttributeError("Negative intensity (%f)".format(intensity))
+
         vec = np.subtract(point2, point1)
         norm = np.linalg.norm(vec)
         # нормировка вектора для вычисления начал координат лучей
@@ -57,24 +59,24 @@ class Generator:
         count = int(pre_count)
         # для равномерного распеределения в середине
         vec_t0 = (pre_count - count) / 2
-        step = (norm - 2 * vec_t0) / count
-        m_rot = [[0, -1],
-                 [1, 0]]
+        step = (norm - 2 * vec_t0) / (count - 1)
+        m_rot = [[0, 1],
+                 [-1, 0]]
         vec_e = np.dot(m_rot, vec)
         e_norm = np.linalg.norm(vec_e)
         # нормировка вектора направления
         vec_e = list(np.divide(vec_e, e_norm))
         arr_ray_pool = []
         # создаем бассейн с размерностью лучей 2(плоскость, а не пространство)
-        rays_pool.Compon.new_dimension(2)
-        # для заполения ячеек, куда мы не можем положить информацию (вычитаем два вектора e и r и начало)
-        remain_len = rays_pool.Compon.RAY_OFFSET.value - (2 * rays_pool.Compon.DIM.value + 1)
+        # оставляем место для ячеек, куда мы не можем положить информацию. Заполняем только  e и r
+        remain_len = rays_pool.Compon2D.RAY_OFFSET - (2 * rays_pool.Compon2D.DIM.value + 2)
         empty_list = [None for i in range(remain_len)]
         for i in range(count):
-            vec_r = rays_pool.Ray.calc_point_of_ray_(vec, point1, vec_t0 + i * step)
+            vec_r = ARay.calc_point_of_ray_(vec, point1, vec_t0 + i * step)
             arr_ray_pool.extend(vec_e)
             arr_ray_pool.extend(vec_r)
             arr_ray_pool.append(0)
+            arr_ray_pool.append(-1)
             arr_ray_pool.extend(empty_list)
 
-        return rays_pool.RaysPool(arr_ray_pool)
+        return rays_pool.RaysPool(arr_ray_pool, rays_pool.Compon2D)

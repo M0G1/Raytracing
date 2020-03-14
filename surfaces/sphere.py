@@ -14,6 +14,7 @@ class Sphere(Surface):
         :argument type_surface - reflecting or refracting surface
         :argument n1,n2 - refractive indexes of space. watch method get_refractive_indexes in class Surface
     """
+
     def __init__(self, center: list, radius: float,
                  type_surface: Surface.types = Surface.types.REFLECTING,
                  n1: float = 1,
@@ -40,34 +41,30 @@ class Sphere(Surface):
     def r(self):
         return self.__r
 
-
     # ============================== Sphere object methods =============================================================
 
     def __str__(self):
         return "Sphere:{ center: %s, radius: %s, type: %s}" % (str(self.center), str(self.r), str(self.type))
 
-    def draw_surface(self, axes, color='b', alpha=0.5) -> bool:
-        if self.dim == 2:
-            sphere = pathes.Circle(self.center, self.r, fill=False, color=color)
-            axes.add_patch(sphere)
-            del sphere
-            return True
-        elif self.dim == 3:
-            u = np.linspace(0, 2 * np.pi, 100)
-            v = np.linspace(0, np.pi, 100)
-
-            x = np.subtract(self.r * np.outer(np.cos(u), np.sin(v)), -self.center[0])
-            y = np.subtract(self.r * np.outer(np.sin(u), np.sin(v)), -self.center[1])
-            z = np.subtract(self.r * np.outer(np.ones(np.size(u)), np.cos(v)), -self.center[2])
-            print('x = ')
-            print(x)
-            print('y = ')
-            print(y)
-
-            axes.plot_surface(x, y, z, rstride=4, cstride=4, color=color, alpha=alpha)
-            return True
-
-        raise AttributeError("Defined only dor dimension 2 and 3")
+    # def draw_surface(self, axes, color='b', alpha=0.5) -> bool:
+    #     if self.dim == 2:
+    #
+    #     elif self.dim == 3:
+    #         u = np.linspace(0, 2 * np.pi, 100)
+    #         v = np.linspace(0, np.pi, 100)
+    #
+    #         x = np.subtract(self.r * np.outer(np.cos(u), np.sin(v)), -self.center[0])
+    #         y = np.subtract(self.r * np.outer(np.sin(u), np.sin(v)), -self.center[1])
+    #         z = np.subtract(self.r * np.outer(np.ones(np.size(u)), np.cos(v)), -self.center[2])
+    #         print('x = ')
+    #         print(x)
+    #         print('y = ')
+    #         print(y)
+    #
+    #         axes.plot_surface(x, y, z, rstride=4, cstride=4, color=color, alpha=alpha)
+    #         return True
+    #
+    #     raise AttributeError("Defined only dor dimension 2 and 3")
 
     def is_point_belong(self, point: list) -> bool:
         if len(point) != self.dim:
@@ -111,7 +108,7 @@ class Sphere(Surface):
             disc = 0
 
         if disc < 0:
-            return
+            return []
         # ищем корни/корень
         t = None
         if (disc != 0):
@@ -121,12 +118,12 @@ class Sphere(Surface):
             t = [r0_p0e]
 
         # проверки
-        if all([i < 0 for i in t]):
-            return
+        if all([i < np.finfo(float).eps for i in t]):
+            return []
         # массив положительных корней
         positive_t = []
         for i in t:
-            if i > np.finfo(float).eps:
+            if i > 10 * np.finfo(float).eps:
                 positive_t.append(i)
         if len(positive_t) > 0:
             return positive_t

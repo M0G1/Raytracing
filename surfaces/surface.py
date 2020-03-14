@@ -54,8 +54,8 @@ class Surface:
         self.__n1 = n1
         self.__n2 = n2
 
-    def draw_surface(self, axes) -> bool:
-        return False
+    # def draw_surface(self, axes) -> bool:
+    #     return False
 
     # ======================================= methods for Ray ==========================================================
 

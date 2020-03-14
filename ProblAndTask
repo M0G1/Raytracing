@@ -38,4 +38,6 @@ Tasks:
     генерация лучей
 
 Source:
-    https://matplotlib.org/mpl_toolkits/mplot3d/tutorial.html 
+    https://matplotlib.org/mpl_toolkits/mplot3d/tutorial.html
+
+    идея с абстракцией алгоритмов в не зависимости от контейнера

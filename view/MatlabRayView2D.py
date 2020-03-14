@@ -4,7 +4,7 @@ import numpy as np
 from ray.ray import Ray
 import ray.rays_pool as rays_pool
 from utility.binarytree import Tree
-import controllers.rayController as rsc
+from ray.abstract_ray import ARay
 
 
 def draw_ray(axes, way_points_of_ray: list, color="green"):
@@ -22,7 +22,9 @@ def draw_ray(axes, way_points_of_ray: list, color="green"):
                      c='b', marker='o')
 
 
-def draw_deep_ray_modeling(tree: Tree, axes, color='r'):
+def draw_deep_ray_modeling(
+        tree: Tree, axes, color='r', lower_limit_brightness: float = 0.01,
+        ray_const_length: float = 1):
     count_of_rays = len(tree)
     for i, subtree in enumerate(tree):
         if isinstance(subtree.value, Ray):
@@ -30,16 +32,28 @@ def draw_deep_ray_modeling(tree: Tree, axes, color='r'):
             # ,linewidth=count_of_rays - i
 
             line = None
-            if val.bright > 0.01:
-                line = pylab.Line2D(val._Ray__path_of_ray[0], val._Ray__path_of_ray[1], color=color,
-                                    alpha=val.bright)
+            t1 = 1
+            isInfiniteRay = False
+            if val.t1 != -1:
+                t1 = val.t1
             else:
-                line = pylab.Line2D(val._Ray__path_of_ray[0], val._Ray__path_of_ray[1], color=color,
-                                    alpha=0.01)
+                isInfiniteRay = True
+                t1 = ray_const_length
+
+            coords = collect_point_to_draw(val.dir, val.start, 0, t1)
+            print("coords", coords)
+            bright = None
+
+            if val.bright > lower_limit_brightness:
+                bright = val.bright
+            else:
+                bright = lower_limit_brightness
+            line = pylab.Line2D(coords[0], coords[1], color=color, alpha=bright)
+
             x_dir_of_text = [1, 0]
             y_dir_of_text = [0, 1]
             # для определения направления надписи относительно уже известного
-            dir_of_ray = [coordinate[1] - coordinate[0] for coordinate in val._Ray__path_of_ray]
+            dir_of_ray = [coordinate[1] - coordinate[0] for coordinate in coords]
             dir_of_ray_norm = np.linalg.norm(dir_of_ray)
             # x_scalar_mul = np.dot(x_dir_of_text, dir_of_ray) / dir_of_ray_norm
             # y_scalar_mul = np.dot(y_dir_of_text, dir_of_ray) / dir_of_ray_norm
@@ -53,10 +67,15 @@ def draw_deep_ray_modeling(tree: Tree, axes, color='r'):
 
             # x_point_label = np.average(val._Ray__path_of_ray[0])
             # y_point_label = np.average(val._Ray__path_of_ray[1])
+            point_label = None
+            if isInfiniteRay:
+                point_label = [0.75, 0.75]
+            else:
+                point_label = [np.average(coor) for coor in coords]
 
-            point_label = [np.average(coor) for coor in val._Ray__path_of_ray]
             m = [[0, 1],
                  [-1, 0]]
+            print("point label ", point_label)
             norm_dir_of_ray = np.linalg.norm(dir_of_ray)
             norm_to_ray = np.dot(np.dot(dir_of_ray, m), 1 / norm_dir_of_ray)
             const = 0.05
@@ -69,30 +88,37 @@ def draw_deep_ray_modeling(tree: Tree, axes, color='r'):
             print('dir of ray', dir_of_ray)
             print("A", val.A)
             print("brightness", val.bright)
-            print('val._Ray__path_of_ray', val._Ray__path_of_ray)
+            print('coords', coords)
             print('line ', i + 1, ' drawed')
             print()
 
 
-def draw_ray_pool(pool: rays_pool.RaysPool):
-    if rays_pool.Compon.DIM.value != 2:
+def draw_ray_pool(pool: rays_pool.RaysPool, ray_const_length: float = 2):
+    if pool.componentIndexes.DIM != 2:
         raise AttributeError("NON-two-dimensional ray pool")
+
     for i in range(len(pool)):
-        x_coor = []
-        y_coor = []
-
-        begin = rsc.calc_point_of_ray_(pool.e(i), pool.r(i), pool.t0(i))
         t1 = 1
-        if pool.t1(i) is not None:
+        if pool.t1(i) != -1:
             t1 = pool.t1(i)
-        end = rsc.calc_point_of_ray_(pool.e(i), pool.r(i), t1)
+        else:
+            t1 = ray_const_length
 
-        x_coor.append([begin[0], end[0]])
-        y_coor.append([begin[1], end[1]])
+        coords = collect_point_to_draw(pool.e(i), pool.r(i), pool.t0(i), t1)
 
-        line = pylab.Line2D(x_coor, y_coor)
+        line = pylab.Line2D(coords[0], coords[1], color="green")
         axes = pylab.gca()
         axes.add_line(line)
+
+
+def collect_point_to_draw(e: (list, iter), r: (list, iter), t0: float, t1: float):
+    begin = ARay.calc_point_of_ray_(e, r, t0)
+    end = ARay.calc_point_of_ray_(e, r, t1)
+
+    x_coor = [begin[0], end[0]]
+    y_coor = [begin[1], end[1]]
+
+    return (x_coor, y_coor)
 
 
 if __name__ == '__main__':

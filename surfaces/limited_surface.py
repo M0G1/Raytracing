@@ -28,8 +28,16 @@ class LimitedSurface(Surface):
     def limits(self) -> list:
         return self.__limits
 
+    @property
+    def surface(self)->Surface:
+        return self.__surface
+
     def set_refractive_indexes(self, n1: float = 1, n2: float = 1):
         self.__surface.set_refractive_indexes(n1, n2)
+
+    @surface.setter
+    def surface(self,surface:Surface):
+        self.__surface = surface
 
     # ==========================methods of object=================================================================
 
