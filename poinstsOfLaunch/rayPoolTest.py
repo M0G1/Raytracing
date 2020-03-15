@@ -38,7 +38,16 @@ if __name__ == '__main__':
 
     print("\n", sphere, "\n")
     lim = [[1.5, 4.5], [-1, 1]]
-    print("lim",lim,"\n")
+    planes = [
+        Plane([1.5, 0], [0, 1]),
+        Plane([4.5, 0], [0, 1]),
+        Plane([0, 1], [1, 0]),
+        Plane([0, -1], [1, 0])
+    ]
+    for i in planes:
+        msv.draw_plane(i, axes,color="black")
+
+    print("lim", lim, "\n")
 
     vray.draw_ray_pool(pool)
     vray.draw_ray_pool(reflected_pool)
@@ -46,7 +55,7 @@ if __name__ == '__main__':
     msv.draw_sphere(sphere, axes)
 
     limited = LimitedSurface(sphere, lim)
-    msv.draw_limited_ellipse(limited,axes)
+    # msv.draw_limited_ellipse(limited,axes)
 
     # a = [(2, 1), (2, 1), (0, 2), (2 * np.pi, 2), (1, 3), (2 * np.pi - 1, 3)]
     # print(a)

@@ -14,7 +14,7 @@ class Plane(Surface):
         :argument n1,n2 - refractive indexes of space. watch method get_refractive_indexes in class Surface
     """
 
-    def __init__(self, radius_vector: list, normal_vector: list,
+    def __init__(self, radius_vector: (list,iter), normal_vector: (list,iter),
                  type_surface: Surface.types = Surface.types.REFLECTING,
                  n1: float = 1,
                  n2: float = 1):

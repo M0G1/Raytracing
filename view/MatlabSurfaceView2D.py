@@ -6,6 +6,7 @@ import math
 from ray.abstract_ray import ARay
 from ray.ray import Ray
 import ray.rays_pool as rays_pool
+import view.MatlabRayView2D as vray
 
 from utility.binarytree import Tree
 
@@ -21,10 +22,13 @@ def draw_plane(plane: Plane, axes: type(pylab.gca()), color="blue", alpha=0.5) -
     m = [[0, -1],
          [1, 0]]
     # direction vector
-    r = np.dot(m, plane.__norm)
-
+    r = np.dot(m, plane._Plane__norm)
+    # coords = vray.collect_point_to_draw(r,)
     point = [ARay.calc_point_of_ray_(plane.rad, r, 10_000),
              ARay.calc_point_of_ray_(plane.rad, r, -10_000)]
+    print("dro",[point[i][0] for i in range(2)])
+
+
     line = pylab.Line2D([point[i][0] for i in range(2)],
                         [point[i][1] for i in range(2)], color=color, alpha=alpha)
     axes.add_line(line)
@@ -78,11 +82,11 @@ def draw_limited_ellipse(ellipse: LimitedSurface, axes: type(pylab.gca()), color
     x1 = None
 
     if x_check[0]:
-        x0 = math.sqrt(expression[0]) + center[0]
+        x0 = math.sqrt(expression[0])
     if x_check[1]:
-        x1 = math.sqrt(expression[1]) + center[0]
+        x1 = math.sqrt(expression[1])
 
-    # находим пересечения по оси Ординат(Y)
+        # находим пересечения по оси Ординат(Y)
     expression = [(ab[1] ** 2) * (1 - ((lim[0][i] - center[0]) / ab[0]) ** 2) for i in range(2)]
     y_check = [var >= 0 for var in expression]
 
@@ -92,9 +96,9 @@ def draw_limited_ellipse(ellipse: LimitedSurface, axes: type(pylab.gca()), color
     y1 = None
 
     if y_check[0]:
-        y0 = np.sqrt(expression[0]) + center[1]
+        y0 = np.sqrt(expression[0])
     if y_check[1]:
-        y1 = np.sqrt(expression[1]) + center[1]
+        y1 = np.sqrt(expression[1])
 
     # удаляем ненужные уже поля
     del x_check
