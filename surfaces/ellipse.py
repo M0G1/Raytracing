@@ -16,7 +16,7 @@ class Ellipse(Surface):
     :argument n1,n2 - refractive indexes of space. watch method get_refractive_indexes in class Surface
     """
 
-    def __init__(self, center: list, ellipse_coefficients: list,
+    def __init__(self, center: (list,iter), ellipse_coefficients: (list,iter),
                  type_surface: Surface.types = Surface.types.REFLECTING,
                  n1: float = 1,
                  n2: float = 1):
@@ -36,8 +36,8 @@ class Ellipse(Surface):
                 """Some element in %s or %s is not a digit.""" % (str(center), str(ellipse_coefficients)))
         self._Surface__dim = len(center)
         self._Surface__type_of_surface = type_surface
-        self.__center = center.copy()
-        self.__abc = ellipse_coefficients.copy()
+        self.__center = list(center).copy()
+        self.__abc = list(ellipse_coefficients).copy()
         self._Surface__n1 = n1
         self._Surface__n2 = n2
 

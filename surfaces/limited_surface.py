@@ -13,7 +13,7 @@ class LimitedSurface(Surface):
         limits must to have array of two-dimension array with left and right bounds. Length of limits must to equal with dimension of surface
     """
 
-    def __init__(self, surface: Surface, limits: list):
+    def __init__(self, surface: Surface, limits: (list,iter)):
         if len(limits) != surface.dim:
             raise AttributeError("Limits(%d) and surface(dim: %d) have different size" % (len(limits), surface.dim))
         if not all(coor[0] < coor[1] for coor in limits):

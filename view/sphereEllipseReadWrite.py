@@ -106,7 +106,7 @@ class Sphere_Ellipse_data_2Dview:
         if file_name is not "":
             partit = cls.__load_sphere_partition_from_file(file_name)
         else:
-            spaced_values = np.arange(start=0, stop=np.pi / 2, step=step)
+            spaced_values = np.arange(start=0, stop=np.pi / 2 + step, step=step)
             partit = (np.cos(spaced_values), np.sin(spaced_values))
             cls.__pickle_sphere_partition_to_file(partit, step)
 
@@ -144,9 +144,11 @@ class Sphere_Ellipse_data_2Dview:
         return to_draw
 
     @classmethod
-    def get_sphere2D(cls, step: float, center: iter) -> iter:
+    def get_sphere2D(cls, step: float, center: iter, radius: float) -> iter:
         is_shift = any(abs(i) > 10 * np.finfo(float).eps for i in center)
-        return cls.__get_partit(step, is_ellipse=False, is_shift=is_shift, center=center)
+        is_scale = radius != 1
+        return cls.__get_partit(step, is_shift=is_shift, center=center,
+                                is_ellipse=is_scale, ab=(radius, radius))
 
     @classmethod
     def get_ellipse2D(cls, step: float, center: iter, ab: iter) -> iter:
