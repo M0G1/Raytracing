@@ -5,6 +5,7 @@ from surfaces.surface import Surface
 from ray.ray import Ray
 from ray.rays_pool import RaysPool
 
+
 class Plane(Surface):
     """
         (r-p0,n) = 0 - canonical equation of plane
@@ -14,7 +15,7 @@ class Plane(Surface):
         :argument n1,n2 - refractive indexes of space. watch method get_refractive_indexes in class Surface
     """
 
-    def __init__(self, radius_vector: (list,iter), normal_vector: (list,iter),
+    def __init__(self, radius_vector: (list, iter), normal_vector: (list, iter),
                  type_surface: Surface.types = Surface.types.REFLECTING,
                  n1: float = 1,
                  n2: float = 1):
@@ -48,7 +49,6 @@ class Plane(Surface):
     def rad(self) -> list:
         return self.__rad
 
-
     # ==========================methods of object plane=================================================================
 
     def __str__(self):
@@ -56,7 +56,7 @@ class Plane(Surface):
             str(self.rad), str(self.__norm), str(self.type), self._Surface__n1, self._Surface__n2)
 
     # =================================== Plane objects methods ========================================================
-    def is_point_belong(self, point: list) -> bool:
+    def is_point_belong(self, point: (list, tuple)) -> bool:
         """
         Not usable
         :param point:
@@ -96,7 +96,7 @@ class Plane(Surface):
             return []
         t = (np.dot(self.__norm, np.subtract(self.__rad, r))) / ne
         # проверка на пересечение плоскостью в нужном направлении не нужна
-        if t < 10*np.finfo(float).eps:
+        if t < 10 * np.finfo(float).eps:
             return []
         return [t]
 

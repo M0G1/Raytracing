@@ -1,5 +1,6 @@
 import numpy as np
 import pickle
+import pathlib
 
 
 class Sphere_Ellipse_data_2Dview:
@@ -13,12 +14,13 @@ class Sphere_Ellipse_data_2Dview:
     """
     __service_data = None
     __PARTITION_SEGMENT = "existing partition"
-    __SERVICE_INFO_LOCATE = "sphereEllipseSerialization"
+    __SERVICE_INFO_LOCATE = pathlib.Path("sphereEllipseSerialization")
 
     @classmethod
     def __get_service_data(cls) -> dict:
         try:
-            with open(cls.__SERVICE_INFO_LOCATE + "/service_information.txt", mode="rb") as file:
+            with open(file=(cls.__SERVICE_INFO_LOCATE / 'service_information.txt'),
+                      mode="rb") as file:
                 return pickle.load(file=file)
         except TypeError:
             print("TypeError.")
@@ -27,7 +29,7 @@ class Sphere_Ellipse_data_2Dview:
 
     @classmethod
     def __pickle_service_data(cls):
-        with open(cls.__SERVICE_INFO_LOCATE + "/service_information.txt", mode="wb") as file:
+        with open(file=(cls.__SERVICE_INFO_LOCATE / 'service_information.txt'), mode="wb") as file:
             pickle.dump(obj=cls.__service_data, protocol=3, file=file)
 
     # Hope what it will initialize the __service_data
@@ -52,7 +54,7 @@ class Sphere_Ellipse_data_2Dview:
         # try to open service data
         cls.__init_service_data()
 
-        file_name = cls.__SERVICE_INFO_LOCATE + "/" + "partit" + str(step)
+        file_name = cls.__SERVICE_INFO_LOCATE / ("partit" + str(step))
 
         # load to file
         with open(file=file_name, mode="wb") as data_file:

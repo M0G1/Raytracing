@@ -28,7 +28,7 @@ class Surface:
         return self.__dim
 
     # =================================== Surface object  methods ======================================================
-    def is_point_belong(self, point: list) -> bool:
+    def is_point_belong(self, point: (list,tuple)) -> bool:
         pass
 
     def norm_vec(self, point) -> list:

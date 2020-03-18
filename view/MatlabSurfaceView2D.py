@@ -19,41 +19,61 @@ from surfaces.ellipse import Ellipse
 from surfaces.limited_surface import LimitedSurface
 
 
-def draw_plane(plane: Plane, color="blue", alpha=0.5) -> bool:
+def draw_plane(plane: Plane, color="blue", alpha=0.5):
     # matrix of rotation
     m = [[0, -1],
          [1, 0]]
     # direction vector
-    r = np.dot(m, plane._Plane__norm)
+    r = np.dot(m, plane.norm_vec([]))
     # coords = vray.collect_point_to_draw(r,)
     point = [ARay.calc_point_of_ray_(r, plane.rad, 10_000),
              ARay.calc_point_of_ray_(r, plane.rad, -10_000)]
-    print("dro", [point[i][0] for i in range(2)])
 
     line = pylab.Line2D([point[i][0] for i in range(2)],
                         [point[i][1] for i in range(2)], color=color, alpha=alpha)
     pylab.gca().add_line(line)
-    return True
 
 
-def draw_sphere(sphere: Sphere, axes: type(pylab.gca()), color='b', alpha=0.5) -> bool:
+def draw_sphere(sphere: Sphere, color='b', alpha=0.5):
     sphere = pylab.Circle(sphere.center, sphere.r, fill=False, color=color, alpha=alpha)
-    axes.add_patch(sphere)
-    del sphere
-    return True
+    pylab.gca().add_patch(sphere)
 
 
-def draw_ellipse(ellipse: Ellipse, axes: type(pylab.gca()), color='b', alpha=0.5):
+def draw_ellipse(ellipse: Ellipse, color='b', alpha=0.5):
     ellipse = patches.Ellipse(ellipse.center, 2 * ellipse.abc[0], 2 * ellipse.abc[1], fill=False, color='b', alpha=0.5)
-    axes.add_patch(ellipse)
-    del ellipse
-    return True
+    pylab.gca().add_patch(ellipse)
 
 
-def draw_limited_plane(plane: LimitedSurface, axes: type(pylab.gca()), color="blue", alpha=0.5) -> bool:
-    line = pylab.Line2D(plane.limits[0], plane.limits[1])
-    axes.add_line(line)
-    return True
+def draw_limited_plane(plane: LimitedSurface, color="blue", alpha=0.5):
+    surface = plane.surface
+    if not isinstance(surface, Plane):
+        return
+    norm = surface.norm_vec(point=[])
+    const = np.dot(surface.rad, norm)
+    limits = plane.limits
+    # keep the unique values
+    x = {-(const + limits[1][i] * norm[1]) / norm[0] for i in range(2)}
+    y = {-(const + limits[0][i] * norm[0]) / norm[1] for i in range(2)}
+    x.update(limits[0])
+    y.update(limits[1])
+
+    x = list(x)
+    y = list(y)
+
+    line = None
+    belong_points = set()
+    for k in range(len(x)):
+        for l in range(len(y)):
+            point = (x[k], y[l])
+            if surface.is_point_belong(point) and plane._is_point_in_limits(point):
+                belong_points.add(point)
+
+    belong_points = list(belong_points)
+    if len(belong_points) == 2:
+        line = pylab.Line2D([belong_points[i][0] for i in range(2)],
+                            [belong_points[i][1] for i in range(2)])
+        pylab.gca().add_line(line)
+    return
 
 
 def draw_limited_ellipse(ellipse: LimitedSurface, color='b', alpha=0.5):
@@ -63,13 +83,17 @@ def draw_limited_ellipse(ellipse: LimitedSurface, color='b', alpha=0.5):
     # получаем коэфициенты растяжения по осям
     surface = ellipse.surface
     lim = ellipse.limits
-    center = surface.center
+
     if isinstance(surface, Sphere):
+        center = surface.center
         to_draw = spell.Sphere_Ellipse_data_2Dview.get_sphere2D(10 ** -2, center, surface.r)
     elif isinstance(surface, Ellipse):
+        center = surface.center
         to_draw = spell.Sphere_Ellipse_data_2Dview.get_ellipse2D(10 ** -2, center, surface.abc)
+    else:
+        return
 
-    # quenes
+        # quenes
     to_cuting_pre = [to_draw]
     to_cuing_cur = []
 
@@ -109,3 +133,37 @@ def __cut(to_draw: iter, lim: iter, k: int) -> iter:
         to_draw2[len(to_draw2) - 1].append(to_draw[0][i:j])
         to_draw2[len(to_draw2) - 1].append(to_draw[1][i:j])
     return to_draw2
+
+
+def draw_limits(surface: LimitedSurface, color: str = "black", alpha: float = 0.5):
+    lim = surface.limits
+    planes = [
+        Plane([lim[0][0], 0], [1, 0]),
+        Plane([lim[0][1], 0], [1, 0]),
+        Plane([0, lim[1][0]], [0, 1]),
+        Plane([0, lim[1][1]], [0, 1]),
+    ]
+    for plane in planes:
+        draw_plane(plane, color=color, alpha=alpha)
+
+
+def draw_exist_surface(surface: Surface, color: str = "blue", alpha: float = 0.5):
+    """
+        draw existing surface: Plane,Sphere,Ellipse and
+        LimitedSurface, where surface is limited Plane,Sphere,Ellipse
+    :return:
+    """
+    if isinstance(surface, Plane):
+        draw_plane(surface, color=color, alpha=alpha)
+    elif isinstance(surface, Sphere):
+        draw_sphere(surface, color=color, alpha=alpha)
+    elif isinstance(surface, Ellipse):
+        draw_ellipse(surface, color=color, alpha=alpha)
+    elif isinstance(surface, LimitedSurface):
+        inner_surface = surface.surface
+        if isinstance(inner_surface, Plane):
+            draw_limited_plane(surface, color=color, alpha=alpha)
+        elif isinstance(inner_surface, (Sphere, Ellipse)):
+            draw_limited_ellipse(surface, color=color, alpha=alpha)
+    else:
+        raise AttributeError("Not supporting surface " + str(surface))

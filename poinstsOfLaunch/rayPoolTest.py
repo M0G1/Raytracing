@@ -12,48 +12,47 @@ import view.MatlabSurfaceView2D as msv
 
 if __name__ == '__main__':
     p1 = [0, -1.9]
-    p2 = [-0.1, 1.9]
-    intensive = 2
+    p2 = [0, 1.9]
+    intensive = 1
 
     # plane
-    n_vec = [1, 0]
-    r_vec = [1, 0]
+    n_vec = [1, -1]
+    r_vec = [0, 0]
 
     plane = Plane(r_vec, n_vec)
     sphere = Sphere([3, 0], 2, Surface.types.REFRACTING, 1, 1.3, )
+
+    lim = [[1, 3.9], [-1, 1]]
+    print("lim", lim, "\n")
+    print(plane)
+
+    limited = LimitedSurface(sphere, lim)
+    lim_plane = LimitedSurface(plane, lim)
 
     pool = gen.Generator.generate_rays_2d(p1, p2, intensive)
 
     print("\n", plane, "\n")
     print(pool, "\n")
 
-    pylab.xlim(-0.5, 7.5)
-    pylab.ylim(-4, 4)
-    pylab.grid()
-    axes = pylab.gca()
-
     reflected_pool = pool.refract(sphere)
     refr_refr_pool = reflected_pool.refract(sphere)
     print(reflected_pool)
 
     print("\n", sphere, "\n")
-    lim = [[1.5, 4.5], [-1, 1]]
-    print("lim", lim, "\n")
 
     vray.draw_ray_pool(pool)
     vray.draw_ray_pool(reflected_pool)
     vray.draw_ray_pool(refr_refr_pool)
-    msv.draw_sphere(sphere, axes)
 
-    limited = LimitedSurface(sphere, lim)
-    # msv.draw_limited_ellipse(limited)
+    msv.draw_sphere(sphere)
+    msv.draw_exist_surface(lim_plane, color="pink", alpha=1)
+    msv.draw_exist_surface(limited, color="red")
+    msv.draw_limits(lim_plane)
     # msv.draw_limited_ellipse(limited,axes)
 
-    # a = [(2, 1), (2, 1), (0, 2), (2 * np.pi, 2), (1, 3), (2 * np.pi - 1, 3)]
-    # print(a)
-    # b = dict(a)
-    # print(b)
-    # c = list(b.keys())
-    # print(c)
-    # print(c.sort())
+    shift = [3, 0]
+    max = abs(np.max(lim)) +2
+    pylab.xlim(-max + shift[0], max + shift[0])
+    pylab.ylim(-max + shift[1], max + shift[1])
+    pylab.grid()
     pylab.show()

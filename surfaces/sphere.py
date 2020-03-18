@@ -66,7 +66,7 @@ class Sphere(Surface):
     #
     #     raise AttributeError("Defined only dor dimension 2 and 3")
 
-    def is_point_belong(self, point: list) -> bool:
+    def is_point_belong(self, point: (list, tuple)) -> bool:
         if len(point) != self.dim:
             raise AttributeError("The point %s have different dimension than sphere(%s)" % (str(point), str(self.dim)))
 

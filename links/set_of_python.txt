@@ -13,3 +13,5 @@ http://torofimofu.fvds.ru/learnwithpython/ru2e/ch19.html
 Языковые особенности
     https://habr.com/ru/post/72757/ - интерфейсы
     https://www.python.org/dev/peps/pep-3119/ - interfaces PEP
+    https://pythlife.blogspot.com/2016/03/init-py-file-packages.html?m=1 - файл __init__.py
+    https://habr.com/ru/post/114585/ - классы и их устройство

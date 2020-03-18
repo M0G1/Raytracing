@@ -40,22 +40,22 @@ def test2():
 
     ell = Ellipse(center, ab)
 
-    limits = ((0, 2), (-1, 1))
+    limits = ((-1, 0.5), (-1, 1))
     planes = [
-        Plane([0, 0], [1, 0]),
-        Plane([2, 0], [1, 0]),
-        Plane([0, -1], [0, 1]),
-        Plane([0, 1], [0, 1])
+        Plane([limits[0][0], 0], [1, 0]),
+        Plane([limits[0][1], 0], [1, 0]),
+        Plane([0, limits[1][0]], [0, 1]),
+        Plane([0, limits[1][1]], [0, 1])
     ]
-    vsur.draw_ellipse(ell, axes=pylab.gca())
-    for plane in planes:
-        vsur.draw_plane(plane,  color="black")
+    # vsur.draw_ellipse(ell, axes=pylab.gca())
+    # for plane in planes:
+    #     vsur.draw_plane(plane,  color="black")
 
     lim_ell = LimitedSurface(ell, limits)
 
     vsur.draw_limited_ellipse(lim_ell,color="green",alpha=1)
 
-
+    pylab.grid()
     max = np.max(2)
     pylab.xlim(-max + center[0], max + center[0])
     pylab.ylim(-max + center[1], max + center[1])

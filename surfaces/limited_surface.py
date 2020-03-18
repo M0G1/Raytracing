@@ -61,7 +61,7 @@ class LimitedSurface(Surface):
             return True
         return False
 
-    def _is_point_in_limits(self, point: list):
+    def _is_point_in_limits(self, point: (list,tuple)):
         if point is None or not all(
                 bounds[0] <= coor and coor <= bounds[1] for coor, bounds in zip(point, self.__limits)):
             return False
