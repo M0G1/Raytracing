@@ -33,8 +33,7 @@ class Plane(Surface):
                 """Some element in %s or %s is not a float number.""" % (
                     str(radius_vector), str(normal_vector)))
 
-        self._Surface__dim = len(radius_vector)
-        self._Surface__type_of_surface = type_surface
+        Surface.__init__(self, type_of_surface=type_surface, dimension=len(radius_vector))
         self.__rad = radius_vector
         self.__norm = normal_vector
         norm_val = np.linalg.norm(self.__norm)

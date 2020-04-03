@@ -10,14 +10,13 @@ class Types(Enum):
 
 class Surface:
     types = Types
-    __type_of_surface = types.REFLECTING
 
     # __dim = 0
 
     #  Don't usable in logic of program
-    # def __init__(self, type_of_surface: bool, dimension: int):
-    #     self.__type_of_surface = type_of_surface
-    #     self.__dim = dimension
+    def __init__(self, type_of_surface: Types, dimension: int):
+        self.__type_of_surface = type_of_surface
+        self.__dim = dimension
 
     @property
     def type(self):
@@ -28,7 +27,7 @@ class Surface:
         return self.__dim
 
     # =================================== Surface object  methods ======================================================
-    def is_point_belong(self, point: (list,tuple)) -> bool:
+    def is_point_belong(self, point: (list, tuple)) -> bool:
         pass
 
     def norm_vec(self, point) -> list:

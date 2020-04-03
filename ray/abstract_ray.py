@@ -20,9 +20,8 @@ class ARay():
     def reflect(self, surface: Surface):
         "Refract from surface"
 
-
     @staticmethod
-    def calc_point_of_ray_(e: (list,iter), r: (list,iter), t: float) -> list:
+    def calc_point_of_ray_(e: (list, iter), r: (list, iter), t: float) -> list:
         return list(np.add(np.multiply(t, e), r))
 
     @staticmethod
@@ -34,7 +33,7 @@ class ARay():
         point = ARay.calc_point_of_ray_(e, r, t[0])
         # ШАГ-2 ищем вектор нормали к поверхности
         nrm = surface.norm_vec(point)
-        if nrm is None:
+        if nrm is None or abs(np.dot(nrm, e)) < np.finfo(float).eps * 2:
             return [], [], None
         return point, nrm, t
 
@@ -44,7 +43,7 @@ class ARay():
         if len(point) == 0 and len(nrm) == 0 and t is None:
             return [], [], None
         # ШАГ-3 преломляем луч
-        n1, n2 = surface.get_refractive_indexes(r)
+        n1, n2 = surface.get_refractive_indexes(ARay.calc_point_of_ray_(e, r, t[0] / 2))
         # calc the formula of refraction
         v1 = np.dot(n1, e)
         v1n = np.dot(v1, nrm)

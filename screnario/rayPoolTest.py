@@ -9,6 +9,7 @@ from surfaces.limited_surface import LimitedSurface
 import ray.rays_pool as rp
 import view.MatlabRayView2D as vray
 import view.MatlabSurfaceView2D as msv
+import controllers.rayPoolmodelingCtrl as rpmc
 
 if __name__ == '__main__':
     p1 = [0, -1.9]
@@ -32,17 +33,12 @@ if __name__ == '__main__':
     pool = gen.Generator.generate_rays_2d(p1, p2, intensive)
 
     print("\n", plane, "\n")
-    print(pool, "\n")
+    print(sphere)
 
-    reflected_pool = pool.refract(sphere)
-    refr_refr_pool = reflected_pool.refract(sphere)
-    print(reflected_pool)
-
-    print("\n", sphere, "\n")
-
-    vray.draw_ray_pool(pool)
-    vray.draw_ray_pool(reflected_pool)
-    vray.draw_ray_pool(refr_refr_pool)
+    pools = rpmc.tracing_rayspool_ordered_surface(pool, (sphere, sphere),is_set_optical_path=True)
+    for pool_i in pools:
+        vray.draw_ray_pool(pool_i)
+        print(pool_i)
 
     msv.draw_sphere(sphere)
     msv.draw_exist_surface(lim_plane, color="pink", alpha=1)
@@ -51,7 +47,7 @@ if __name__ == '__main__':
     # msv.draw_limited_ellipse(limited,axes)
 
     shift = [3, 0]
-    max = abs(np.max(lim)) +2
+    max = abs(np.max(lim)) + 2
     pylab.xlim(-max + shift[0], max + shift[0])
     pylab.ylim(-max + shift[1], max + shift[1])
     pylab.grid()

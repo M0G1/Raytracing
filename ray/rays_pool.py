@@ -19,10 +19,11 @@ class Compon2D(Compon_Interface):
     R_OFFSET = 2
     T0_OFFSET = 4
     T1_OFFSET = 5
+    l_OFFSET = 6
     # For future code
     # LAM_OFFSET.value = 6
     # W_OFFSET.value = 7
-    RAY_OFFSET = 6
+    RAY_OFFSET = 7
     DIM = 2
 
 
@@ -34,6 +35,7 @@ class Compon3D(Compon_Interface):
     R_OFFSET = 3
     T0_OFFSET = 6
     T1_OFFSET = 7
+    # l_OFFSET = 8
     # For future code
     # LAM_OFFSET.value = 8
     # W_OFFSET.value = 9
@@ -143,12 +145,13 @@ class RaysPool(ARay):
         s = 'rays pool:\n'
 
         for i in range(self.__rays_num):
-            s += ('%s- %s: %-60s, %s: %-60s, %s: %-18s, %s: %-18s\n'
+            s += ('%-2s- %s: %-42s, %s: %-44s, %s: %-18s, %s: %-18s, %s: %-18s\n'
                   % (str(i),
                      str(self.__ComIndex.E_OFFSET), str(self.e(i)),
                      str(self.__ComIndex.R_OFFSET), str(self.r(i)),
                      str(self.__ComIndex.T0_OFFSET), str(self.t0(i)),
-                     str(self.__ComIndex.T1_OFFSET), str(self.t1(i)))
+                     str(self.__ComIndex.T1_OFFSET), str(self.t1(i)),
+                     str(self.__ComIndex.l_OFFSET), str(self.l(i)))
                   )
         return s
 
@@ -156,6 +159,20 @@ class RaysPool(ARay):
         return self.__rays_num
 
     # ================================================Getters=================================================
+
+    def get(self, i: int, needed_offset: (type(Compon2D.RAY_OFFSET), type(Compon3D.RAY_OFFSET))):
+        """
+        Not recomended to use
+        :param i: index of ray
+        :param needed_offset:
+        :return:
+        """
+        r_i = i * self.__ComIndex.RAY_OFFSET
+        next_offset = None
+        for i in self.__ComIndex:
+            if i > needed_offset:
+                next_offset = i
+        return self.__pool[r_i + needed_offset:r_i + next_offset]
 
     def e(self, i: int) -> list:
         r_i = i * self.__ComIndex.RAY_OFFSET
@@ -177,20 +194,37 @@ class RaysPool(ARay):
         r_i = i * self.__ComIndex.RAY_OFFSET
         return self.__pool[r_i + self.__ComIndex.T1_OFFSET]
 
+    def l(self, i) -> float:
+        r_i = i * self.__ComIndex.RAY_OFFSET
+        return self.__pool[r_i + self.__ComIndex.l_OFFSET]
+
     @property
     def componentIndexes(self):
         return self.__ComIndex
 
     # ================================================Setters=================================================
+    # calculate from radius vector of ray
+    def set_t0(self, i: int, t0: float):
+        if t0 < 0:
+            raise AttributeError("Negative length(%f)" % (t0))
+        r_i = i * self.__ComIndex.RAY_OFFSET
+        self.__pool[r_i + self.__ComIndex.T0_OFFSET] = t0
 
     # calculate from radius vector of ray
     def set_t1(self, i: int, t1: float):
         if t1 < 0:
-            raise AttributeError("Negative lenght(%f)" % (t1))
+            raise AttributeError("Negative length(%f)" % (t1))
         if t1 < self.t0(i):
             raise AttributeError("Length less than begin of ray t0(%f), t1(%f)" % (self.t0(i), t1))
         r_i = i * self.__ComIndex.RAY_OFFSET
         self.__pool[r_i + self.__ComIndex.T1_OFFSET] = t1
+
+    # calculate from radius vector of ray
+    def set_l(self, i: int, l: float):
+        if l < 0:
+            raise AttributeError("Negative optical path(%f)" % (l))
+        r_i = i * self.__ComIndex.RAY_OFFSET
+        self.__pool[r_i + self.__ComIndex.l_OFFSET] = l
 
     # methods of object RaysPool========================================================================================
     @staticmethod
@@ -198,7 +232,7 @@ class RaysPool(ARay):
         # обертываем функцию
         def f(self, surface: Surface, push_non_reflected_ray: bool = False):
             rays = []
-            # для заполения ячеек, куда мы не можем положить информацию (вычитаем два вектора e и r и начало)
+            # для заполения ячеек, куда мы не можем положить информацию (вычитаем два вектора e и r и начало и конец луча)
             remain_len = self.__ComIndex.RAY_OFFSET - (2 * self.__ComIndex.DIM + 2)
             empty_list = [None for i in range(remain_len)]
             # моделируем отражние
@@ -218,6 +252,8 @@ class RaysPool(ARay):
                     rays.append(0)
                     rays.append(-1)
                     rays.extend(empty_list)
+            if len(rays) is 0:
+                return None
             return RaysPool(rays, self.__ComIndex)
 
         return f
@@ -229,3 +265,14 @@ class RaysPool(ARay):
     def refract(self, surface: Surface, push_non_refracted_ray: bool = False):
         ray_pool_reflect = RaysPool.__reflect_refract(ARay.refract_)
         return ray_pool_reflect(self, surface, push_non_refracted_ray)
+
+    def calc_point_of_ray(self, i: int, t: float) -> list:
+        return ARay.calc_point_of_ray_(self.e(i), self.r(i), t)
+
+    def r1(self, h: float) -> list:
+        """
+        :param h: length of rays
+        :return: list of points for length h:
+        """
+        return [self.calc_point_of_ray_(self.e(i), self.r(i), h)
+                for i in range(self.__rays_num)]

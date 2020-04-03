@@ -18,9 +18,10 @@ class LimitedSurface(Surface):
             raise AttributeError("Limits(%d) and surface(dim: %d) have different size" % (len(limits), surface.dim))
         if not all(coor[0] < coor[1] for coor in limits):
             raise AttributeError("Invalid limits " + str(limits))
+
+        Surface.__init__(self, type_of_surface=surface.type, dimension=surface.dim)
         self.__limits = limits
         self.__surface = surface
-        self._Surface__dim = surface.dim
 
     # =========================== getter and setter ====================================================================
 

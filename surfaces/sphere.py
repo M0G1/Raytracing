@@ -24,8 +24,7 @@ class Sphere(Surface):
         if not all(isinstance(i, float) or isinstance(i, int) for i in center):
             raise AttributeError("""Some element in %s is not a float number.""" % (str(center)))
 
-        self._Surface__dim = len(center)
-        self._Surface__type_of_surface = type_surface
+        Surface.__init__(self, type_of_surface=type_surface, dimension=len(center))
         self.__center = center.copy()
         self.__r = radius
         self._Surface__n1 = n1

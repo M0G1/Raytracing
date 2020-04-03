@@ -93,7 +93,7 @@ def draw_deep_ray_modeling(
             print()
 
 
-def draw_ray_pool(pool: rays_pool.RaysPool, ray_const_length: float = 2):
+def draw_ray_pool(pool: rays_pool.RaysPool, ray_const_length: float = 2,alpha:float=1):
     if pool.componentIndexes.DIM != 2:
         raise AttributeError("NON-two-dimensional ray pool")
 
@@ -106,7 +106,7 @@ def draw_ray_pool(pool: rays_pool.RaysPool, ray_const_length: float = 2):
 
         coords = collect_point_to_draw(pool.e(i), pool.r(i), pool.t0(i), t1)
 
-        line = pylab.Line2D(coords[0], coords[1], color="green")
+        line = pylab.Line2D(coords[0], coords[1], color="green",alpha=alpha)
         axes = pylab.gca()
         axes.add_line(line)
 
