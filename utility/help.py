@@ -1,4 +1,5 @@
 import numpy as np
+import math as m
 from ray.ray import Ray
 from surfaces.surface import Surface
 from surfaces.plane import Plane
@@ -52,3 +53,22 @@ def read_param_from_file(file, dimension: int):
     if len(rays) == 1:
         rays = rays[0]
     return rays, surfaces
+
+
+def get_rot_mat_3d(a: float, b: float, g: float):
+    Mx = (
+        (1, 0, 0),
+        (0, m.cos(a), -m.sin(a)),
+        (0, m.sin(a), m.cos(a))
+    )
+    My = (
+        (m.cos(a), 0, m.sin(a)),
+        (0, 1, 0),
+        (-m.sin(a), 0, m.cos(a))
+    )
+    Mz = (
+        (m.cos(a), -m.sin(a), 0),
+        (m.sin(a), m.cos(a), 0),
+        (0, 0, 1),
+    )
+    return (Mx, My, Mz)

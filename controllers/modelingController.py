@@ -7,6 +7,20 @@ import controllers.rayController as rc
 from ray.abstract_ray import ARay
 
 
+# def restruct_way_point_of_ray(way_point_of_ray: list):
+#     if len(way_point_of_ray) == 0:
+#         return None
+#
+#     shape = len(way_point_of_ray[0])
+#     ans = [[]] * shape
+#
+#     for i in range(len(way_point_of_ray)):
+#         for j in range(shape):
+#             ans[j].append(way_point_of_ray[i][j])
+#
+#     return ans
+
+
 def _not_sequence_modeling(ray: Ray, surfaces: list):
     min_p = float(np.finfo(float).max)
     # index of nearest surface and intersection point
@@ -88,7 +102,8 @@ def deep_modeling(type_polarization: str, ray: Ray, surfaces: list, deep: int,
     return tree
 
 
-def model_path(ray: Ray, surfaces: list, is_return_ray_list: bool = False, is_have_ray_in_infinity: bool = False):
+def model_path(ray: Ray, surfaces: list, is_return_ray_list: bool = False, is_have_ray_in_infinity: bool = False,
+               lenght_last_ray: float = 1):
     way_point_of_ray = []
     ray_list = [ray]
     new_ray = ray
@@ -112,7 +127,8 @@ def model_path(ray: Ray, surfaces: list, is_return_ray_list: bool = False, is_ha
             ray_list.append(temp)
         new_ray = temp
     if is_have_ray_in_infinity:
-        _append_point_to_path(new_ray, way_point_of_ray, ARay.calc_point_of_ray_(new_ray.dir, new_ray.start, 10000))
+        _append_point_to_path(new_ray, way_point_of_ray,
+                              ARay.calc_point_of_ray_(new_ray.dir, new_ray.start, lenght_last_ray))
     if is_return_ray_list:
         return way_point_of_ray, ray_list
     return way_point_of_ray

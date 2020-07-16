@@ -141,8 +141,8 @@ if __name__ == '__main__':
     # pools = rpmc.tracing_rayspool_ordered_surface(pool, lim_ell)
     pools = rpmc.tracing_rayspool_ordered_surface(pool, lim_ell, is_set_optical_path=True)
     # find the refraction coefficient(refractive_indexes) there goes the last RaysPool
-    # index 0 and length 0.1 are random
     last_RaysPool: RaysPool = pools[len(pools) - 1]
+    # index 0 and length 0.1 are random
     point = last_RaysPool.calc_point_of_ray(0, 0.1)
     refr_coef = lim_ell[len(lim_ell) - 1].get_refractive_indexes(point)[0]
 
@@ -151,18 +151,14 @@ if __name__ == '__main__':
     sco_f, r1 = get_sco_func(pools, refr_coef)
     # minimize the sco
     # params a and b are random!!!!!
-    accuracy = 0.01
+    accuracy = 0.00001
     h, val = help.min_golden_ratio(sco_f, 0, 100, accuracy)
 
     print("optical length of last RaysPool: %f\nsco in that point: %f with accuracy: %f" % (h, val, accuracy))
 
     points = r1(h)
     focus_point = average(points)
-
-    # # test
-    # f = lambda x: x ** 2
-    # print("test", help.min_golden_ratio(f, -1, 2, 10 ** -2))
-    # # test
+    print("focus_point: ", focus_point)
 
     # drawing
     pylab.figure(0, figsize=(5, 5))
