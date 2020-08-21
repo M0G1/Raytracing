@@ -7,8 +7,8 @@ import queue
 from ray.abstract_ray import ARay
 from ray.ray import Ray
 import ray.rays_pool as rays_pool
-import view.MatlabRayView2D as vray
-import view.sphereEllipseReadWrite as spell
+import view.matlab_ray_view2D as vray
+import view.sphere_ellipse_data2D as spell
 
 from utility.binarytree import Tree
 

@@ -8,9 +8,9 @@ from surfaces.limited_surface import LimitedSurface
 from tools.generators import Generator
 
 import tools.help as help
-import controllers.rayPoolmodelingCtrl as rpmc
-import view.MatlabSurfaceView2D as msv
-import view.MatlabRayView2D as mvray
+import controllers.ray_pool_ctrl as rpmc
+import view.matlab_surface_view2D as msv
+import view.matlab_ray_view2D as mvray
 
 
 def average(points: (list, tuple, iter)) -> np.ndarray:

@@ -3,7 +3,7 @@ import math as m
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-import controllers.modelingController as mctrl
+import controllers.modeling_controller as mctrl
 from surfaces.plane import Plane
 from utility.help import get_rot_mat_3d
 from ray.ray import Ray

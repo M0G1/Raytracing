@@ -7,9 +7,9 @@ from surfaces.sphere import Sphere
 from surfaces.sphere import Surface
 from surfaces.limited_surface import LimitedSurface
 import ray.rays_pool as rp
-import view.MatlabRayView2D as vray
-import view.MatlabSurfaceView2D as msv
-import controllers.rayPoolmodelingCtrl as rpmc
+import view.matlab_ray_view2D as vray
+import view.matlab_surface_view2D as msv
+import controllers.ray_pool_ctrl as rpmc
 
 if __name__ == '__main__':
     p1 = [0, -1.9]

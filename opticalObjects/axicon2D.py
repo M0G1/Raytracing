@@ -7,7 +7,7 @@ from surfaces.limited_surface import LimitedSurface
 from ray.ray import Ray
 
 from utility.binarytree import Tree
-import controllers.modelingController as modelCtrl
+import controllers.modeling_controller as modelCtrl
 
 
 def create_axicon(angle: float, is_isosceles: bool, lenght_of_side_ribs: float, is_closed: bool,

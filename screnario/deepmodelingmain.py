@@ -1,8 +1,8 @@
 import pylab
 
 from ray.ray import Ray
-import controllers.modelingController as modelCtrl
-import view.MatlabRayView2D as vray
+import controllers.modeling_controller as modelCtrl
+import view.matlab_ray_view2D as vray
 import opticalObjects.axicon2D as axicon
 import time
 import numpy as np

@@ -3,7 +3,7 @@ import numpy as np
 from surfaces.surface import Surface
 from ray.ray import Ray
 from utility.binarytree import Tree
-import controllers.rayController as rc
+import controllers.ray_controller as rc
 from ray.abstract_ray import ARay
 
 

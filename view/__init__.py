@@ -1,7 +1,7 @@
 import pathlib
 import os
 
-import view.sphereEllipseReadWrite as sphereEllipseReadWrite
+import view.sphere_ellipse_data2D as sphereEllipseReadWrite
 
 
 # init correct path to files in program

@@ -3,8 +3,8 @@ import logging
 import pylab
 
 from utility import help as h
-import controllers.modelingController as mCTRL
-import view.MatlabRayView2D as view
+import controllers.modeling_controller as mCTRL
+import view.matlab_ray_view2D as view
 
 
 def log(func):

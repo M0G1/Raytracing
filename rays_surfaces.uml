@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>Python</ID>
+  <OriginalElement>#D:/Projects/Python/rayTracingOOPwithGIT/surfaces</OriginalElement>
+  <nodes>
+    <node x="79.91666666666652" y="1909.5">surfaces.surface.Types</node>
+    <node x="1378.0" y="1766.0">surfaces.plane.Plane</node>
+    <node x="2347.0" y="1755.0">surfaces.sphere.Sphere</node>
+    <node x="366.0" y="1645.0">ray.ray.Ray</node>
+    <node x="3548.0000000000005" y="1722.0">surfaces.ellipse.Ellipse</node>
+    <node x="25.916666666666515" y="1155.0">enum.Enum</node>
+    <node x="3184.0" y="1744.0">surfaces.limited_surface.LimitedSurface</node>
+    <node x="10.5" y="104.0">enum.EnumMeta</node>
+    <node x="612.7321428571429" y="1265.5">ray.abstract_ray.ARay</node>
+    <node x="830.0" y="1612.0">ray.rays_pool.RaysPool</node>
+    <node x="445.22916666666674" y="0.0">typing.Hashable</node>
+    <node x="2867.25" y="1155.0">surfaces.surface.Surface</node>
+    <node x="751.9791666666667" y="346.0">object</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="enum.Enum" target="object">
+      <point x="105.33333333333331" y="-203.5" />
+      <point x="289.2499999999998" y="1125.0" />
+      <point x="789.9791666666667" y="1125.0" />
+      <point x="-76.0" y="258.5" />
+    </edge>
+    <edge source="enum.Enum" target="typing.Hashable">
+      <point x="-105.33333333333326" y="-203.5" />
+      <point x="78.58333333333326" y="1135.0" />
+      <point x="0.0" y="1135.0" />
+      <point x="0.0" y="79.0" />
+      <point x="483.22916666666674" y="79.0" />
+      <point x="-38.0" y="27.0" />
+    </edge>
+    <edge source="surfaces.sphere.Sphere" target="surfaces.surface.Surface">
+      <point x="0.0" y="-192.5" />
+      <point x="2755.5" y="1592.0" />
+      <point x="3008.625" y="1592.0" />
+      <point x="-47.125" y="203.5" />
+    </edge>
+    <edge source="ray.ray.Ray" target="ray.abstract_ray.ARay">
+      <point x="0.0" y="-302.5" />
+      <point x="588.0" y="1592.0" />
+      <point x="693.7321428571429" y="1592.0" />
+      <point x="-81.0" y="93.0" />
+    </edge>
+    <edge source="surfaces.ellipse.Ellipse" target="surfaces.surface.Surface">
+      <point x="0.0" y="-225.5" />
+      <point x="4013.5000000000005" y="1582.0" />
+      <point x="3197.125" y="1582.0" />
+      <point x="141.375" y="203.5" />
+    </edge>
+    <edge source="ray.abstract_ray.ARay" target="object">
+      <point x="0.0" y="-93.0" />
+      <point x="774.7321428571429" y="1135.0" />
+      <point x="865.9791666666667" y="1135.0" />
+      <point x="0.0" y="258.5" />
+    </edge>
+    <edge source="surfaces.surface.Surface" target="object">
+      <point x="0.0" y="-203.5" />
+      <point x="3055.75" y="1135.0" />
+      <point x="941.9791666666667" y="1135.0" />
+      <point x="76.0" y="258.5" />
+    </edge>
+    <edge source="surfaces.limited_surface.LimitedSurface" target="surfaces.surface.Surface">
+      <point x="0.0" y="-203.5" />
+      <point x="3356.0" y="1592.0" />
+      <point x="3102.875" y="1592.0" />
+      <point x="47.125" y="203.5" />
+    </edge>
+    <edge source="surfaces.plane.Plane" target="surfaces.surface.Surface">
+      <point x="0.0" y="-181.5" />
+      <point x="1852.5" y="1582.0" />
+      <point x="2914.375" y="1582.0" />
+      <point x="-141.375" y="203.5" />
+    </edge>
+    <edge source="ray.rays_pool.RaysPool" target="ray.abstract_ray.ARay">
+      <point x="0.0" y="-335.5" />
+      <point x="1094.0" y="1592.0" />
+      <point x="855.7321428571429" y="1592.0" />
+      <point x="81.0" y="93.0" />
+    </edge>
+    <edge source="object" target="typing.Hashable">
+      <point x="0.0" y="-258.5" />
+      <point x="865.9791666666667" y="79.0" />
+      <point x="559.2291666666667" y="79.0" />
+      <point x="38.0" y="27.0" />
+    </edge>
+    <edge source="surfaces.surface.Types" target="enum.Enum">
+      <point x="0.0" y="-38.0" />
+      <point x="0.0" y="203.5" />
+    </edge>
+    <edge source="enum.Enum" target="enum.EnumMeta">
+      <point x="0.0" y="-203.5" />
+      <point x="183.91666666666652" y="1135.0" />
+      <point x="262.5" y="1135.0" />
+      <point x="0.0" y="500.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.6" x="1025.8333333333335" y="1750.8333333333335" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Fields</Category>
+    <Category>Methods</Category>
+    <Category>Inner Classes</Category>
+  </Categories>
+</Diagram>
+

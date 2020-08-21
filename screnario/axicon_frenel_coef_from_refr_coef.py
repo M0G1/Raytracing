@@ -4,8 +4,8 @@ import time
 
 import opticalObjects.axicon2D as axic
 from ray.ray import Ray
-import view.MatlabRayView2D as rayView
-import controllers.modelingController as modelCtrl
+import view.matlab_ray_view2D as rayView
+import controllers.modeling_controller as modelCtrl
 
 if __name__ == '__main__':
     start = time.time()

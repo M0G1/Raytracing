@@ -90,3 +90,38 @@ def min_golden_ratio(f, a: float, b: float, eps: float):
 
     argmin = (b + a) / 2
     return (argmin, f(argmin))
+
+
+def reshape_arrays_into_one(*args):
+    """
+    Arrays must have the same length
+    reshape given arrays
+    x = [x0,x1,...,xn]
+    y = [y0,y1,...,yn]
+    ...
+    z = [z0,z1,...,zn]
+    into
+    ans = [x0,y0,...,z0,x1,y1,...,z1,...,xn,yn,zn]
+
+
+    return numpy.array
+    """
+    narray = np.array(args)
+    return narray.ravel(order='F')
+
+
+def reshape_array_into_many(arr, row_count, column_count):
+    """
+    Better to use numpy.reshape(). This method just recall it.
+    reshape given array
+    arr = [x0,y0,...,z0,x1,y1,...,z1,...,xn,yn,zn]
+    into
+
+    x = [x0,x1,...,xn]
+    y = [y0,y1,...,yn]
+    ...
+    z = [z0,z1,...,zn]
+
+    return list of numpy.array
+    """
+    return list(np.reshape(arr, (row_count, column_count), order='F'))
