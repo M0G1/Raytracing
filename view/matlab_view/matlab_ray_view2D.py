@@ -15,7 +15,7 @@ def draw_ray(axes, way_points_of_ray: list, color="green"):
             way_points_of_ray[0],
             way_points_of_ray[1],
             way_points_of_ray[2],
-            label='LINE', color=color);
+            label='LINE', color=color)
         axes.scatter(way_points_of_ray[0],
                      way_points_of_ray[1],
                      way_points_of_ray[2],
@@ -29,7 +29,7 @@ def draw_deep_ray_modeling(
     for i, subtree in enumerate(tree):
         if isinstance(subtree.value, Ray):
             val = subtree.value
-            # ,linewidth=count_of_rays - i
+            # linewidth=count_of_rays - i
 
             line = None
             t1 = 1

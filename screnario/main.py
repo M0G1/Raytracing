@@ -4,7 +4,7 @@ import pylab
 
 from utility import help as h
 import controllers.modeling_controller as mCTRL
-import view.matlab_ray_view2D as view
+import view.matlab_view.matlab_ray_view2D as view
 
 
 def log(func):

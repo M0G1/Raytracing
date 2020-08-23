@@ -1,3 +1,5 @@
+"""Now is deprecated """
+
 import numpy as np
 
 from surfaces.surface import Surface

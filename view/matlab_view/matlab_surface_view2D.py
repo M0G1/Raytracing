@@ -1,16 +1,9 @@
 import numpy as np
 import pylab
 import matplotlib.patches as patches
-import math
-import queue
 
 from ray.abstract_ray import ARay
-from ray.ray import Ray
-import ray.rays_pool as rays_pool
-import view.matlab_ray_view2D as vray
-import view.sphere_ellipse_data2D as spell
-
-from utility.binarytree import Tree
+import view.matlab_view.sphere_ellipse_data2D as spell
 
 from surfaces.surface import Surface
 from surfaces.plane import Plane

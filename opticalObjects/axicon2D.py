@@ -1,3 +1,5 @@
+"""Module used for research the axicon and Frenel coefficients"""
+
 import numpy as np
 import pylab
 
@@ -6,7 +8,6 @@ from surfaces.plane import Plane
 from surfaces.limited_surface import LimitedSurface
 from ray.ray import Ray
 
-from utility.binarytree import Tree
 import controllers.modeling_controller as modelCtrl
 
 
@@ -116,14 +117,12 @@ def get_points_of_func_frenel_from_refr_coef(
 
     refraction_indexs = axicon[0].get_refractive_indexes([1, 1])
     refraction_outside_index = refraction_indexs[0]
-    index = 0
 
     while end_n >= cur_n:  # np.finfo(float).eps:
         for i in axicon:
             i.set_refractive_indexes(cur_n, refraction_outside_index)
 
         # log
-        print(index)
         print("n: ", cur_n)
         for i in axicon:
             print(i)
@@ -167,7 +166,6 @@ def get_points_of_func_frenel_from_refr_coef(
         transmittance[1].append(T)
 
         cur_n = cur_n + step
-        ++index
 
     print("x_coor", x_coor)
     print("refl_coef", refl_coef[1])

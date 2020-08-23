@@ -58,7 +58,7 @@ class Ellipse(Surface):
 
     def draw_surface(self, axes, color='b', alpha=0.5) -> bool:
         if self.dim == 2:
-            ellipse = pathes.Ellipse(self.center, 2 * self.abc[0], 2 * self.abc[1], fill=False)
+            ellipse = pathes.Ellipse(tuple(self.center), 2 * self.abc[0], 2 * self.abc[1], fill=False)
             axes.add_patch(ellipse)
             del ellipse
             return True

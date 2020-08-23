@@ -9,12 +9,12 @@ class Sphere_Ellipse_data_2Dview:
         partition = segment
     """
     """
-        structure of sefvise data - dict(key - string info about section of service data :
+        structure of service data - dict(key - string info about section of service data :
         value - another structure describing this section
     """
     __service_data = None
     __PARTITION_SEGMENT = "existing partition"
-    __SERVICE_INFO_LOCATE = pathlib.Path("sphereEllipseSerialization")
+    __SERVICE_INFO_LOCATE = None  # Initialize in __init__.py
 
     @classmethod
     def __get_service_data(cls) -> dict:
