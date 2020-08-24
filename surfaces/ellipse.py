@@ -1,6 +1,5 @@
 from ray.ray import Ray
 from surfaces.surface import Surface
-import matplotlib.patches as pathes
 import numpy as np
 import math as m
 
@@ -58,10 +57,7 @@ class Ellipse(Surface):
 
     def draw_surface(self, axes, color='b', alpha=0.5) -> bool:
         if self.dim == 2:
-            ellipse = pathes.Ellipse(tuple(self.center), 2 * self.abc[0], 2 * self.abc[1], fill=False)
-            axes.add_patch(ellipse)
-            del ellipse
-            return True
+            return False
         elif self.dim == 3:
             u = np.linspace(0, 2 * np.pi, 100)
             v = np.linspace(0, np.pi, 100)

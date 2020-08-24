@@ -2,8 +2,8 @@ import numpy as np
 import pylab
 
 from surfaces.plane import Plane
-from view.matlab_view.sphere_ellipse_data2D import Sphere_Ellipse_data_2Dview
-import view.matlab_view.matlab_surface_view2D as vsur
+from view.matlab.sphere_ellipse_data2D import Sphere_Ellipse_data_2Dview
+import view.matlab.matlab_surface_view2D as vsur
 
 from surfaces.ellipse import Ellipse
 from surfaces.limited_surface import LimitedSurface

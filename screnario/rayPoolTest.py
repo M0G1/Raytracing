@@ -6,8 +6,8 @@ from surfaces.plane import Plane
 from surfaces.sphere import Sphere
 from surfaces.sphere import Surface
 from surfaces.limited_surface import LimitedSurface
-import view.matlab_view.matlab_ray_view2D as vray
-import view.matlab_view.matlab_surface_view2D as msv
+import view.matlab.matlab_ray_view2D as vray
+import view.matlab.matlab_surface_view2D as msv
 import controllers.ray_pool_ctrl as rpmc
 
 if __name__ == '__main__':

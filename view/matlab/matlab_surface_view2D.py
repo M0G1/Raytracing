@@ -3,7 +3,7 @@ import pylab
 import matplotlib.patches as patches
 
 from ray.abstract_ray import ARay
-import view.matlab_view.sphere_ellipse_data2D as spell
+import view.matlab.sphere_ellipse_data2D as spell
 
 from surfaces.surface import Surface
 from surfaces.plane import Plane

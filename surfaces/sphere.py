@@ -1,5 +1,4 @@
 from surfaces.surface import Surface
-import matplotlib.patches as pathes
 from ray.ray import Ray
 from ray.rays_pool import RaysPool
 import numpy as np

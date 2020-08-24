@@ -9,8 +9,8 @@ from tools.generators import Generator
 
 import tools.help as help
 import controllers.ray_pool_ctrl as rpmc
-import view.matlab_view.matlab_surface_view2D as msv
-import view.matlab_view.matlab_ray_view2D as mvray
+import view.matlab.matlab_surface_view2D as msv
+import view.matlab.matlab_ray_view2D as mvray
 
 
 def average(points: (list, tuple, iter)) -> np.ndarray:

@@ -1,5 +1,4 @@
 import numpy as np
-import pylab
 
 from surfaces.surface import Surface
 from ray.ray import Ray

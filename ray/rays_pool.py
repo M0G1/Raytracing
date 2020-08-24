@@ -252,7 +252,7 @@ class RaysPool(ARay):
                     rays.append(0)
                     rays.append(-1)
                     rays.extend(empty_list)
-            if len(rays) is 0:
+            if len(rays) == 0:
                 return None
             return RaysPool(rays, self.__ComIndex)
 
