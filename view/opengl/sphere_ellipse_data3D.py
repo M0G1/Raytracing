@@ -15,8 +15,8 @@ from view.opengl.gen_id_buff_and_arrays import GenId
 from view.opengl.np_gl_manage_types import NP_GL_Types
 
 
-class Sphere_Ellipse_data_3Dview:
-    def __init__(self, sector_count=50, stack_count=50, np_gl_types: NP_GL_Types = NP_GL_Types()):
+class Sphere_Ellipse_data_3D:
+    def __init__(self, sector_count=50, stack_count=50, np_gl_types: NP_GL_Types = NP_GL_Types(64)):
         """
             realization from https: // songho.ca / opengl / gl_sphere.html
             param sector_count:
@@ -35,6 +35,8 @@ class Sphere_Ellipse_data_3Dview:
         self.is_prepared = False  # is create/bind/fill glBuffers and glArrays
         self.np_gl_t = np_gl_types  # for works with types of opengl and numpy
 
+        self.ebo_sphere = None
+
     def init_data(self):
         self.vertexes = self.get_sphere_vertexes3D()
         # flag self.is_init_data is True
@@ -47,14 +49,34 @@ class Sphere_Ellipse_data_3Dview:
         self.tex_coords = self._make_text_coords()
         self.indexes = self._make_incidents_vertexes_to_opengl()
         self.is_init_opengl_data = True
+        # print(np.reshape(self.vertexes, (3, self.sector_count * self.stack_count), order='F'))
+        print(self.indexes)
 
     # =================================|generating and data getting|================================================
+    def gen_approximate_sphere2(self):
+        # did from there, but on python: https: // songho.ca / opengl / gl_sphere.html
+        vertexes = []
+        sector_step = 2 * math.pi / (self.sector_count )
+        stack_step = math.pi /( self.stack_count)
+
+        for i in range(self.stack_count +1):
+            stack_angle = math.pi / 2 - i * stack_step
+            xy = math.cos(stack_angle)
+            z = math.sin(stack_angle)
+            for j in range(self.sector_count +1):
+                sector_angle = j * sector_step
+                x = xy * math.cos(sector_angle)
+                y = xy * math.sin(sector_angle)
+                vertexes.append(x)
+                vertexes.append(y)
+                vertexes.append(z)
+        return np.array(vertexes, dtype=self.np_gl_t.npf)
 
     def gen_approximate_sphere(self):
         # do like there, but on python: https: // songho.ca / opengl / gl_sphere.html
 
-        stack_angles = np.linspace(math.pi / 2, -math.pi / 2, self.stack_count, dtype=self.np_gl_t.npf)
-        sector_angles = np.linspace(0, 2 * math.pi, self.sector_count, dtype=self.np_gl_t.npf)
+        stack_angles = np.linspace(math.pi / 2, -math.pi / 2, self.stack_count+1, dtype=self.np_gl_t.npf)
+        sector_angles = np.linspace(0, 2 * math.pi, self.sector_count+1, dtype=self.np_gl_t.npf)
 
         xy = np.cos(stack_angles, dtype=self.np_gl_t.npf)
         z = np.sin(stack_angles, dtype=self.np_gl_t.npf)
@@ -65,13 +87,17 @@ class Sphere_Ellipse_data_3Dview:
         # make grid of coordinates
         x = np.outer(xy, cos_sec)
         y = np.outer(xy, sin_sec)
-        z = np.outer(z, np.ones(self.sector_count))
+        z = np.outer(z, np.ones(self.sector_count+1))
+        print(f"x %5f{x}", f"y %5f{y}", f"z %5f{z}")
 
         x = np.ravel(x)
         y = np.ravel(y)
         z = np.ravel(z)
 
-        return tools.help.reshape_arrays_into_one(x, y, z)
+        print(f"x %5f{x}", f"y %5f{y}", f"z %5f{z}")
+        temp = tools.help.reshape_arrays_into_one(x, y, z)
+        print(f"%5f{temp}")
+        return temp
 
     def get_sphere_vertexes3D(self):
         """It is change the state of variable vertexes.
@@ -85,11 +111,11 @@ class Sphere_Ellipse_data_3Dview:
 
     def _make_text_coords(self):
         # do like there, but on python: https: // songho.ca / opengl / gl_sphere.html
-        s = np.linspace(0, 1, self.sector_count)  # for column
-        t = np.linspace(0, 1, self.stack_count)  # for row
+        s = np.linspace(0, 1, self.sector_count+1)  # for column
+        t = np.linspace(0, 1, self.stack_count+1)  # for row
 
-        t = np.outer(t, np.ones(self.sector_count))
-        s = np.outer(np.ones(self.stack_count), s)
+        t = np.outer(t, np.ones(self.sector_count+1))
+        s = np.outer(np.ones(self.stack_count+1), s)
 
         return tools.help.reshape_arrays_into_one(s, t)
 
@@ -104,7 +130,7 @@ class Sphere_Ellipse_data_3Dview:
         scale inner variable vertexes
         # try to use opengl func scale
         """
-        reshapes_arr = np.reshape(self.vertexes, (self.stack_count, self.sector_count), order='F')
+        reshapes_arr = np.reshape(self.vertexes, (self.stack_count+1, self.sector_count+1), order='F')
         x = a * reshapes_arr[0]
         y = b * reshapes_arr[1]
         z = c * reshapes_arr[2]
@@ -114,7 +140,7 @@ class Sphere_Ellipse_data_3Dview:
     # =================================|opengl usage|==================================================================
 
     def _make_incidents_vertexes_to_opengl(self):
-        # do like there, but on python: https: // songho.ca / opengl / gl_sphere.html
+        # done it like there, but on python: https: // songho.ca / opengl / gl_sphere.html
 
         incidents = []
         k1, k2 = None, None
@@ -158,8 +184,8 @@ class Sphere_Ellipse_data_3Dview:
                         GL.GL_STATIC_DRAW)
 
         # element buffer object
-        ebo_sphere = GL.glGenBuffers(1)
-        GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, ebo_sphere)
+        self.ebo_sphere = GL.glGenBuffers(1)
+        GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, self.ebo_sphere)
         GL.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER,
                         self.indexes.itemsize * len(self.indexes),
                         self.indexes,
@@ -170,9 +196,12 @@ class Sphere_Ellipse_data_3Dview:
         # # normilase = false
         # # next vertex position in bites
         # # GL.ctypes.c_void_p(0) - number of bites in array there beginning the vertex
-        GL.glVertexAttribPointer(GenId.vertex_attr_point, 3, self.np_gl_t.glf, GL.GL_FALSE, 3 * self.np_gl_t.sizeof_f,
+        GL.glVertexAttribPointer(0, 3, self.np_gl_t.glf, GL.GL_FALSE,
+                                 3 * self.np_gl_t.sizeof_f,
                                  GL.ctypes.c_void_p(0))
-        GL.glEnableVertexAttribArray()
+        GL.glEnableVertexAttribArray(0)
+        # # unbind  sphere vao
+        # GL.glBindVertexArray(0)
 
         self.is_prepared = True
 
@@ -195,7 +224,7 @@ class Sphere_Ellipse_data_3Dview:
         """
         if not self.is_prepared:
             self._prepare_to_draw()
-
+        # GL.glBindVertexArray(self.vao_sphere)
         GL.glDrawElements(GL.GL_TRIANGLES, len(self.indexes), self.np_gl_t.gli, None)
 
         if not is_stay_prepared:
@@ -208,13 +237,23 @@ class Sphere_Ellipse_data_3Dview:
 
 
 def main():
-    obj = Sphere_Ellipse_data_3Dview(25, 50)
-    obj2 = Sphere_Ellipse_data_3Dview(30, 30)
+    obj = Sphere_Ellipse_data_3D(25, 50)
+    obj2 = Sphere_Ellipse_data_3D(30, 30)
     d = {obj: GenId.get_some_value(obj), obj2: GenId.get_some_value(obj2)}
     print(f"op: {d[obj]}", f"op2: {d[obj2]}")
     print(f"ou: {GenId.get_some_value(obj)}", f"ou2: {GenId.get_some_value(obj2)}")
 
-    obj.init_opengl_data()
+    obj3 = Sphere_Ellipse_data_3D(5, 5,np_gl_types=NP_GL_Types(64))
+    var_a = obj3.gen_approximate_sphere()
+    var_b = obj3.gen_approximate_sphere2()
+    var_c = np.reshape(var_b, (3, var_b.size // 3), order="F")
+    var_d = np.reshape(var_a, (3, var_a.size // 3), order="F")
+    i = 4
+    i = i + 1
+    obj3.draw_sphere(None)
+
+    sub = np.subtract(var_a,var_b)
+    print(f"sub {sub}, max {np.max(sub)}")
 
 
 if __name__ == '__main__':
