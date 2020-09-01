@@ -16,7 +16,7 @@ from view.opengl.np_gl_manage_types import NP_GL_Types
 
 
 class Sphere_Ellipse_data_3D:
-    def __init__(self, sector_count=50, stack_count=50, np_gl_types: NP_GL_Types = NP_GL_Types(64)):
+    def __init__(self, sector_count=50, stack_count=50, np_gl_types: NP_GL_Types = NP_GL_Types()):
         """
             realization from https: // songho.ca / opengl / gl_sphere.html
             param sector_count:
@@ -50,20 +50,20 @@ class Sphere_Ellipse_data_3D:
         self.indexes = self._make_incidents_vertexes_to_opengl()
         self.is_init_opengl_data = True
         # print(np.reshape(self.vertexes, (3, self.sector_count * self.stack_count), order='F'))
-        print(self.indexes)
+        # print(self.indexes)
 
     # =================================|generating and data getting|================================================
     def gen_approximate_sphere2(self):
         # did from there, but on python: https: // songho.ca / opengl / gl_sphere.html
         vertexes = []
-        sector_step = 2 * math.pi / (self.sector_count )
-        stack_step = math.pi /( self.stack_count)
+        sector_step = 2 * math.pi / (self.sector_count)
+        stack_step = math.pi / (self.stack_count)
 
-        for i in range(self.stack_count +1):
+        for i in range(self.stack_count + 1):
             stack_angle = math.pi / 2 - i * stack_step
             xy = math.cos(stack_angle)
             z = math.sin(stack_angle)
-            for j in range(self.sector_count +1):
+            for j in range(self.sector_count + 1):
                 sector_angle = j * sector_step
                 x = xy * math.cos(sector_angle)
                 y = xy * math.sin(sector_angle)
@@ -75,29 +75,26 @@ class Sphere_Ellipse_data_3D:
     def gen_approximate_sphere(self):
         # do like there, but on python: https: // songho.ca / opengl / gl_sphere.html
 
-        stack_angles = np.linspace(math.pi / 2, -math.pi / 2, self.stack_count+1, dtype=self.np_gl_t.npf)
-        sector_angles = np.linspace(0, 2 * math.pi, self.sector_count+1, dtype=self.np_gl_t.npf)
+        stack_angles = np.linspace(math.pi / 2, -math.pi / 2, self.stack_count + 1)  # , dtype=self.np_gl_t.npf)
+        sector_angles = np.linspace(0, 2 * math.pi, self.sector_count + 1)  # , dtype=self.np_gl_t.npf)
 
-        xy = np.cos(stack_angles, dtype=self.np_gl_t.npf)
-        z = np.sin(stack_angles, dtype=self.np_gl_t.npf)
-        cos_sec = np.cos(sector_angles, dtype=self.np_gl_t.npf)
-        sin_sec = np.sin(sector_angles, dtype=self.np_gl_t.npf)
+        xy = np.cos(stack_angles)  # , dtype=self.np_gl_t.npf)
+        z = np.sin(stack_angles)  # , dtype=self.np_gl_t.npf)
+        cos_sec = np.cos(sector_angles)  # , dtype=self.np_gl_t.npf)
+        sin_sec = np.sin(sector_angles)  # , dtype=self.np_gl_t.npf)
 
         # len(xy) elements are same dot. It repeats twice
         # make grid of coordinates
         x = np.outer(xy, cos_sec)
         y = np.outer(xy, sin_sec)
-        z = np.outer(z, np.ones(self.sector_count+1))
-        print(f"x %5f{x}", f"y %5f{y}", f"z %5f{z}")
+        z = np.outer(z, np.ones(self.sector_count + 1))
 
         x = np.ravel(x)
         y = np.ravel(y)
         z = np.ravel(z)
 
-        print(f"x %5f{x}", f"y %5f{y}", f"z %5f{z}")
         temp = tools.help.reshape_arrays_into_one(x, y, z)
-        print(f"%5f{temp}")
-        return temp
+        return np.array(temp, dtype=self.np_gl_t.npf)
 
     def get_sphere_vertexes3D(self):
         """It is change the state of variable vertexes.
@@ -111,11 +108,11 @@ class Sphere_Ellipse_data_3D:
 
     def _make_text_coords(self):
         # do like there, but on python: https: // songho.ca / opengl / gl_sphere.html
-        s = np.linspace(0, 1, self.sector_count+1)  # for column
-        t = np.linspace(0, 1, self.stack_count+1)  # for row
+        s = np.linspace(0, 1, self.sector_count + 1)  # for column
+        t = np.linspace(0, 1, self.stack_count + 1)  # for row
 
-        t = np.outer(t, np.ones(self.sector_count+1))
-        s = np.outer(np.ones(self.stack_count+1), s)
+        t = np.outer(t, np.ones(self.sector_count + 1))
+        s = np.outer(np.ones(self.stack_count + 1), s)
 
         return tools.help.reshape_arrays_into_one(s, t)
 
@@ -130,7 +127,7 @@ class Sphere_Ellipse_data_3D:
         scale inner variable vertexes
         # try to use opengl func scale
         """
-        reshapes_arr = np.reshape(self.vertexes, (self.stack_count+1, self.sector_count+1), order='F')
+        reshapes_arr = np.reshape(self.vertexes, (self.stack_count + 1, self.sector_count + 1), order='F')
         x = a * reshapes_arr[0]
         y = b * reshapes_arr[1]
         z = c * reshapes_arr[2]
@@ -171,6 +168,7 @@ class Sphere_Ellipse_data_3D:
         Create buffer, binding buffer and copy in buffer data. For more fast works of app.
 
         """
+        print(self.np_gl_t.npf)
         if not self.is_init_opengl_data:
             self.init_opengl_data()
 
@@ -217,23 +215,29 @@ class Sphere_Ellipse_data_3D:
 
             self.is_prepared = False
 
-    def draw_sphere(self, sphere: Sphere, is_stay_prepared=False):
+    def draw_sphere(self, is_stay_prepared=False):
         """
         Drawing the current sphere in opengl
         is_stay_prepared: save the prepared state to draw the next sphere or ellipse
         """
         if not self.is_prepared:
             self._prepare_to_draw()
+
         # GL.glBindVertexArray(self.vao_sphere)
         GL.glDrawElements(GL.GL_TRIANGLES, len(self.indexes), self.np_gl_t.gli, None)
-
         if not is_stay_prepared:
             self._end_of_draw()
 
     def draw_in_opengl(self, surface: (Ellipse, Sphere), is_stay_prepared=False):
         """draw the sphere in open gl"""
-        if isinstance(surface, Sphere):
-            self.draw_sphere(surface, is_stay_prepared)
+        GL.glPushMatrix()
+
+        GL.glTranslate(*surface.center)  # auto unpacking arg
+        if isinstance(surface, Ellipse):
+            GL.glScale(*surface.abc)
+
+        self.draw_sphere(is_stay_prepared=is_stay_prepared)
+        GL.glPopMatrix()
 
 
 def main():
@@ -243,16 +247,16 @@ def main():
     print(f"op: {d[obj]}", f"op2: {d[obj2]}")
     print(f"ou: {GenId.get_some_value(obj)}", f"ou2: {GenId.get_some_value(obj2)}")
 
-    obj3 = Sphere_Ellipse_data_3D(5, 5,np_gl_types=NP_GL_Types(64))
+    obj3 = Sphere_Ellipse_data_3D(5, 5, np_gl_types=NP_GL_Types(64))
     var_a = obj3.gen_approximate_sphere()
     var_b = obj3.gen_approximate_sphere2()
     var_c = np.reshape(var_b, (3, var_b.size // 3), order="F")
     var_d = np.reshape(var_a, (3, var_a.size // 3), order="F")
     i = 4
     i = i + 1
-    obj3.draw_sphere(None)
+    # obj3.draw_sphere(None)
 
-    sub = np.subtract(var_a,var_b)
+    sub = np.subtract(var_a, var_b)
     print(f"sub {sub}, max {np.max(sub)}")
 
 

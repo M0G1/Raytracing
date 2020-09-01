@@ -26,7 +26,7 @@ def read_param():
     isosceles = True
     if not auto_run:
         isosceles = input("Is it isosceles triangle(y/n)?")
-        if isosceles is 'y' or isosceles is 'Y':
+        if isosceles == 'y' or isosceles == 'Y':
             isosceles = True
         else:
             isosceles = False
@@ -72,10 +72,10 @@ def read_param():
         return
     if not is_correct_length(length):
         return
-    if len(refr_coef) is not 2:
+    if len(refr_coef) != 2:
         print("Oops. You should read carefully. And think about it. I sad you that it is difficult.")
         return
-    if len(rayarr) is not 4:
+    if len(rayarr) != 4:
         print("Oops. You should read carefully. And think about it. I sad you that it is difficult.")
         return
     # else:
