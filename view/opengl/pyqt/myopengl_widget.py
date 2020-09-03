@@ -11,15 +11,16 @@ class MyOpenGLWidget(QtWidgets.QOpenGLWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.is_draw = False
-        self.obj = Sphere_Ellipse_data_3D(25, 50)
+        self.obj = Sphere_Ellipse_data_3D(50, 50)
         center = (2, 0, 0)
         abc = (1.2, 1.0, 1)
         self.surface = Ellipse(center, abc)
         self.aspect_ratio = self.size().width() / self.size().height()
+        self.wireframe = True
 
     def initializeGL(self) -> None:
         GL.glClearColor(1., 1.0, 1., 0.5)
-        light_pos = (0.0, 0.0, 0.0)
+        light_pos = (-1.0, 0.0, 0.0)
         ambient = (1.0, 1.0, 1.0, 1.0)
 
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
@@ -46,4 +47,9 @@ class MyOpenGLWidget(QtWidgets.QOpenGLWidget):
     def paintGL(self) -> None:
         GL.glColor(1.0, 1.0, 1.0, 1.0)
         if self.is_draw:
+            if self.wireframe:
+                GL.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_LINE)
+            else:
+                GL.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_FILL)
+
             self.obj.draw_in_opengl(self.surface, True)

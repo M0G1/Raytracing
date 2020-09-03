@@ -222,7 +222,7 @@ class Sphere_Ellipse_data_3D:
         """
         if not self.is_prepared:
             self._prepare_to_draw()
-
+        GL.glColor(135, 1, 1, 0.5)
         # GL.glBindVertexArray(self.vao_sphere)
         GL.glDrawElements(GL.GL_TRIANGLES, len(self.indexes), self.np_gl_t.gli, None)
         if not is_stay_prepared:
