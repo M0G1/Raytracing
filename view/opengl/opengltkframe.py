@@ -37,3 +37,4 @@ class MyOpenGLFrame(OpenGLFrame):
         for m in self.__drawing_methods:
             m()
         return
+

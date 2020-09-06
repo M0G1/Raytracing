@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtWidgets
+import OpenGL.GL.shaders
 from OpenGL import GL, GLU
 
 from surfaces.ellipse import Ellipse
@@ -11,12 +12,13 @@ class MyOpenGLWidget(QtWidgets.QOpenGLWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.is_draw = False
-        self.obj = Sphere_Ellipse_data_3D(50, 50)
+        self.obj = Sphere_Ellipse_data_3D(20, 20)
         center = (2, 0, 0)
         abc = (1.2, 1.0, 1)
         self.surface = Ellipse(center, abc)
-        self.aspect_ratio = self.size().width() / self.size().height()
+        self.uniform = {}  # set
         self.wireframe = True
+        self.line_width = 2
 
     def initializeGL(self) -> None:
         GL.glClearColor(1., 1.0, 1., 0.5)
@@ -28,10 +30,25 @@ class MyOpenGLWidget(QtWidgets.QOpenGLWidget):
         GL.glEnable(GL.GL_LIGHTING)  # Включаем освещение
         GL.glEnable(GL.GL_LIGHT0)  # Включаем один источник света
         GL.glLightfv(GL.GL_LIGHT0, GL.GL_POSITION, light_pos)  # Определяем положение источника света
+        self.init_shader()
+
+    def init_shader(self):
+        solo_color_shader_code = """
+        # version 330
+        uniform vec4 vertexesColor;
+        out vec4 outColor;
+        void main()
+        {
+        outColor = vertexesColor;
+        }
+        """
+        shader = OpenGL.GL.shaders.compileProgram(
+            GL.shaders.compileShader(solo_color_shader_code, GL.GL_FRAGMENT_SHADER))
+        GL.glUseProgram(shader)
+        self.uniform["vertexesColor"] = GL.glGetUniformLocation(shader, "vertexesColor")
 
     def resizeGL(self, w: int, h: int) -> None:
         self.size()
-        self.aspect_ratio = w / h
         min_x, max_x, min_y, max_y = (-2, 2, -2, 2)
         # coordinate bounds
         c_b = MyOpenGLWidget._calc_bounds_with_aspect_ratio(w / h, min_x, max_x, min_y, max_y)
@@ -44,12 +61,20 @@ class MyOpenGLWidget(QtWidgets.QOpenGLWidget):
         x_range = asp_ratio * (max_y - min_y)
         return midle_x - x_range / 2, midle_x + x_range / 2, min_y, max_y
 
+    def set_drawing_color(self, color: (list, tuple)):
+        if len(color) == 4:
+            GL.glUniform4f(self.uniform["vertexesColor"], *color)
+        elif len(color) == 3:
+            GL.glUniform4f(self.uniform["vertexesColor"], *color, 1)
+
     def paintGL(self) -> None:
         GL.glColor(1.0, 1.0, 1.0, 1.0)
         if self.is_draw:
+            GL.glLineWidth(self.line_width)
             if self.wireframe:
-                GL.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_LINE)
+                GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE)
             else:
-                GL.glPolygonMode(GL.GL_FRONT_AND_BACK,GL.GL_FILL)
+                GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL)
 
+            self.set_drawing_color((0, 50, 0))
             self.obj.draw_in_opengl(self.surface, True)

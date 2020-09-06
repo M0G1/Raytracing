@@ -43,9 +43,10 @@ class Sphere_Ellipse_data_3D:
 
     def init_opengl_data(self):
         if self.is_init_data:
-            self.normals = self.vertexes.copy
+            self.normals = self.vertexes.copy()
         else:
             self.vertexes = self.gen_approximate_sphere()
+            self.normals = self.vertexes.copy()
         self.tex_coords = self._make_text_coords()
         self.indexes = self._make_incidents_vertexes_to_opengl()
         self.is_init_opengl_data = True
@@ -168,7 +169,6 @@ class Sphere_Ellipse_data_3D:
         Create buffer, binding buffer and copy in buffer data. For more fast works of app.
 
         """
-        print(self.np_gl_t.npf)
         if not self.is_init_opengl_data:
             self.init_opengl_data()
 
@@ -192,12 +192,21 @@ class Sphere_Ellipse_data_3D:
         # # zero? may be it is an ID
         # # 3 vertex coor
         # # normilase = false
-        # # next vertex position in bites
+        # # next vertex position in bites. 0 if it doesn't need
         # # GL.ctypes.c_void_p(0) - number of bites in array there beginning the vertex
         GL.glVertexAttribPointer(0, 3, self.np_gl_t.glf, GL.GL_FALSE,
-                                 3 * self.np_gl_t.sizeof_f,
+                                 0,
                                  GL.ctypes.c_void_p(0))
+
         GL.glEnableVertexAttribArray(0)
+
+        # self.norm_buff = GL.glGenBuffers(1) # has no visible effect
+        # GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.norm_buff)
+        # GL.glBufferData(GL.GL_ARRAY_BUFFER, self.np_gl_t.sizeof_f * len(self.normals),
+        #                 self.normals, GL.GL_STATIC_DRAW)
+        # GL.glVertexAttribPointer(2, 3, self.np_gl_t.glf, GL.GL_FALSE,
+        #                          0, GL.ctypes.c_void_p(0))
+        # GL.glEnableVertexAttribArray(2)
         # # unbind  sphere vao
         # GL.glBindVertexArray(0)
 
@@ -208,6 +217,8 @@ class Sphere_Ellipse_data_3D:
 
     def _end_of_draw(self):
         if self.is_prepared:
+            GL.glDisableVertexAttribArray(0)
+            GL.glDisableVertexAttribArray(2)
             # unbind indexes
             GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
             # unbind sphere vao
@@ -222,7 +233,6 @@ class Sphere_Ellipse_data_3D:
         """
         if not self.is_prepared:
             self._prepare_to_draw()
-        GL.glColor(135, 1, 1, 0.5)
         # GL.glBindVertexArray(self.vao_sphere)
         GL.glDrawElements(GL.GL_TRIANGLES, len(self.indexes), self.np_gl_t.gli, None)
         if not is_stay_prepared:

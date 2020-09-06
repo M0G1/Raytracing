@@ -16,109 +16,129 @@ from view.opengl.pyqt.myopengl_widget import MyOpenGLWidget
 
 
 class Ui_MainWindow(object):
-    def __init__(self):
-        super().__init__()
-        self.menubar = None
-        self.menu_file = None
-        self.action_save = None
-        self.action_open = None
-        self.menu_edit = None
-
-        self.central_widget = None
-        self.grid_layout = None
-        self.verticalLayout = None
-        self.openGL_widget = None
-        self.label = None
-
-        self.statusbar = None
-
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 600)
-        size_police = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
-        size_police.setHorizontalStretch(30)
-        size_police.setVerticalStretch(0)
-        size_police.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
-        MainWindow.setSizePolicy(size_police)
-        self.central_widget = QtWidgets.QWidget(MainWindow)
-        self.central_widget.setObjectName("central_widget")
-        self.grid_layout = QtWidgets.QGridLayout(self.central_widget)
-        self.grid_layout.setObjectName("gridLayout")
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(30)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
+        MainWindow.setSizePolicy(sizePolicy)
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
+        self.gridLayout.setObjectName("gridLayout")
         self.verticalLayout = QtWidgets.QVBoxLayout()
         self.verticalLayout.setObjectName("verticalLayout")
 
         # ===========openGL widget======================================
-        self.openGL_widget = MyOpenGLWidget(self.central_widget)
-        self.openGL_widget.setMinimumSize(QtCore.QSize(780, 400))
-        self.openGL_widget.setObjectName("openGLWidget")
-        self.verticalLayout.addWidget(self.openGL_widget)
-        self.grid_layout.addLayout(self.verticalLayout, 0, 0, 1, 1)
+        self.openGLWidget = MyOpenGLWidget(self.centralwidget)
+        self.openGLWidget.setMinimumSize(QtCore.QSize(780, 400))
+        self.openGLWidget.setObjectName("openGLWidget")
+        self.verticalLayout.addWidget(self.openGLWidget)
+        self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
 
-        # =============label============================================
-        self.label = QtWidgets.QLabel(self.central_widget)
+        # =============layout and label============================================
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setEnabled(True)
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setObjectName("label")
-        self.grid_layout.addWidget(self.label, 1, 0, 1, 1)
-
-        # =============horizontal layout=================================
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.horizontalLayout_2.addWidget(self.label)
+        # =============grid===========================================
+        self.gridLayout_2 = QtWidgets.QGridLayout()
+        self.gridLayout_2.setObjectName("gridLayout_2")
 
         # =============buttons===========================================
-        self.pushButton_2 = QtWidgets.QPushButton(self.central_widget)
-        self.pushButton = QtWidgets.QPushButton(self.central_widget)
-        self.pushButton_2.setObjectName("pushButton_2")
-        self.pushButton.setObjectName("pushButton")
+        self.btn_up = QtWidgets.QPushButton(self.centralwidget)
+        self.btn_up.setObjectName("btn_up")
+        self.gridLayout_2.addWidget(self.btn_up, 0, 1, 1, 1)
+        self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        self.btn_forward = QtWidgets.QPushButton(self.centralwidget)
+        self.btn_forward.setObjectName("btn_forward")
+        self.horizontalLayout_3.addWidget(self.btn_forward)
+        self.btn_toward = QtWidgets.QPushButton(self.centralwidget)
+        self.btn_toward.setObjectName("btn_toward")
+        self.horizontalLayout_3.addWidget(self.btn_toward)
+        self.gridLayout_2.addLayout(self.horizontalLayout_3, 1, 1, 1, 1)
+        self.btn_right = QtWidgets.QPushButton(self.centralwidget)
+        self.btn_right.setObjectName("btn_right")
+        self.gridLayout_2.addWidget(self.btn_right, 1, 2, 1, 1)
+        self.btn_down = QtWidgets.QPushButton(self.centralwidget)
+        self.btn_down.setObjectName("btn_down")
+        self.gridLayout_2.addWidget(self.btn_down, 3, 1, 1, 1)
+        self.btn_left = QtWidgets.QPushButton(self.centralwidget)
+        self.btn_left.setObjectName("btn_left")
+        self.gridLayout_2.addWidget(self.btn_left, 1, 0, 1, 1)
+        self.btn_radio_wireframe = QtWidgets.QRadioButton(self.centralwidget)
+        self.btn_radio_wireframe.setObjectName("radioButton_wireframe")
+        self.gridLayout_2.addWidget(self.btn_radio_wireframe, 3, 0, 1, 1)
+        self.horizontalLayout_2.addLayout(self.gridLayout_2)
+        self.gridLayout.addLayout(self.horizontalLayout_2, 2, 0, 1, 1)
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.btn_create_sphere = QtWidgets.QPushButton(self.centralwidget)
+        self.btn_create_sphere.setObjectName("btn_create_sphere")
+        self.horizontalLayout.addWidget(self.btn_create_sphere)
+        self.gridLayout.addLayout(self.horizontalLayout, 5, 0, 1, 1)
+        MainWindow.setCentralWidget(self.centralwidget)
 
-        def btn_act2() -> None:
-            self.openGL_widget.is_draw ^= True
-            print(f"open gl widget drawing is {self.openGL_widget.is_draw}")
-            self.openGL_widget.update()
-
-        # def btn_act() -> None:
-        #     self.label.setText("Button clicked")
-
-        self.pushButton.clicked.connect(btn_act2)
-        self.horizontalLayout.addWidget(self.pushButton)
-        self.horizontalLayout.addWidget(self.pushButton_2)
-        self.grid_layout.addLayout(self.horizontalLayout, 2, 0, 1, 1)
-
-        MainWindow.setCentralWidget(self.central_widget)
+        self.set_btn_action()
         # ================upper menu==================================
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
         self.menubar.setObjectName("menubar")
-        self.menu_file = QtWidgets.QMenu(self.menubar)
-        self.menu_file.setObjectName("menuFile")
-        self.menu_edit = QtWidgets.QMenu(self.menubar)
-        self.menu_edit.setObjectName("menuedit")
+        self.menuFile = QtWidgets.QMenu(self.menubar)
+        self.menuFile.setObjectName("menuFile")
+        self.menuedit = QtWidgets.QMenu(self.menubar)
+        self.menuedit.setObjectName("menuedit")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
-        self.action_open = QtWidgets.QAction(MainWindow)
-        self.action_open.setObjectName("actionOpen")
-        self.action_save = QtWidgets.QAction(MainWindow)
-        self.action_save.setObjectName("actionSave")
-        self.menu_file.addAction(self.action_open)
-        self.menu_file.addAction(self.action_save)
-        self.menubar.addAction(self.menu_file.menuAction())
-        self.menubar.addAction(self.menu_edit.menuAction())
+        self.actionOpen = QtWidgets.QAction(MainWindow)
+        self.actionOpen.setObjectName("actionOpen")
+        self.actionSave = QtWidgets.QAction(MainWindow)
+        self.actionSave.setObjectName("actionSave")
+        self.menuFile.addAction(self.actionOpen)
+        self.menuFile.addAction(self.actionSave)
+        self.menubar.addAction(self.menuFile.menuAction())
+        self.menubar.addAction(self.menuedit.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def set_btn_action(self):
+        def btn_create_sphere() -> None:
+            self.openGLWidget.is_draw ^= True
+            self.openGLWidget.update()
+
+        def btn_wireframe():
+            self.openGLWidget.wireframe = self.btn_radio_wireframe.isChecked()
+            self.openGLWidget.update()
+
+        self.btn_create_sphere.clicked.connect(btn_create_sphere)
+        self.btn_radio_wireframe.toggled.connect(btn_wireframe)
+        self.btn_radio_wireframe.setChecked(True)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.label.setText(_translate("MainWindow", "Text Area"))
-        self.pushButton_2.setText(_translate("MainWindow", "Create Sphere"))
-        self.pushButton.setText(_translate("MainWindow", "PushButton"))
-        self.menu_file.setTitle(_translate("MainWindow", "File"))
-        self.menu_edit.setTitle(_translate("MainWindow", "edit"))
-        self.action_open.setText(_translate("MainWindow", "Open"))
-        self.action_save.setText(_translate("MainWindow", "Save"))
+        self.btn_up.setText(_translate("MainWindow", "Up"))
+        self.btn_forward.setText(_translate("MainWindow", "forward"))
+        self.btn_toward.setText(_translate("MainWindow", "toward"))
+        self.btn_right.setText(_translate("MainWindow", "right"))
+        self.btn_down.setText(_translate("MainWindow", "down"))
+        self.btn_left.setText(_translate("MainWindow", "left"))
+        self.btn_radio_wireframe.setText(_translate("MainWindow", "lined wireframe"))
+        self.btn_create_sphere.setText(_translate("MainWindow", "Create Sphere"))
+        self.menuFile.setTitle(_translate("MainWindow", "File"))
+        self.menuedit.setTitle(_translate("MainWindow", "edit"))
+        self.actionOpen.setText(_translate("MainWindow", "Open"))
+        self.actionSave.setText(_translate("MainWindow", "Save"))
 
 
 if __name__ == "__main__":
