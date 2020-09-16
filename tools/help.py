@@ -12,24 +12,6 @@ from surfaces.ellipse import Ellipse
 i_g_r = (3 - m.sqrt(5)) / 2
 
 
-def get_rot_mat_3d(a: float, b: float, g: float):
-    Mx = (
-        (1, 0, 0),
-        (0, m.cos(a), -m.sin(a)),
-        (0, m.sin(a), m.cos(a))
-    )
-    My = (
-        (m.cos(a), 0, m.sin(a)),
-        (0, 1, 0),
-        (-m.sin(a), 0, m.cos(a))
-    )
-    Mz = (
-        (m.cos(a), -m.sin(a), 0),
-        (m.sin(a), m.cos(a), 0),
-        (0, 0, 1),
-    )
-    return (Mx, My, Mz)
-
 
 def func_of_reading_surf_ray_from_strings(strings, dimension):
     d = dimension

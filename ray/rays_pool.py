@@ -35,11 +35,11 @@ class Compon3D(Compon_Interface):
     R_OFFSET = 3
     T0_OFFSET = 6
     T1_OFFSET = 7
-    # l_OFFSET = 8
+    l_OFFSET = 8
     # For future code
     # LAM_OFFSET.value = 8
     # W_OFFSET.value = 9
-    RAY_OFFSET = 8
+    RAY_OFFSET = 9
     DIM = 3
 
 
@@ -83,7 +83,7 @@ class RaysPool(ARay):
 
     # ================================================Object's=================================================
 
-    def __init__(self, rays: (list, iter), componentIndexes):
+    def __init__(self, rays: (list, iter), componentIndexes, default_ray_length: float = 1):
         """
         :param rays: iterable object with Numeric values. It is lenght must be a multiple value of RAY_OFFSET
          of class Compon2D or Compon3D
@@ -92,6 +92,7 @@ class RaysPool(ARay):
 
         self.__check_comIndex(componentIndexes)
         self.__ComIndex = componentIndexes
+        self.default_ray_length = default_ray_length
 
         self.__check_list(rays)
         self.__pool = list(rays.copy())
@@ -201,6 +202,15 @@ class RaysPool(ARay):
     @property
     def componentIndexes(self):
         return self.__ComIndex
+
+    def begin_ray(self, i: int):
+        return np.add(self.r(i), np.dot(self.t0(i), self.e(i)))
+
+    def end_ray(self, i: int):
+        t1 = self.default_ray_length
+        if self.t1(i) > 0:
+            t1 = self.t1(i)
+        return np.add(self.r(i), np.dot(t1, self.e(i)))
 
     # ================================================Setters=================================================
     # calculate from radius vector of ray

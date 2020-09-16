@@ -5,23 +5,41 @@ import OpenGL.GL.shaders
 from OpenGL import GL, GLU
 
 from surfaces.ellipse import Ellipse
+from surfaces.sphere import Sphere
 from view.opengl.sphere_ellipse_data3D import Sphere_Ellipse_data_3D
+from controllers.ray_surface_storage import RaySurfaceStorage
+from tools.generators import Generator
+from view.opengl.rays_pool import draw_ray_pool
 
 
 class MyOpenGLWidget(QtWidgets.QOpenGLWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.is_draw = False
-        self.obj = Sphere_Ellipse_data_3D(20, 20)
-        center = (2, 0, 0)
-        abc = (1.2, 1.0, 1)
-        self.surface = Ellipse(center, abc)
+        self.obj = Sphere_Ellipse_data_3D(10, 10)
+        arg = self.test_func()
+        print(arg)
+        print(arg[0][0])
+        self.ray_sur_con = RaySurfaceStorage(*arg)
+        self.ray_sur_con.trace()
         self.uniform = {}  # set
         self.wireframe = True
         self.line_width = 2
 
+    def test_func(self):
+        """Create object """
+        center = (2, 0, 0)
+        abc = (1.2, 1.1, 1.1)
+        surfaces = [Ellipse(center, abc)]
+        points = ((3, -1, 1),
+                  (3, 1, -1),
+                  (1, 1, -1))
+        intensity = 0.3
+        rays = Generator.generate_rays_3d(*points, intensity)
+        return [[rays], surfaces]
+
     def initializeGL(self) -> None:
-        GL.glClearColor(1., 1.0, 1., 0.5)
+        GL.glClearColor(0.5, 0.5, 0.5,0.5)
         light_pos = (-1.0, 0.0, 0.0)
         ambient = (1.0, 1.0, 1.0, 1.0)
 
@@ -68,13 +86,21 @@ class MyOpenGLWidget(QtWidgets.QOpenGLWidget):
             GL.glUniform4f(self.uniform["vertexesColor"], *color, 1)
 
     def paintGL(self) -> None:
-        GL.glColor(1.0, 1.0, 1.0, 1.0)
         if self.is_draw:
-            GL.glLineWidth(self.line_width)
+            GL.glLineWidth(self.line_width//2)
             if self.wireframe:
                 GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE)
             else:
                 GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_FILL)
 
+            self.set_drawing_color((50, 0, 0))
+            print(f"\ncount of RaysPool is {len(self.ray_sur_con.rays)}\n")
+            for rays in self.ray_sur_con.rays:
+                draw_ray_pool(rays, (1, 0, 0, 1))
+                # print(rays)
+
+            GL.glLineWidth(self.line_width)
             self.set_drawing_color((0, 50, 0))
-            self.obj.draw_in_opengl(self.surface, True)
+            for surface in self.ray_sur_con.surfaces:
+                if isinstance(surface, (Sphere, Ellipse)):
+                    self.obj.draw_in_opengl(surface, True)

@@ -5,9 +5,10 @@ from mpl_toolkits.mplot3d import Axes3D
 
 import controllers.modeling_controller as mctrl
 from surfaces.plane import Plane
-from utility.help import get_rot_mat_3d
 from ray.ray import Ray
 from surfaces.ellipse import Ellipse
+from tools.generators import Generator
+from controllers.ray_surface_storage import RaySurfaceStorage
 
 
 def ellipse(axes, abc: list, center: list = [0, 0, 0], color='b', alpha=0.5):
@@ -27,7 +28,7 @@ def line(axes, x, y, z, color='b'):
 
 def d_plane(axes, plane: Plane, color='b', alpha=0.5):
     pi_2 = m.pi / 2
-    M = get_rot_mat_3d(pi_2, pi_2, pi_2)
+    M = Generator.get_rot_mat_3d(pi_2, pi_2, pi_2)
     norm = plane.norm_vec([])
     r = plane.rad
     rotated_n = np.dot(M[1], norm)
@@ -60,7 +61,7 @@ def points(axes, x, y, z, color='b', marker='o'):
     axes.scatter(x, y, z, c='b', marker='o')
 
 
-if __name__ == '__main__':
+def main():
     center = [1, 2, 1]
     abc = [1, 1, 1]
     ray: Ray = Ray([0, 0, 0], [1, 1, 1])
@@ -82,3 +83,21 @@ if __name__ == '__main__':
     d_plane(ax, plane)
 
     plt.show()
+
+
+def main2():
+    center = [1, 2, 1]
+    abc = [1, 1, 1]
+    ellipse1 = Ellipse(center=center, ellipse_coefficients=abc, type_surface=Ellipse.types.REFRACTING, n1=1, n2=1.33)
+    points = ((0.1, 1.1, 0.1),
+              (0.1, 2.9, 1.9),
+              (1.9, 2.9, 0.1))
+    intensity = 0.1
+    rays = Generator.generate_rays_3d(*points, intensity)
+
+    a = RaySurfaceStorage([rays], [ellipse1])
+    a.trace()
+
+
+if __name__ == '__main__':
+    main2()
