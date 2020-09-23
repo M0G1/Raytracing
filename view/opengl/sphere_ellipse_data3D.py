@@ -138,7 +138,14 @@ class Sphere_Ellipse_data_3D:
     # =================================|opengl usage|==================================================================
 
     def _make_incidents_vertexes_to_opengl(self):
-        # done it like there, but on python: https: // songho.ca / opengl / gl_sphere.html
+        """
+            triangulation method. It creates an array of indices along the vertex grid.
+            ??width of grid is sector count??
+            ??height of grid is stack count??
+
+            for  more information see:
+            done it like there, but on python: https: // songho.ca / opengl / gl_sphere.html
+        """
 
         incidents = []
         k1, k2 = None, None

@@ -1,3 +1,5 @@
+
+"""Doesn't test. And may be it doesn't work"""
 import numpy as np
 
 from surfaces.ellipse import Ellipse

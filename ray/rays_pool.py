@@ -12,7 +12,7 @@ class Compon_Interface(IntEnum):
 
 class Compon2D(Compon_Interface):
     """
-        Component of 2 dimension RAY
+        Components of 2 dimension RAY
     """
 
     E_OFFSET = 0
@@ -29,7 +29,7 @@ class Compon2D(Compon_Interface):
 
 class Compon3D(Compon_Interface):
     """
-        Component of  3 dimension  RAY
+        Components of  3 dimension  RAY
     """
     E_OFFSET = 0
     R_OFFSET = 3
@@ -204,9 +204,11 @@ class RaysPool(ARay):
         return self.__ComIndex
 
     def begin_ray(self, i: int):
+        """return the point(numpy.array) of begin of ray"""
         return np.add(self.r(i), np.dot(self.t0(i), self.e(i)))
 
     def end_ray(self, i: int):
+        """return the point(numpy.array) of end of ray"""
         t1 = self.default_ray_length
         if self.t1(i) > 0:
             t1 = self.t1(i)
