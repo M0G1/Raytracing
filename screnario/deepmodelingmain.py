@@ -110,8 +110,8 @@ if arg is not None:
     axes = pylab.gca()
 
     tree = modelCtrl.deep_modeling('p', ray, surfaces, 4, ray_const_length=ray_const_lenght)
-    for node in tree:
-        print(str(node.value) + str(node.value._Ray__path_of_ray))
+    # for node in tree:
+    #     print(str(node.value) + str(node.value._Ray__path_of_ray))
 
     for node in tree:
         print(str(node.value))

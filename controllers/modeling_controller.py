@@ -65,6 +65,7 @@ def deep_modeling(type_polarization: str, ray: Ray, surfaces: list, deep: int,
         refract_ray = None
         exit = False
 
+        # if intersection is
         if i_point == None:
             tree.left = None
             tree.right = None
@@ -78,6 +79,7 @@ def deep_modeling(type_polarization: str, ray: Ray, surfaces: list, deep: int,
         if exit:
             return
 
+        # check total returnal refraction
         if rc.is_total_returnal_refraction(ray_, surfaces[index]):
             reflect_ray = Ray.reflect(ray_, surfaces[index])
             tree.left = Tree(reflect_ray)
@@ -92,10 +94,15 @@ def deep_modeling(type_polarization: str, ray: Ray, surfaces: list, deep: int,
         # , n1, n2
         rc.set_brightness(type_polarization, ray_, refract_ray, reflect_ray, norm, n1, n2)
 
+        # следующая итерация рекурсии
         if tree.left is not None:
             fill_ray_tree(tree.left, surfaces, deep - 1)
+        else:
+            tree.left = Tree(None)
         if tree.right is not None:
             fill_ray_tree(tree.right, surfaces, deep - 1)
+        else:
+            tree.right = Tree(None)
 
     tree = Tree(ray)
     fill_ray_tree(tree, surfaces, deep)

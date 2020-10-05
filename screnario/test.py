@@ -1,6 +1,6 @@
 from ray.rays_pool import *
-from utility.generators import Generator
-import binarytree as btr
+from tools.generators import Generator
+from utility.binarytree import Tree
 
 
 def ray_pool_test():
@@ -26,12 +26,27 @@ def generator_test():
     print("new vector " + str(np.dot(mat, vector3D)))
 
 
+def fill_tree(tree, deep: int, arr: list):
+    if deep < 0:
+        return
+    print(f"left - {arr[0]}, rigth is {arr[0] + 1}")
+
+    tree.left = Tree(arr[0])
+    tree.right = Tree(arr[0] + 1)
+    arr[0] = arr[0] + 2
+
+    fill_tree(tree.left, deep - 1, arr)
+    fill_tree(tree.right, deep - 1, arr)
+    return tree
+
+
 def binary_tree_test():
-    btr.tree()
-    tree = btr.Node()
+    tree = fill_tree(Tree(0), 3, [1])
+    for i, subtree in enumerate(tree):
+        print(f"i={i}, and value is {subtree.value}")
 
 
-if __name__ == '__main__':
+def raypool_offset():
     # file = open("pic.txt")
     # print(file.readlines())
     print(Compon3D.T1_OFFSET == 7)
@@ -45,5 +60,12 @@ if __name__ == '__main__':
     print(issubclass(Compon3D, IntEnum))
     print(issubclass(Compon3D, Compon_Interface))
 
+
+def main():
+    binary_tree_test()
+
+
+if __name__ == '__main__':
+    main()
 
 # generator_test()

@@ -24,12 +24,13 @@ def draw_ray(axes, way_points_of_ray: list, color="green"):
 
 def draw_deep_ray_modeling(
         tree: Tree, axes, color='r', lower_limit_brightness: float = 0.01,
-        ray_const_length: float = 1):
+        ray_const_length: float = 1, is_real_index: bool = False):
     count_of_rays = len(tree)
+    index = 0
     for i, subtree in enumerate(tree):
         if isinstance(subtree.value, Ray):
+            index = index + 1
             val = subtree.value
-            # linewidth=count_of_rays - i
 
             line = None
             t1 = 1
@@ -81,7 +82,10 @@ def draw_deep_ray_modeling(
             const = 0.05
             point_label = np.add(point_label, norm_to_ray * const)  # norm_to_ray * norm_dir_of_ray / 50)
             print("norm_dir_of_ray", norm_dir_of_ray)
-            axes.text(point_label[0], point_label[1], str(i + 1), va='center', size=8)
+            if not is_real_index:
+                axes.text(point_label[0], point_label[1], str(index), va='center', size=8)
+            else:
+                axes.text(point_label[0], point_label[1], str(i + 1), va='center', size=8)
 
             line.set_label(str(i + 1))
             axes.add_line(line)
@@ -93,7 +97,7 @@ def draw_deep_ray_modeling(
             print()
 
 
-def draw_ray_pool(pool: rays_pool.RaysPool, ray_const_length: float = 2,alpha:float=1):
+def draw_ray_pool(pool: rays_pool.RaysPool, ray_const_length: float = 2, alpha: float = 1):
     if pool.componentIndexes.DIM != 2:
         raise AttributeError("NON-two-dimensional ray pool")
 
@@ -106,7 +110,7 @@ def draw_ray_pool(pool: rays_pool.RaysPool, ray_const_length: float = 2,alpha:fl
 
         coords = collect_point_to_draw(pool.e(i), pool.r(i), pool.t0(i), t1)
 
-        line = pylab.Line2D(coords[0], coords[1], color="green",alpha=alpha)
+        line = pylab.Line2D(coords[0], coords[1], color="green", alpha=alpha)
         axes = pylab.gca()
         axes.add_line(line)
 

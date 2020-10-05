@@ -91,7 +91,7 @@ def draw_axicon2D(surfaces: list, axes, is_isosceles: bool = True):
 def get_points_of_func_frenel(
         type_polarization: str,
         ray: Ray, ray_indexes: (list, tuple),
-        axicon: list, deep,
+        axicon: list,
         refr_axicon_coef: list, step: float):
     """
 
@@ -99,7 +99,6 @@ def get_points_of_func_frenel(
        :param ray:ray_index:
        :param ray_indexes: rays after what will be calculate Frenel coefficients. You must know it!
        :param axicon: from method create_axicon()
-       :param deep: deep modeling. depth of tree of ray
        :param refr_axicon_coef: list from 2 values (n1,n2) n2 >n1
        :param step: step of discreditation
        :return:
@@ -110,14 +109,18 @@ def get_points_of_func_frenel(
     if len(refr_axicon_coef) != 2 or not (refr_axicon_coef[1] > refr_axicon_coef[0]):
         raise AttributeError("Incorrect refract coefficients %s" % (str(refr_axicon_coef)))
 
+    # save using the memory
+    deep = np.max(ray_indexes) + 1
     cur_n = refr_axicon_coef[0]
     end_n = refr_axicon_coef[1]
     x_coor = []
-    refl_coef = [[]] * len(ray_indexes)
-    transmittance = [[]] * len(ray_indexes)
+    refl_coef = [[] for i in range(len(ray_indexes))]
+    transmittance = [[] for i in range(len(ray_indexes))]
 
     refraction_indexs = axicon[0].get_refractive_indexes([1, 1])
     refraction_outside_index = refraction_indexs[0]
+
+    check = []
 
     while end_n >= cur_n:  # np.finfo(float).eps:
         # set next refractive index in the axicon
@@ -132,7 +135,11 @@ def get_points_of_func_frenel(
         for i, sub_tree in enumerate(tree):
             if i in ray_indexes:
                 subtree_list.append(sub_tree)
+                # print(f"{i} - {sub_tree.value}")
+                # print(f"left {sub_tree.left.value}")
+                # print(f"right {sub_tree.right.value}\n")
 
+        # check.append(subtree_list)
         # calculate frenel indexes
         for i, subtree in enumerate(subtree_list):
             # calculate frenel indexes for current ray
@@ -149,20 +156,28 @@ def get_points_of_func_frenel(
         # next refractive index
         cur_n = cur_n + step
 
+    # print(f"x_coor:\n{x_coor}")
+    # print(f"refl_coef: len = {len(refl_coef)},len of first el = {len(refl_coef[0])}\n{np.asarray(refl_coef)}")
+    # print(
+    #     f"transmittance: len = {len(transmittance)},len of first el = {len(transmittance[0])}\n{np.asarray(transmittance)}")
+
+    # check_str = ""
+    # for s in check:
+    #     check_str += (str(s) + "\n")
+    # # print(f"\n check=\n{ check_str}")
     return x_coor, refl_coef, transmittance
 
 
 def get_points_of_func_frenel_from_refr_coef(
         type_polarization: str,
         ray: Ray, ray_index: int,
-        axicon: list, deep,
+        axicon: list,
         refr_axicon_coef: list, step: float):
     """
     :param type_polarization: p or s
     :param ray:ray_index:
     :param ray_index: ray after what will be calculate Frenel coefficients. You must know it!
     :param axicon: from method create_axicon()
-    :param deep: deep modeling. depth of tree of ray
     :param refr_axicon_coef: list from 2 values (n1,n2) n2 >n1
     :param step: step of discreditation
     :return:
@@ -192,7 +207,8 @@ def get_points_of_func_frenel_from_refr_coef(
             print(i)
 
         # trace ray
-        tree = modelCtrl.deep_modeling(type_polarization, ray, axicon, deep)
+        # deep =  ray_index + 1, because it save the memory
+        tree = modelCtrl.deep_modeling(type_polarization, ray, axicon, ray_index + 1)
         subtree = None
 
         # search needed ray in tree
@@ -236,9 +252,9 @@ def get_frenel_coef(fall_ray: Ray, reflect_ray: Ray, refract_ray: Ray):
     R = None
     T = None
     if reflect_ray is not None:
-        R = reflect_ray.bright / fall_ray.bright
+        R = reflect_ray.bright #/ fall_ray.bright
     if refract_ray is not None:
-        T = refract_ray.bright / fall_ray.bright
+        T = refract_ray.bright #/ fall_ray.bright
     if T is None and R is not None:
         T = 0
         R = 1
