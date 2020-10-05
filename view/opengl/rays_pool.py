@@ -9,6 +9,6 @@ def draw_ray_pool(rays: RaysPool, color: (list, tuple)):
         GL.glColor(*color)
         begin = rays.begin_ray(i)
         end = rays.end_ray(i)
-        GL.glVertex3f(*begin)
-        GL.glVertex3f(*end)
+        GL.glVertex(*begin)
+        GL.glVertex(*end)
         GL.glEnd()

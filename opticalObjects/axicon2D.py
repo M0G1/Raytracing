@@ -88,13 +88,76 @@ def draw_axicon2D(surfaces: list, axes, is_isosceles: bool = True):
     axes.add_line(l1)
 
 
+def get_points_of_func_frenel(
+        type_polarization: str,
+        ray: Ray, ray_indexes: (list, tuple),
+        axicon: list, deep,
+        refr_axicon_coef: list, step: float):
+    """
+
+       :param type_polarization: p or s
+       :param ray:ray_index:
+       :param ray_indexes: rays after what will be calculate Frenel coefficients. You must know it!
+       :param axicon: from method create_axicon()
+       :param deep: deep modeling. depth of tree of ray
+       :param refr_axicon_coef: list from 2 values (n1,n2) n2 >n1
+       :param step: step of discreditation
+       :return:
+       Take a graph of the dependence of the Fresnel coefficients on the refractive index for rays coming after a given.
+       refration_indexes, refl_coef, transmittance
+       refl_coef, transmittance is a list, where every element is calculated coefficients for every ray in ray_indexes
+       """
+    if len(refr_axicon_coef) != 2 or not (refr_axicon_coef[1] > refr_axicon_coef[0]):
+        raise AttributeError("Incorrect refract coefficients %s" % (str(refr_axicon_coef)))
+
+    cur_n = refr_axicon_coef[0]
+    end_n = refr_axicon_coef[1]
+    x_coor = []
+    refl_coef = [[]] * len(ray_indexes)
+    transmittance = [[]] * len(ray_indexes)
+
+    refraction_indexs = axicon[0].get_refractive_indexes([1, 1])
+    refraction_outside_index = refraction_indexs[0]
+
+    while end_n >= cur_n:  # np.finfo(float).eps:
+        # set next refractive index in the axicon
+        for i in axicon:
+            i.set_refractive_indexes(cur_n, refraction_outside_index)
+
+        # trace ray
+        tree = modelCtrl.deep_modeling(type_polarization, ray, axicon, deep)
+        subtree_list = list()
+
+        # search needed ray in tree
+        for i, sub_tree in enumerate(tree):
+            if i in ray_indexes:
+                subtree_list.append(sub_tree)
+
+        # calculate frenel indexes
+        for i, subtree in enumerate(subtree_list):
+            # calculate frenel indexes for current ray
+            fall_ray = subtree.value
+            reflect_ray = subtree.left.value if subtree.left is not None else None
+            refract_ray = subtree.right.value if subtree.right is not None else None
+            R, T = get_frenel_coef(fall_ray, reflect_ray, refract_ray)
+
+            # save the data in list
+            refl_coef[i].append(R)
+            transmittance[i].append(T)
+        # add the refraction index
+        x_coor.append(cur_n)
+        # next refractive index
+        cur_n = cur_n + step
+
+    return x_coor, refl_coef, transmittance
+
+
 def get_points_of_func_frenel_from_refr_coef(
         type_polarization: str,
         ray: Ray, ray_index: int,
         axicon: list, deep,
         refr_axicon_coef: list, step: float):
     """
-
     :param type_polarization: p or s
     :param ray:ray_index:
     :param ray_index: ray after what will be calculate Frenel coefficients. You must know it!
@@ -104,7 +167,7 @@ def get_points_of_func_frenel_from_refr_coef(
     :param step: step of discreditation
     :return:
     Take a graph of the dependence of the Fresnel coefficients on the refractive index for rays coming after a given.
-    (x coordinates, y coordinates)
+    refl_coef, transmittance is a list of calculated coefficients
     """
     if len(refr_axicon_coef) != 2 or not (refr_axicon_coef[1] > refr_axicon_coef[0]):
         raise AttributeError("Incorrect refract coefficients %s" % (str(refr_axicon_coef)))
@@ -112,13 +175,14 @@ def get_points_of_func_frenel_from_refr_coef(
     cur_n = refr_axicon_coef[0]
     end_n = refr_axicon_coef[1]
     x_coor = []
-    refl_coef = [x_coor, []]
-    transmittance = [x_coor, []]
+    refl_coef = []
+    transmittance = []
 
     refraction_indexs = axicon[0].get_refractive_indexes([1, 1])
     refraction_outside_index = refraction_indexs[0]
 
     while end_n >= cur_n:  # np.finfo(float).eps:
+        # set next refractive index in the axicon
         for i in axicon:
             i.set_refractive_indexes(cur_n, refraction_outside_index)
 
@@ -127,32 +191,21 @@ def get_points_of_func_frenel_from_refr_coef(
         for i in axicon:
             print(i)
 
+        # trace ray
         tree = modelCtrl.deep_modeling(type_polarization, ray, axicon, deep)
         subtree = None
 
+        # search needed ray in tree
         for i, sub_tree in enumerate(tree):
             if i == ray_index:
                 subtree = sub_tree
                 break
 
+        # calculate frenel indexes
         fall_ray = subtree.value
-        reflect_ray = None
-        refract_ray = None
-        R = None
-        T = None
-
-        if subtree.left is not None:
-            reflect_ray = subtree.left.value
-            R = reflect_ray.bright / fall_ray.bright
-        if subtree.right is not None:
-            refract_ray = subtree.right.value
-            T = refract_ray.bright / fall_ray.bright
-        if T is None and R is not None:
-            T = 0
-            R = 1
-        if R is None and T is not None:
-            R = 0
-            T = 1
+        reflect_ray = subtree.left.value if subtree.left is not None else None
+        refract_ray = subtree.right.value if subtree.right is not None else None
+        R, T = get_frenel_coef(fall_ray, reflect_ray, refract_ray)
 
         # log
         print("fall ray: ", fall_ray)
@@ -161,17 +214,36 @@ def get_points_of_func_frenel_from_refr_coef(
         print("refract ray: ", refract_ray)
         print("T: ", T, '\n')
 
+        # save the data in list
         x_coor.append(cur_n)
-        refl_coef[1].append(R)
-        transmittance[1].append(T)
-
+        refl_coef.append(R)
+        transmittance.append(T)
+        # next refractive index
         cur_n = cur_n + step
 
     print("x_coor", x_coor)
-    print("refl_coef", refl_coef[1])
-    print("transmittance", transmittance[1])
+    print("refl_coef", refl_coef)
+    print("transmittance", transmittance)
 
+    # return old refraction index
     for i in axicon:
         i.set_refractive_indexes(refraction_indexs[0], refraction_outside_index)
 
-    return (refl_coef, transmittance)
+    return x_coor, refl_coef, transmittance
+
+
+def get_frenel_coef(fall_ray: Ray, reflect_ray: Ray, refract_ray: Ray):
+    R = None
+    T = None
+    if reflect_ray is not None:
+        R = reflect_ray.bright / fall_ray.bright
+    if refract_ray is not None:
+        T = refract_ray.bright / fall_ray.bright
+    if T is None and R is not None:
+        T = 0
+        R = 1
+    if R is None and T is not None:
+        R = 0
+        T = 1
+
+    return R, T

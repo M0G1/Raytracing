@@ -3,6 +3,7 @@
 from PyQt5 import QtWidgets
 import OpenGL.GL.shaders
 from OpenGL import GL, GLU
+from pyrr import matrix44, Matrix44, Vector3
 
 from surfaces.ellipse import Ellipse
 from surfaces.sphere import Sphere
@@ -16,7 +17,7 @@ class MyOpenGLWidget(QtWidgets.QOpenGLWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.is_draw = False
-        self.obj = Sphere_Ellipse_data_3D(10, 10)
+        self.obj = Sphere_Ellipse_data_3D(20, 20)
         arg = self.test_func()
         print(arg)
         print(arg[0][0])
@@ -30,7 +31,7 @@ class MyOpenGLWidget(QtWidgets.QOpenGLWidget):
         """Create object """
         center = (2, 0, 0)
         abc = (1.2, 1.1, 1.1)
-        surfaces = [Ellipse(center, abc)]
+        surfaces = [Ellipse(center, abc,n1=1.0, n2=1.3)]
         points = ((3, -1, 1),
                   (3, 1, -1),
                   (1, 1, -1))
@@ -39,7 +40,7 @@ class MyOpenGLWidget(QtWidgets.QOpenGLWidget):
         return [[rays], surfaces]
 
     def initializeGL(self) -> None:
-        GL.glClearColor(0.5, 0.5, 0.5,0.5)
+        GL.glClearColor(0.5, 0.5, 0.5, 0.5)
         light_pos = (-1.0, 0.0, 0.0)
         ambient = (1.0, 1.0, 1.0, 1.0)
 
@@ -49,12 +50,21 @@ class MyOpenGLWidget(QtWidgets.QOpenGLWidget):
         GL.glEnable(GL.GL_LIGHT0)  # Включаем один источник света
         GL.glLightfv(GL.GL_LIGHT0, GL.GL_POSITION, light_pos)  # Определяем положение источника света
         self.init_shader()
+        # #view projection
+        # view = matrix44.create_from_translation(Vector3([0.0, 0.0, -2.0]))
+        # projection = matrix44.create_perspective_projection_matrix(45.0, self.aspect_ratio, 0.1, 100.0)
+        #
+        # vp = matrix44.multiply(view, projection)  # view projection
+        #
+        # GL.glUniformMatrix4fv(self.uniform["viewProject"],1, GL.GL_FALSE, vp)
 
     def init_shader(self):
         solo_color_shader_code = """
         # version 330
+        
         uniform vec4 vertexesColor;
         out vec4 outColor;
+        
         void main()
         {
         outColor = vertexesColor;
@@ -64,6 +74,7 @@ class MyOpenGLWidget(QtWidgets.QOpenGLWidget):
             GL.shaders.compileShader(solo_color_shader_code, GL.GL_FRAGMENT_SHADER))
         GL.glUseProgram(shader)
         self.uniform["vertexesColor"] = GL.glGetUniformLocation(shader, "vertexesColor")
+        self.uniform["viewProject"] = GL.glGetUniformLocation(shader, "vp")
 
     def resizeGL(self, w: int, h: int) -> None:
         self.size()
@@ -87,7 +98,7 @@ class MyOpenGLWidget(QtWidgets.QOpenGLWidget):
 
     def paintGL(self) -> None:
         if self.is_draw:
-            GL.glLineWidth(self.line_width//2)
+            GL.glLineWidth(self.line_width // 2)
             if self.wireframe:
                 GL.glPolygonMode(GL.GL_FRONT_AND_BACK, GL.GL_LINE)
             else:
@@ -100,7 +111,7 @@ class MyOpenGLWidget(QtWidgets.QOpenGLWidget):
                 # print(rays)
 
             GL.glLineWidth(self.line_width)
-            self.set_drawing_color((0, 50, 0))
+            self.set_drawing_color((0, 50, 0, 1))
             for surface in self.ray_sur_con.surfaces:
                 if isinstance(surface, (Sphere, Ellipse)):
                     self.obj.draw_in_opengl(surface, True)

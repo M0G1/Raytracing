@@ -1,4 +1,4 @@
-import pylab
+from matplotlib import pylab
 import time
 
 import opticalObjects.axicon2D as axic
@@ -29,7 +29,8 @@ if __name__ == '__main__':
         axicon, ray_index + 1,
         [from_refr_coef, to_refr_coef], step
     )
-
+    # приводим данные к привычному формату
+    func = ((func[0], func[1]), (func[0], func[2]))
 
     print("\nCalculated time:", time.time() - start, " sec")
 
@@ -60,7 +61,7 @@ if __name__ == '__main__':
             y = func[0][1][i]
 
     pylab.figure(2)
-    pylab.title("R(n) and T(n) step(%.4f)"%(step))
+    pylab.title("R(n) and T(n) step(%.4f)" % (step))
     pylab.plot(func[0][0], func[0][1], color='blue', label="R(n)")
     pylab.plot(func[1][0], func[1][1], color='black', label="T(n)")
 
