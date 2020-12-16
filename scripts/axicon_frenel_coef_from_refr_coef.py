@@ -102,7 +102,7 @@ def multiple_calculate_frenel_coeff(type_polarization, axicon, ray, ray_indexes,
     min_diff = 1000000000000000
     index_min = -1
     for i in range(len(x_coor)):
-        diff = abs(transmittance[0][i]-transmittance[1][i])
+        diff = abs(transmittance[0][i] - transmittance[1][i])
         if diff < min_diff:
             min_diff = diff
             index_min = i
@@ -117,7 +117,6 @@ def multiple_calculate_frenel_coeff(type_polarization, axicon, ray, ray_indexes,
     print(ans)
     print(ans)
     draw_deep_modeling_trace(type_polarization, axicon, ray, refr_coeff, deep)
-
 
     pylab.figure(1)
     for cur_ray_index in range(max_subplots):
@@ -157,7 +156,7 @@ def draw_deep_modeling_trace(type_polarization, axicon, ray, refr_coef_in_axic, 
     import view.matlab.matlab_ray_view2D as vray
 
     # prepare the axicon
-    pylab.title(f"Axicon with refr index {refr_coef_in_axic}")
+    pylab.title("Axicon with refrection index %.7f" % refr_coef_in_axic)
     refraction_indexs = axicon[0].get_refractive_indexes([1, 1])
     refraction_outside_index = refraction_indexs[0]
     for i in axicon:
@@ -168,6 +167,7 @@ def draw_deep_modeling_trace(type_polarization, axicon, ray, refr_coef_in_axic, 
     ray_const_lenght = ((xlim[0] - xlim[1]) ** 2 + (ylim[0] - ylim[1]) ** 2) ** 0.5
     # ray_const_lenght = ray_const_lenght/2
     axes = pylab.gca()
+    pylab.legend()
     pylab.grid(True)
     pylab.xlim(xlim[0], xlim[1])
     pylab.ylim(ylim[0], ylim[1])
@@ -176,7 +176,7 @@ def draw_deep_modeling_trace(type_polarization, axicon, ray, refr_coef_in_axic, 
     tree = modelCtrl.deep_modeling(type_polarization, ray, axicon, deep)
     for i, subtree in enumerate(tree):
         print(f"{i} - {subtree.value}")
-    vray.draw_deep_ray_modeling(tree, axes=axes, color='g')
+    vray.draw_deep_ray_modeling(tree, axes=axes, color='g',is_real_index=True,ray_const_length=2)
     axic.draw_axicon2D(axicon, axes=axes)
 
     # return back

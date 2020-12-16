@@ -109,23 +109,23 @@ if arg is not None:
     pylab.grid()
     axes = pylab.gca()
 
-    tree = modelCtrl.deep_modeling('p', ray, surfaces, 4, ray_const_length=ray_const_lenght)
+    tree = modelCtrl.deep_modeling('p', ray, surfaces, 3, ray_const_length=ray_const_lenght)
     # for node in tree:
     #     print(str(node.value) + str(node.value._Ray__path_of_ray))
 
     for node in tree:
         print(str(node.value))
 
-    vray.draw_deep_ray_modeling(tree=tree, axes=axes, color='g', lower_limit_brightness=0.07)
+    vray.draw_deep_ray_modeling(tree=tree, axes=axes, color='g', ray_const_length=1.59,lower_limit_brightness=0.07)
     axicon.draw_axicon2D(surfaces, axes, arg[3])
     refr_index = surfaces[0].get_refractive_indexes([-1, 0])
     # pylab.title(
     #     "Axicon\nhalf angle: =%f \nrefractive indexs: inside: %f, outside: %f" % (arg[4], refr_index[0], refr_index[1]),
     #     alpha=0.7)
 
-    pylab.title(
-        "Axicon \nrefractive indexs inside: %.4f\nrefractive indexs outside: %.4f" % (refr_index[0], refr_index[1]),
-        alpha=0.7)
+    # pylab.title(
+    #     "Axicon \nrefractive indexs inside: %.7f\nrefractive indexs outside: %.7f" % (refr_index[0], refr_index[1]),
+    #     alpha=0.7)
     axes.legend()
 
     print("Worked time:", time.time() - start, " sec")

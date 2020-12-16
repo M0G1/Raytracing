@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
+"""Not a single point of launch. It is one of scripts file.
+   !!! Deprecated !!!
+"""
+
 import logging
 import pylab
 
-from utility import help as h
+from tools import help as h
 import controllers.modeling_controller as mCTRL
 import view.matlab.matlab_ray_view2D as view
 

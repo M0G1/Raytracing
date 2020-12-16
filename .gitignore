@@ -126,4 +126,4 @@ dmypy.json
 .pyre/
 
 .idea/
-screnario/input_data.
+scripts/input_data.

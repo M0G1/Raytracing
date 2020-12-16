@@ -69,10 +69,11 @@ def draw_deep_ray_modeling(
             # x_point_label = np.average(val._Ray__path_of_ray[0])
             # y_point_label = np.average(val._Ray__path_of_ray[1])
             point_label = None
-            if isInfiniteRay:
-                point_label = [0.75, 0.75]
-            else:
-                point_label = [np.average(coor) for coor in coords]
+            # if isInfiniteRay:
+            #     point_label = [0.75, 0.75]
+            # else:
+            #     pass
+            point_label = [np.average(coor) for coor in coords]
 
             m = [[0, 1],
                  [-1, 0]]
