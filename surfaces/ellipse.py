@@ -1,12 +1,13 @@
+import math as m
+import numpy as np
+from typing import NewType
+
 from ray.ray import Ray
 from surfaces.surface import Surface
-import numpy as np
-import math as m
 
 
 class Ellipse(Surface):
-    __center = []
-    __abc = []
+    type_ = NewType("Ellipse", Surface)
     """
     (x-x0)^2/a^2 + (y - y0)^2/b^2 + (z - z0)^2/c^2 = 1 - canonical equation of ellipse
     :argument center - сооrdinate of ellipse center  
@@ -15,7 +16,7 @@ class Ellipse(Surface):
     :argument n1,n2 - refractive indexes of space. watch method get_refractive_indexes in class Surface
     """
 
-    def __init__(self, center: (list,iter), ellipse_coefficients: (list,iter),
+    def __init__(self, center: (list, iter), ellipse_coefficients: (list, iter),
                  type_surface: Surface.types = Surface.types.REFLECTING,
                  n1: float = 1,
                  n2: float = 1):

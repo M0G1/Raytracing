@@ -1,6 +1,7 @@
 import pylab
 import numpy as np
 import math as m
+from typing import List
 
 from surfaces.ellipse import Ellipse
 from ray.rays_pool import RaysPool
@@ -18,7 +19,7 @@ def average(points: (list, tuple, iter)) -> np.ndarray:
     :param points: list of same dimensional point
     :return: average point for list of point
     """
-    p_aver = [0] * len(points[0])
+    p_aver = np.zeros(len(points[0]))
     for point in points:
         p_aver = np.add(p_aver, point)
 
@@ -35,7 +36,7 @@ def get_sco_func(rays_pools: (tuple, list), refr_coef: float):
     :return: function of sco for searching focus
     """
     if not all(isinstance(val, RaysPool) for val in rays_pools):
-        raise AttributeError("Some element in argument ray_pool is not instance of RaysPool class")
+        raise ValueError("Some element in argument ray_pool is not instance of RaysPool class")
     # if not all(isinstance(val, (int, float)) and val > 0 for val in refr_coef):
     #     raise AttributeError("Some element in argument refr_coef is not real positive number")
     # if len(rays_pools) != len(refr_coef):
@@ -62,7 +63,7 @@ def get_sco_func(rays_pools: (tuple, list), refr_coef: float):
     del ray_opt_paths
     print("ray_path_const", ray_path_const)
 
-    # write the answer function in vector form
+    # write the answer function
 
     def r(h: float):
         """
@@ -85,8 +86,8 @@ def get_sco_func(rays_pools: (tuple, list), refr_coef: float):
     def ans(h: float):
         """
         This function used to calculate the sco of rays for length rays equal h
-        : param h: length rays
-        : return: sco of rays for length rays equal h
+            : param h: length rays
+            : return: sco of rays for length rays equal h
         """
         # point for ray length - h
         p_ray = r(h)
@@ -101,38 +102,95 @@ def get_sco_func(rays_pools: (tuple, list), refr_coef: float):
     return (ans, r)
 
 
-# ADD the second LENS
+def len_width_on_main_axis(list_ellips: (tuple, list)):
+    """
+        Ellipses must be on abscissa axis(X)
+        The first ellipse must have a center right than the second one
+    """
+
+    return (list_ellips[1].center[0] + list_ellips[1].abc[0]) - (list_ellips[0].center[0] - list_ellips[0].abc[0])
+
+
+DELTA = 1e-15
+DELTA_2 = np.array((-DELTA, DELTA))
+
 if __name__ == '__main__':
     # surface preparation
-    ab_1 = [0.8, 3]
-    ab_2 = [1, 3]
-    ab_s = [ab_1, ab_2]
+    ab_1_1 = (0.8, 3)
+    ab_1_2 = (1, 3)
+    ab_2_1 = (0.8, 3)
+    ab_2_2 = (1, 3)
+    ab_s = [ab_1_1, ab_1_2, ab_2_1, ab_2_2]
 
-    r0 = 0.5
-    center2 = [0, 0]
-    center1 = [center2[0] + r0, center2[0]]
-    center_s = [center1, center2]
+    # distance between centers
+    r0_1 = 0.5
+    r0_2 = 0.5
+    dis_bet_lens = 1  # distance between lens
+    # illustration
+    #   /          \                  /          \
+    #   \---r0_1---/---dis_bet_lens---\---r0_2---/
+    #    1         2                  3         4
+    #    0         1                  2         3 - indexs
+    #   ----------------------------------------> X axis
+    center2 = (0, 0)
+    center1 = (center2[0] + r0_1, 0)
+    center4 = (center2[0] + ab_s[1][0] + dis_bet_lens + ab_s[3][0], 0)
+    center3 = (center4[0] + r0_2, 0)
 
-    # n1 - outside n2 - inside
+    center_s = (center1, center2, center3, center4)
+
+    # n1 - outside of len, n2 - inside of len, n3 - inside of len.
     n1 = 1
     n2 = 1.33
+    n3 = 1.33
+    n_len = (n2, n3)
 
-    ellipsis = [Ellipse(center_s[i], ab_s[i], Ellipse.types.REFRACTING, n1=n1, n2=n2) for i in range(2)]
+    ellipsis = [Ellipse(center_s[i], ab_s[i], Ellipse.types.REFRACTING, n1=n1, n2=n_len[i // 2]) for i in range(4)]
 
-    y_lim = 2.8
-    limits1 = [[center1[0] - ab_1[0], center1[0]], [-y_lim, y_lim]]
-    limits2 = [[center2[0], center2[0] + ab_2[0]], [-y_lim, y_lim]]
-    limits = [limits1, limits2]
+    y_lim_1 = 2.8  # coordinate Y where 2 ellipse intersect
+    y_lim_2 = 2.8
+    limits1 = ((center1[0] - ab_s[0][0], center1[0]), (-y_lim_1, y_lim_1))
+    limits2 = ((center2[0], center2[0] + ab_s[1][0]), (-y_lim_1, y_lim_1))
+    limits3 = ((center3[0] - ab_s[2][0], center3[0]), (-y_lim_2, y_lim_2))
+    limits4 = ((center4[0], center4[0] + ab_s[3][0]), (-y_lim_2, y_lim_2))
+    limits = [limits1, limits2, limits3, limits4]
+    limits = DELTA_2 + limits  # make borders more a little. VERY IMPORTANT
 
-    lim_ell = [LimitedSurface(ellipsis[i], limits[i]) for i in range(2)]
+    lim_ell = [LimitedSurface(ellipsis[i], limits[i]) for i in range(4)]
 
     for lim_surface in lim_ell:
         print(lim_surface)
 
+    # ------------- preview of surface for debug --------------
+    is_need_view_custom = False
+    if is_need_view_custom:
+        print(f"len_width is {len_width_on_main_axis(ellipsis[:2])}")
+        pylab.figure(404, figsize=(5, 5))
+        for lim_surface in lim_ell:
+            msv.draw_exist_surface(lim_surface, "purple", 1)
+
+        for ellipse in ellipsis:
+            msv.draw_exist_surface(ellipse)
+        pylab.grid()
+        distanse_from_border = 0.1
+        b_max = np.max([ab_s[i][1] for i in range(4)])
+        a_max = np.max([ab_s[i][0] for i in range(4)])
+        y_inf = np.min([center_s[i][1] for i in range(4)]) - b_max - distanse_from_border
+        y_sup = np.max([center_s[i][1] for i in range(4)]) + b_max + distanse_from_border
+        x_inf = np.min([center_s[i][0] for i in range(4)]) - a_max - distanse_from_border
+        x_sup = np.max([center_s[i][0] for i in range(4)]) + a_max + distanse_from_border
+
+        pylab.xlim(x_inf, x_sup)
+        pylab.ylim(y_inf, y_sup)
+        pylab.show()
+
+    # ___________________________________________________________
+
     # raysPool preparation
+    y_abs = 1
     points = [
-        [-1.1, -1],
-        [-1.1, 1]
+        [-1.1, -y_abs],
+        [-1.1, y_abs]
     ]
     intensity = 5.5
 
@@ -143,8 +201,9 @@ if __name__ == '__main__':
     pools = rpmc.tracing_rayspool_ordered_surface(pool, lim_ell, is_set_optical_path=True)
     # find the refraction coefficient(refractive_indexes) there goes the last RaysPool
     last_RaysPool: RaysPool = pools[len(pools) - 1]
-    # index 0 and length 0.1 are random
-    point = last_RaysPool.calc_point_of_ray(0, 0.1)
+    # index 0 and length DELTA = 0.1 are random
+    DELTA = 0.1
+    point = last_RaysPool.calc_point_of_ray(0, DELTA)
     refr_coef = lim_ell[len(lim_ell) - 1].get_refractive_indexes(point)[0]
 
     print("refr_coef(%s) = %s" % (str(point), str(refr_coef)))
@@ -157,45 +216,84 @@ if __name__ == '__main__':
 
     print("optical length of last RaysPool: %f\nsco in that point: %f with accuracy: %f" % (h, val, accuracy))
 
+    h_ch = h - 0.01
     points = r1(h)
     focus_point = average(points)
-    print("focus_point: ", focus_point)
+    sco = sco_f(h)
+    print(f"\nfocus_point:  {focus_point}\nsco is {sco}")
 
-    # drawing
-    pylab.figure(0, figsize=(5, 5))
+    points2 = r1(h_ch)
+    focus_point2 = average(points2)
+    sco2 = sco_f(h_ch)
 
-    # focus point
-    xy = [[points[j][i] for j in range(len(points))] for i in range(2)]
-    pylab.scatter(xy[0], xy[1], color="red", marker='.', alpha=0.5)
-    pylab.scatter(focus_point[0], focus_point[1], color="purple", marker="*")
+    print(f"focus_point2:  {focus_point2}\nsco is {sco2}")
 
-    # surfaces
-    for lim_surface in lim_ell:
-        msv.draw_exist_surface(lim_surface, "purple", 1)
+    opt_path = np.linspace(h - 0.1, h + 0.1, 20)
+    sco_arr = [sco_f(cur_path) for cur_path in opt_path]
 
-    for ellipse in ellipsis:
-        msv.draw_exist_surface(ellipse)
+    fig_num = 0
 
-    print()
+    print(last_RaysPool)
 
-    # rays pools
-    for ray_pool in pools:
-        mvray.draw_ray_pool(ray_pool, ray_const_length=18, alpha=0.2)
-        print(ray_pool)
 
-    # config the view
+    def draw(limits, points, focus_point):
+        global fig_num
+        # drawing
+        pylab.figure(fig_num, figsize=(6, 5))
+        fig_num = fig_num + 1
+        # focus point
+        xy = [[points[j][i] for j in range(len(points))] for i in range(2)]
+        pylab.scatter(xy[0], xy[1], color="red", marker='.', alpha=0.5)
+        pylab.scatter(focus_point[0], focus_point[1], color="purple", marker="*")
 
+        # surfaces
+        for lim_surface in lim_ell:
+            msv.draw_exist_surface(lim_surface, "purple", 1)
+
+        for ellipse in ellipsis:
+            msv.draw_exist_surface(ellipse)
+
+        print()
+
+        # rays pools
+        for ray_pool in pools:
+            mvray.draw_ray_pool(ray_pool, ray_const_length=18, alpha=0.2)
+
+        # config the view
+        pylab.grid()
+
+        pylab.xlim(*limits[0])
+        pylab.ylim(*limits[1])
+
+
+    distanse_from_border = 0.1
+    b_max = np.max([ab_s[i][1] for i in range(4)])
+    a_max = np.max([ab_s[i][0] for i in range(4)])
+    y_inf = np.min([center_s[i][1] for i in range(4)]) - b_max - distanse_from_border
+    y_sup = np.max([center_s[i][1] for i in range(4)]) + b_max + distanse_from_border
+    x_inf = np.min([center_s[i][0] for i in range(4)]) - a_max - distanse_from_border
+    x_sup = np.max([center_s[i][0] for i in range(4)]) + a_max + distanse_from_border
+
+    lim_x_sco_min = focus_point[0] - 1.5 * sco
+    lim_x_sco_max = focus_point[0] + 1.5 * sco
+    lim_y_sco_min = focus_point[1] - 1.2 * sco
+    lim_y_sco_max = focus_point[1] + 1.2 * sco
+
+    # draw(((x_inf, x_sup), (y_inf, y_sup)), points, focus_point)
+    draw(((x_inf, x_sup + 6.2), (y_inf, y_sup)), points, focus_point)
+    pylab.title("Ray density: %.1f, focus at (%.3f,%3.f)" % (intensity, *focus_point))
+    draw(((lim_x_sco_min, lim_x_sco_max), (lim_y_sco_min, lim_y_sco_max)), points, focus_point)
+    pylab.title(f"Count of ray is {len(points)}, sco is {sco}")
+    # draw(((10.1, 10.2), (-0.05, 0.05)), points, focus_point)
+    # draw(((10.1, 10.2), (-0.05, 0.05)), points2, focus_point2)
+
+    pylab.figure(fig_num + 1)
+    pylab.plot(opt_path, sco_arr)
+    pylab.scatter(h, sco, color="red", marker='*', alpha=0.5)
+    pylab.title(f"Dependence of SCO from optical path")
+    # pylab.scatter(h_ch, sco2, color="red", marker='.', alpha=0.5)
     pylab.grid()
-    a = 8
-    lim = max(np.abs([2 + a]))
-
-    shift = (0 + a, 0)
-    lim_x = (-lim + shift[0], lim + shift[0])
-    lim_y = (-lim + shift[1], lim + shift[1])
-
-    pylab.xlim(lim_x[0], lim_x[1])
-    pylab.ylim(lim_y[0], lim_y[1])
 
     pylab.show()
-# 1/f = (n2/n1 -1)(1/r1 + 1/r2) -где r1,r2 радиусы кривизны(отрицательны елси вогнутая относительно одного направления)
-# 1/f = 0.33(1 - 0.5) = 0.165 f=6.06
+    # 1/f = (n2/n1 -1)(1/r1 + 1/r2) -где r1,r2 радиусы кривизны(отрицательны елси вогнутая относительно одного направления)
+    # 1/f = 0.33(1 - 0.5) = 0.165 f=6.06

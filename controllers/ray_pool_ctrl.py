@@ -42,10 +42,11 @@ def tracing_rayspool_ordered_surface(pool: RaysPool, surfaces: (tuple, iter, lis
             #     continue
             t = (new_rays_pool.t1(0) - new_rays_pool.t0(0)) / 2
             n1, n2 = surface.get_refractive_indexes(new_rays_pool.calc_point_of_ray(0, t))
+
             for j in range(len(new_rays_pool)):
                 l_i = (new_rays_pool.t1(j) - new_rays_pool.t0(j)) * n1
-                new_rays_pool.set_l(j, l_i)
 
+                new_rays_pool.set_l(j, l_i)
         ans.append(temp)
         new_rays_pool = temp
     else:

@@ -43,6 +43,9 @@ class Compon3D(Compon_Interface):
     DIM = 3
 
 
+LOWER_BOUND_OF_T0_RAY_BEGIN = 10 ** -15
+
+
 class RaysPool(ARay):
     """
         Class of set of rays. It have access methods: e,r,t0,t1
@@ -146,7 +149,7 @@ class RaysPool(ARay):
         s = 'rays pool:\n'
 
         for i in range(self.__rays_num):
-            s += ('%-2s- %s: %-42s, %s: %-44s, %s: %-18s, %s: %-18s, %s: %-18s\n'
+            s += ('%-2s- %s: %-44s, %s: %-44s, %s: %-20s, %s: %-20s, %s: %-18s\n'
                   % (str(i),
                      str(self.__ComIndex.E_OFFSET), str(self.e(i)),
                      str(self.__ComIndex.R_OFFSET), str(self.r(i)),
@@ -234,7 +237,7 @@ class RaysPool(ARay):
     # calculate from radius vector of ray
     def set_l(self, i: int, l: float):
         if l < 0:
-            raise AttributeError("Negative optical path(%f)" % (l))
+            raise ValueError("Negative optical path(%f)" % l)
         r_i = i * self.__ComIndex.RAY_OFFSET
         self.__pool[r_i + self.__ComIndex.l_OFFSET] = l
 
@@ -244,9 +247,10 @@ class RaysPool(ARay):
         # обертываем функцию
         def f(self, surface: Surface, push_non_reflected_ray: bool = False):
             rays = []
-            # для заполения ячеек, куда мы не можем положить информацию (вычитаем два вектора e и r и начало и конец луча)
+            # для заполения ячеек, куда мы не можем положить информацию
+            # (вычитаем длины двух векторов e и r и начало и конец луча)
             remain_len = self.__ComIndex.RAY_OFFSET - (2 * self.__ComIndex.DIM + 2)
-            empty_list = [None for i in range(remain_len)]
+            empty_list = [None] * remain_len
             # моделируем отражние
             for i in range(len(self)):
                 r, e, t1 = func(self.e(i), self.r(i), surface)
@@ -261,7 +265,7 @@ class RaysPool(ARay):
                     self.set_t1(i, t1)
                     rays.extend(e)
                     rays.extend(r)
-                    rays.append(0)
+                    rays.append(LOWER_BOUND_OF_T0_RAY_BEGIN)
                     rays.append(-1)
                     rays.extend(empty_list)
             if len(rays) == 0:
