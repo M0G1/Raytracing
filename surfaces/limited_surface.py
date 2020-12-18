@@ -13,7 +13,7 @@ class LimitedSurface(Surface):
         limits must to have array of two-dimension array with left and right bounds. Length of limits must to equal with dimension of surface
     """
 
-    def __init__(self, surface: Surface, limits: (list,iter)):
+    def __init__(self, surface: Surface, limits: (list, iter)):
         if len(limits) != surface.dim:
             raise AttributeError("Limits(%d) and surface(dim: %d) have different size" % (len(limits), surface.dim))
         if not all(coor[0] < coor[1] for coor in limits):
@@ -30,14 +30,14 @@ class LimitedSurface(Surface):
         return self.__limits
 
     @property
-    def surface(self)->Surface:
+    def surface(self) -> Surface:
         return self.__surface
 
     def set_refractive_indexes(self, n1: float = 1, n2: float = 1):
         self.__surface.set_refractive_indexes(n1, n2)
 
     @surface.setter
-    def surface(self,surface:Surface):
+    def surface(self, surface: Surface):
         self.__surface = surface
 
     # ==========================methods of object=================================================================
@@ -62,7 +62,7 @@ class LimitedSurface(Surface):
             return True
         return False
 
-    def _is_point_in_limits(self, point: (list,tuple)):
+    def _is_point_in_limits(self, point: (list, tuple)):
         if point is None or not all(
                 bounds[0] <= coor and coor <= bounds[1] for coor, bounds in zip(point, self.__limits)):
             return False

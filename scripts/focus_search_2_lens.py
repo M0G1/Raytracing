@@ -53,8 +53,8 @@ def get_sco_func(rays_pools: (tuple, list), refr_coef: float):
         for i in range(len(rays_pools) - 1)
     ]
     #     calc const
-    ray_path_const = ray_opt_paths[0]
-    for i in range(1, len(ray_opt_paths)):
+    ray_path_const = np.zeros(len(ray_opt_paths[0]))
+    for i in range(len(ray_opt_paths)):
         ray_path_const = np.add(ray_path_const, ray_opt_paths[i])
 
     # define variables
@@ -62,6 +62,7 @@ def get_sco_func(rays_pools: (tuple, list), refr_coef: float):
     # del some variables
     del ray_opt_paths
     print("ray_path_const", ray_path_const)
+    print(f"\nmax of ray_path_const {np.max(ray_path_const)}\n")
 
     # write the answer function
 
@@ -111,6 +112,75 @@ def len_width_on_main_axis(list_ellips: (tuple, list)):
     return (list_ellips[1].center[0] + list_ellips[1].abc[0]) - (list_ellips[0].center[0] - list_ellips[0].abc[0])
 
 
+def sco_from_z(z: np.array, surfaces, begin_of_rays_on_z: float, r) -> (np.array, list, np.ndarray):
+    """
+        z - some linspace of axis z. All z must begin after last surfaces. Z is the axis along which the rays go.
+        surfaces - ellipses, what center is on z=0  and y=0 line. It must be sorted in order of ray going.
+            Pair of ellipses is a lens
+        begin_of_rays_on_z:float - the coordinate of z. The rays must begin before all surfaces.
+        r - function, what returned the end points of ray for given optical path r(h)
+            see function get_sco_func
+
+        return values of sco for linspace of axis z
+    """
+    if any([not isinstance(surface, LimitedSurface) for surface in surfaces]):
+        raise ValueError
+
+    if any([not isinstance(surface.surface, Ellipse) for surface in surfaces]):
+        raise ValueError
+
+    length_of_medium = np.zeros(len(surfaces))
+    optical_destiny = np.zeros(len(surfaces))
+    ctrl_point = np.zeros(surfaces[0].dim)
+    cur_z = begin_of_rays_on_z
+    next_z = None
+    for i, surface in enumerate(surfaces):
+        if i == 0:
+            ctrl_point[0] = begin_of_rays_on_z
+        else:
+            if i % 2 == 0:
+                ctrl_point[0] = (cur_z + (surface.surface.center[0] - surface.surface.abc[0])) / 2
+            else:
+                ctrl_point[0] = surface.surface.center[0]
+        optical_destiny[i] = surface.get_refractive_indexes(ctrl_point)[0]
+
+        if i % 2 == 0:
+            next_z = surfaces[i].surface.center[0] - surfaces[i].surface.abc[0]
+            length_of_medium[i] = next_z - cur_z
+        else:
+            ellipses = (surfaces[i - 1].surface, surfaces[i].surface)
+            len_width = len_width_on_main_axis(ellipses)
+            length_of_medium[i] = len_width
+            next_z = len_width + cur_z
+        cur_z = next_z
+    #
+    # print(f"\nlength_of_medium \n{length_of_medium}")
+    # print(f"\noptical_destiny \n{optical_destiny}")
+
+    # found the full optical path along the axis
+    # # optical path with help of scalar mul
+    const_l = np.dot(length_of_medium, optical_destiny)
+    ctrl_point[0] += (surfaces[len(surfaces) - 2].surface.abc[0] + 1)
+    optical_destiny_last_medium = surfaces[len(surfaces) - 2].get_refractive_indexes(ctrl_point)[0]
+    # print(f"\nconst_l {const_l}\n")
+    # print(f"n = {optical_destiny_last_medium}")
+    # print(cur_z)
+    # print(z)
+    # print(np.array(z - cur_z))
+    L = (z - cur_z) * optical_destiny_last_medium + const_l
+
+    r_arr = [r(l_el) for l_el in L]
+    r_average = np.average(r_arr, axis=1)
+
+    sco = np.zeros(len(z))
+    for i in range(len(L)):
+        p_sub = r_average[i] - r_arr[i]
+        for j in range(len(p_sub)):
+            sco[i] += np.dot(p_sub[j], p_sub[j])
+
+    return np.sqrt(sco / len(r_arr[0])), L
+
+
 DELTA = 1e-15
 DELTA_2 = np.array((-DELTA, DELTA))
 
@@ -135,8 +205,8 @@ if __name__ == '__main__':
     center2 = (0, 0)
     center1 = (center2[0] + r0_1, 0)
     center4 = (center2[0] + ab_s[1][0] + dis_bet_lens + ab_s[3][0], 0)
+    # center4 = (center1[0] + ab_s[1][0] + dis_bet_lens + ab_s[3][0], 0)# Think about it
     center3 = (center4[0] + r0_2, 0)
-
     center_s = (center1, center2, center3, center4)
 
     # n1 - outside of len, n2 - inside of len, n3 - inside of len.
@@ -188,13 +258,13 @@ if __name__ == '__main__':
 
     # raysPool preparation
     y_abs = 1
-    points = [
+    gen_ray_points = [
         [-1.1, -y_abs],
         [-1.1, y_abs]
     ]
     intensity = 5.5
 
-    pool = Generator.generate_rays_2d(points[0], points[1], intensity)
+    pool = Generator.generate_rays_2d(gen_ray_points[0], gen_ray_points[1], intensity)
 
     # modeling and calculating optical path
     # pools = rpmc.tracing_rayspool_ordered_surface(pool, lim_ell)
@@ -274,10 +344,25 @@ if __name__ == '__main__':
     x_inf = np.min([center_s[i][0] for i in range(4)]) - a_max - distanse_from_border
     x_sup = np.max([center_s[i][0] for i in range(4)]) + a_max + distanse_from_border
 
-    lim_x_sco_min = focus_point[0] - 1.5 * sco
-    lim_x_sco_max = focus_point[0] + 1.5 * sco
-    lim_y_sco_min = focus_point[1] - 1.2 * sco
-    lim_y_sco_max = focus_point[1] + 1.2 * sco
+    h_tab = np.linspace(10, 12, 50)
+    r_arr = [r1(h_tab_el) for h_tab_el in h_tab]
+    print(r_arr)
+    r_average = [average(r_arr_el)[0] for r_arr_el in r_arr]
+
+    z = np.linspace(8, 12, 100)
+    sco_z, L = sco_from_z(z, lim_ell, gen_ray_points[0][0], r1)
+    l_sum = 0
+    for i in range(len(pools)):
+        j = len(pools[i]) // 2
+        if i < len(pools) - 1:
+            l_sum += pools[i].l(j)
+        print(f"e {pools[i].e(j)}, r {pools[i].r(j)}, t0 {pools[i].t0(j)},  t1 {pools[i].t1(j)},  l {pools[i].l(j)}")
+
+    print(f"\nopt path {l_sum}")
+    lim_x_sco_min = focus_point[0] - 3 * sco
+    lim_x_sco_max = focus_point[0] + 3 * sco
+    lim_y_sco_min = focus_point[1] - 2 * sco
+    lim_y_sco_max = focus_point[1] + 2 * sco
 
     # draw(((x_inf, x_sup), (y_inf, y_sup)), points, focus_point)
     draw(((x_inf, x_sup + 6.2), (y_inf, y_sup)), points, focus_point)
@@ -292,6 +377,23 @@ if __name__ == '__main__':
     pylab.scatter(h, sco, color="red", marker='*', alpha=0.5)
     pylab.title(f"Dependence of SCO from optical path")
     # pylab.scatter(h_ch, sco2, color="red", marker='.', alpha=0.5)
+    pylab.grid()
+
+    pylab.figure(fig_num + 2)
+    pylab.plot(h_tab, r_average)
+    pylab.plot(L, z, color="r")
+    pylab.grid()
+    pylab.title("Dependence of average from optical path")
+
+    pylab.figure(fig_num + 3)
+    pylab.plot(r_average, h_tab)
+    pylab.plot(z, L, color="r")
+    pylab.grid()
+    pylab.title("Dependence of z from optical path")
+
+    pylab.figure(fig_num + 4)
+    pylab.plot(z, sco_z)
+    pylab.title("Dependence of sco from coordinate abscissa")
     pylab.grid()
 
     pylab.show()
