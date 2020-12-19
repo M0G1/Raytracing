@@ -123,6 +123,6 @@ def reshape_array_into_many(arr, row_count, column_count):
     ...
     z = [z0,z1,...,zn]
 
-    return list of numpy.array
+    return numpy.array
     """
-    return list(np.reshape(arr, (row_count, column_count), order='F'))
+    return np.reshape(arr, (row_count, column_count), order='F')

@@ -153,7 +153,7 @@ def sco_from_z(z: np.array, surfaces, begin_of_rays_on_z: float, r) -> (np.array
             length_of_medium[i] = len_width
             next_z = len_width + cur_z
         cur_z = next_z
-    #
+
     # print(f"\nlength_of_medium \n{length_of_medium}")
     # print(f"\noptical_destiny \n{optical_destiny}")
 
@@ -162,11 +162,6 @@ def sco_from_z(z: np.array, surfaces, begin_of_rays_on_z: float, r) -> (np.array
     const_l = np.dot(length_of_medium, optical_destiny)
     ctrl_point[0] += (surfaces[len(surfaces) - 2].surface.abc[0] + 1)
     optical_destiny_last_medium = surfaces[len(surfaces) - 2].get_refractive_indexes(ctrl_point)[0]
-    # print(f"\nconst_l {const_l}\n")
-    # print(f"n = {optical_destiny_last_medium}")
-    # print(cur_z)
-    # print(z)
-    # print(np.array(z - cur_z))
     L = (z - cur_z) * optical_destiny_last_medium + const_l
 
     r_arr = [r(l_el) for l_el in L]
@@ -298,7 +293,8 @@ if __name__ == '__main__':
 
     print(f"focus_point2:  {focus_point2}\nsco is {sco2}")
 
-    opt_path = np.linspace(h - 0.1, h + 0.1, 20)
+    shift_in_sco_plot = 0.1
+    opt_path = np.linspace(h - shift_in_sco_plot, h + shift_in_sco_plot, 20)
     sco_arr = [sco_f(cur_path) for cur_path in opt_path]
 
     fig_num = 0
@@ -349,7 +345,8 @@ if __name__ == '__main__':
     print(r_arr)
     r_average = [average(r_arr_el)[0] for r_arr_el in r_arr]
 
-    z = np.linspace(8, 12, 100)
+    print(f"")
+    z = np.linspace((focus_point[0] - shift_in_sco_plot), (focus_point[0] + shift_in_sco_plot))
     sco_z, L = sco_from_z(z, lim_ell, gen_ray_points[0][0], r1)
     l_sum = 0
     for i in range(len(pools)):

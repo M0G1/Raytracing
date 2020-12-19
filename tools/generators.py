@@ -5,8 +5,15 @@ import ray.rays_pool as rays_pool
 from ray.abstract_ray import ARay
 
 
-
 class Generator:
+    @staticmethod
+    def get_rot_mat_2d(tetha: float):
+        s, c = np.sin(tetha), np.cos(tetha)
+        return np.array(
+            ((c, -s),
+             (s, c))
+        )
+
     @staticmethod
     def get_rot_mat_3d(a: float, b: float, g: float):
         Mx = (

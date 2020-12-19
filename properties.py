@@ -1,5 +1,8 @@
 import os
 
+EPS_D = 1e-15
+
+
 class property:
     __APPLICATION_LOCATION = os.getcwd()
 
