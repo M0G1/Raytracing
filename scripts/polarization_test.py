@@ -1,8 +1,7 @@
 import pylab
 import numpy as np
-import matplotlib
 
-from controllers import polarization
+from view.matlab import polarization
 
 
 def main():
@@ -13,12 +12,18 @@ def main():
                   (0, 1),
                   (1 / sq2, complex(0, 1) / sq2),
                   (1 / sq2, complex(0, -1) / sq2),
+                  (1 / sq2, complex(1, -1) / sq2),
+                  (complex(1, -1) / sq2, 1 / sq2),
+                  (complex(1, -1) / sq2, complex(1, -1) / sq2),
+                  (complex(-1, 1) / sq2, complex(-1, 1) / sq2),
+                  (complex(-1, 4) / sq2, complex(3, -1) ),
                   )
-    str_title = ("vertically", "horizontly", "right circle", "left circle")
+    str_title = ("vertically", "horizontly", "right circle", "left circle",
+                 "unc", "unc")
 
-    for i in range(len(str_title)):
+    for i in range(len(vec_jonson)):
         pylab.figure(i)
-        polarization.draw_polar_ellipse(vec_jonson[i])
+        polarization.draw_polar_ellipse(vec_jonson[i], 100)
         pylab.grid()
     pylab.show()
 
