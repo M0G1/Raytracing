@@ -28,7 +28,7 @@ import pylab
 
 from tools import help
 from tools.generators import Generator
-from controllers.polarization import get_param_ellipse_polar
+from controllers.polarization import get_param_ellipse_polar, get_str_view_polar_vec
 
 
 def get_ellipse_points_from_alpha_beta(alpha: float, beta: float, return_point_count: int = 100, is_need_check=True):
@@ -50,7 +50,7 @@ def get_ellipse_points_from_alpha_beta(alpha: float, beta: float, return_point_c
     # СДЕЛАТЬ ВРАЩАЮЩУЮСЯ ПОВЕРХНОСТЬ
     # и возвращать вращнный эллипс
     fi = None
-    if beta < 0:
+    if beta > 0:
         fi = np.linspace(0, 2 * np.pi, return_point_count)
     else:
         fi = np.linspace(2 * np.pi, 0, return_point_count)
@@ -137,26 +137,32 @@ def draw_arrow_to_polarization(x: (np.array, list, tuple), y: (np.array, list, t
 
 
 def draw_polar_ellipse(vec: (np.array, list, tuple), count_drawing_point: int = 100, count_of_arrow_on_ellipse: int = 2,
-                       fp: int = 2, **kwargs):
+                       fp: int = 2, title: str = "", float_dtype=np.float64, **kwargs):
     """
         Drawing polarization for given Jonson vector.
         vec - Jonson vector is two dimensional vector with complex numbers
         count_drawing_point - count of drawing point. Not recommended to use value less than 10.
         fp - float precision
+        title - title of figure
+        float_dtype - numpy type of float data ()
+
 
     """
-    alpha_, beta = get_param_ellipse_polar(vec)
+    if not (float_dtype in (np.float32, np.float64, np.complex64, np.complex128)):
+        float_dtype = np.float64
+    alpha_, beta = get_param_ellipse_polar(vec, float_dtype=float_dtype)
     x, y = get_ellipse_points_from_alpha_beta(alpha_, beta, is_need_check=False, return_point_count=count_drawing_point)
     color = kwargs.setdefault("color", "blue")
 
     xlim, ylim = focus_on_without_cutting((-1, 1), (-1, 1), x, y, 0.1)
     pylab.xlim(*xlim)
     pylab.ylim(*ylim)
-    formatstr = (f"Jones vector is (%.{fp}f %.{fp}fj,%.{fp}f %.{fp}fj)") % \
-                (complex(vec[0]).real, complex(vec[0]).imag,
-                 complex(vec[1]).real, complex(vec[1]).imag)
     labelstr = (f"alpha = %.{fp}f,beta = %.{fp}f)") % (alpha_, beta)
-    pylab.title(f"Jones vector is {formatstr}")
     pylab.plot(x, y, color=color, label=labelstr)
+    if not title:
+        formatstr = get_str_view_polar_vec(vec, fp, float_dtype=float_dtype)
+        pylab.title(formatstr)
+    else:
+        pylab.title(title)
     pylab.legend()
     draw_arrow_to_polarization(x, y, xlim, ylim, beta, count_of_arrow_on_ellipse)
