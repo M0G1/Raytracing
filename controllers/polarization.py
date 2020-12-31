@@ -207,7 +207,7 @@ def get_str_view_jones(vec: (np.array, list, tuple), is_need_check=True, fp: int
     if is_need_check:
         if not is_2d_complex_vector(vec):
             return f"This is not Jones vector {vec}"
-    return (f"Jones vector is (%.{fp}f %.{fp}fj,%.{fp}f %.{fp}fj)") % \
+    return (f"Jones vector (%.{fp}f %.{fp}fj,%.{fp}f %.{fp}fj)") % \
            (complex(vec[0]).real, complex(vec[0]).imag,
             complex(vec[1]).real, complex(vec[1]).imag)
 
@@ -216,7 +216,7 @@ def get_str_view_stokes(vec: (np.array, list, tuple), is_need_check=True, fp: in
     if is_need_check:
         if not is_stokes_vector(vec, float_dtype=float_dtype):
             return f"This is not Stokes vector {vec}"
-    return (f"Stokes vector is (%.{fp}f, %.{fp}f,%.{fp}f, %.{fp}f)") % (vec[0], vec[1], vec[2], vec[3])
+    return (f"Stokes vector (%.{fp}f, %.{fp}f,%.{fp}f, %.{fp}f)") % (vec[0], vec[1], vec[2], vec[3])
 
 
 def get_str_view_polar_vec(vec: (np.array, list, tuple), fp: int = 2, float_dtype=np.float64) -> str:

@@ -20,9 +20,6 @@ def main():
                   (complex(-1, 1) / sq2, complex(-1, 1) / sq2),
                   (complex(-1, 4) / sq2, complex(3, -1)),
                   )
-    str_title = ("vertically", "horizontly", "right circle", "left circle",
-                 "unc", "unc")
-
     for i in range(len(vec_jonson)):
         stokes = jones_vector_to_stokes(vec_jonson[i])
         jones = stokes_vector_to_jones(stokes)
