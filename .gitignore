@@ -127,3 +127,4 @@ dmypy.json
 
 .idea/
 scripts/input_data.
+!/tools/learning_py.py
