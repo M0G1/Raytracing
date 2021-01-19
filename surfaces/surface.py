@@ -4,6 +4,7 @@ from enum import Enum
 class Types(Enum):
     REFLECTING = 1
     REFRACTING = 2
+    POLARIZING = 3
 
 
 class Surface:
@@ -15,6 +16,7 @@ class Surface:
     def __init__(self, type_of_surface: Types, dimension: int):
         self.__type_of_surface = type_of_surface
         self.__dim = dimension
+        self.__
 
     @property
     def type(self):

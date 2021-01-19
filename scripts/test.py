@@ -1,4 +1,6 @@
 from ray.rays_pool import *
+from ray.abstract_ray import ARay
+from surfaces.plane import Plane
 from tools.generators import Generator
 from utility.binarytree import Tree
 
@@ -6,7 +8,7 @@ from utility.binarytree import Tree
 def ray_pool_test():
     rays_arr = [i for i in range(0, 24)]
 
-    ra = RaysPool(rays_arr)
+    ra = RaysPool(rays_arr, Compon2D)
     print(ra)
     ra.append_rays([i for i in range(2, 10)])
     print(ra)
@@ -61,8 +63,22 @@ def raypool_offset():
     print(issubclass(Compon3D, Compon_Interface))
 
 
+def aray_typing_test():
+    e = [1, 0, 0]
+    r = [2.3, 12, 3]
+    p = Plane([3, 0, 0], [1, 0, 0])
+
+    args = ARay.reflect_(e, r, p)
+
+    print(f"ray: \ne = {e},\nr = {r}")
+    print(f"{p}")
+    print(f"{args}")
+
+
 def main():
-    binary_tree_test()
+    aray_typing_test()
+
+# binary_tree_test()
 
 
 if __name__ == '__main__':

@@ -1,34 +1,14 @@
 """
-    This module include the tools with working polarisation.
-    Jones calculus here is used.
-    Jones vector is a two dimensional vector with complex numbers.
-            /E_DX\   /A_X * e^(i * fi_X) \
-    E_D =   \E_DY/ = \A_Y * e^(i * fi_Y)/
-    module |E_D| = A = sqrt(A_X **2 + A_Y **2)
-    normal Jones vector
-            /e_X\   /a_X*e^(i*fi_X) \
-    E_D =   \e_Y/ = \a_Y*e^(i*fi_Y)/
-
-    e - ellipticity
-    e = b/a = tg(beta)
-
-    alpha - polarization ellipse azimuth.   -pi/2 <= alpha <= pi/2
-    beta - angle of ellipticity.            -pi/4 <= beta <= pi/4
-
-    sing of beta show direction of polarization.
-    For positive beta - right polarisation.
-    For negative - left polarisation.
-
-    Еhe vector electric field strength rotates clockwise for an observer
-    looking in the opposite direction of radiation propagation,
-    then the polarization is called right elliptical, else left.
+    Drawing methods for polarisation
+    Methods of working with polarisation look at controllers.polarisation.py
 """
 import numpy as np
 import pylab
 
-from tools import help
+from tools import numpy_tool
 from tools.generators import Generator
 from controllers.polarization import get_param_ellipse_polar, get_str_view_polar_vec
+from view.matlab import general
 
 
 def get_ellipse_points_from_alpha_beta(alpha: float, beta: float, return_point_count: int = 100, is_need_check=True):
@@ -58,32 +38,15 @@ def get_ellipse_points_from_alpha_beta(alpha: float, beta: float, return_point_c
     y = b * np.sin(fi)
 
     if abs(alpha) > np.finfo(np.float_).eps:
-        xy = help.reshape_arrays_into_one(x, y)
+        xy = numpy_tool.reshape_arrays_into_one(x, y)
         xy = np.reshape(xy, (xy.size // 2, 2))
         rot_mat = Generator.get_rot_mat_2d(alpha)
         xy = np.matmul(xy, rot_mat)
         xy = xy.ravel()
-        x, y = help.reshape_array_into_many(xy, row_count=2, column_count=return_point_count)
+        x, y = numpy_tool.reshape_array_into_many(xy, row_count=2, column_count=return_point_count)
     return x, y
 
 
-def focus_on_without_cutting(xlim: (np.array, list, tuple), ylim: (np.array, list, tuple),
-                             x: (np.array, list, tuple), y: (np.array, list, tuple), indent: float):
-    """
-    xlim, ylim - default area
-    x,y - float point data
-    indent - indent borders from data
-    Return xlim and ylim, what includes the area that you specified in coordinates, while expanding it if data leaves it
-    """
-    if len(xlim) != len(ylim) != 2:
-        raise ValueError(f"Limits must have length equals xlim {xlim}, ylim {ylim}")
-    indents = (-indent, +indent)
-    x_min = min(xlim[0], np.min(x))
-    x_max = max(xlim[1], np.max(x))
-    y_min = min(ylim[0], np.min(y))
-    y_max = max(ylim[1], np.max(y))
-
-    return np.add((x_min, x_max), indents), np.add((y_min, y_max), indents)
 
 
 def draw_arrow_to_polarization(x: (np.array, list, tuple), y: (np.array, list, tuple),
@@ -154,7 +117,7 @@ def draw_polar_ellipse(vec: (np.array, list, tuple), count_drawing_point: int = 
     x, y = get_ellipse_points_from_alpha_beta(alpha_, beta, is_need_check=False, return_point_count=count_drawing_point)
     color = kwargs.setdefault("color", "blue")
 
-    xlim, ylim = focus_on_without_cutting((-1, 1), (-1, 1), x, y, 0.1)
+    xlim, ylim = general.focus_on_without_cutting((-1, 1), (-1, 1), x, y, 0.1)
     pylab.xlim(*xlim)
     pylab.ylim(*ylim)
     labelstr = (f"alpha = %.{fp}f,beta = %.{fp}f)") % (alpha_, beta)

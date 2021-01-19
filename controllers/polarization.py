@@ -1,3 +1,31 @@
+"""
+    This module include the tools with working polarisation.
+    Drawing methods look at view.matlab.polarization.py file
+
+    Jones calculus here is used.
+    Jones vector is a two dimensional vector with complex numbers.
+            /E_DX\   /A_X * e^(i * fi_X) \
+    E_D =   \E_DY/ = \A_Y * e^(i * fi_Y)/
+    module |E_D| = A = sqrt(A_X **2 + A_Y **2)
+    normal Jones vector
+            /e_X\   /a_X*e^(i*fi_X) \
+    E_D =   \e_Y/ = \a_Y*e^(i*fi_Y)/
+
+    e - ellipticity
+    e = b/a = tg(beta)
+
+    alpha - polarization ellipse azimuth.   -pi/2 <= alpha <= pi/2
+    beta - angle of ellipticity.            -pi/4 <= beta <= pi/4
+
+    sing of beta show direction of polarization.
+    For positive beta - right polarisation.
+    For negative - left polarisation.
+
+    Еhe vector electric field strength rotates clockwise for an observer
+    looking in the opposite direction of radiation propagation,
+    then the polarization is called right elliptical, else left.
+"""
+
 import numpy as np
 
 

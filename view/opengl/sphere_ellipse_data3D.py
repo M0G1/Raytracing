@@ -7,7 +7,7 @@ import math
 import numpy as np
 from OpenGL import GL
 
-import tools.help
+import tools.numpy_tool
 from surfaces.sphere import Sphere
 from surfaces.ellipse import Ellipse
 
@@ -94,7 +94,7 @@ class Sphere_Ellipse_data_3D:
         y = np.ravel(y)
         z = np.ravel(z)
 
-        temp = tools.help.reshape_arrays_into_one(x, y, z)
+        temp = tools.numpy_tool.reshape_arrays_into_one(x, y, z)
         return np.array(temp, dtype=self.np_gl_t.npf)
 
     def get_sphere_vertexes3D(self):
@@ -115,7 +115,7 @@ class Sphere_Ellipse_data_3D:
         t = np.outer(t, np.ones(self.sector_count + 1))
         s = np.outer(np.ones(self.stack_count + 1), s)
 
-        return tools.help.reshape_arrays_into_one(s, t)
+        return tools.numpy_tool.reshape_arrays_into_one(s, t)
 
     def get_tex_coords(self):
         if self.tex_coords:
@@ -132,7 +132,7 @@ class Sphere_Ellipse_data_3D:
         x = a * reshapes_arr[0]
         y = b * reshapes_arr[1]
         z = c * reshapes_arr[2]
-        self.vertexes = tools.help.reshape_arrays_into_one(x, y, z)
+        self.vertexes = tools.numpy_tool.reshape_arrays_into_one(x, y, z)
         return self.vertexes
 
     # =================================|opengl usage|==================================================================

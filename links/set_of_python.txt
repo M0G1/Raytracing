@@ -15,3 +15,6 @@ http://torofimofu.fvds.ru/learnwithpython/ru2e/ch19.html
     https://www.python.org/dev/peps/pep-3119/ - interfaces PEP
     https://pythlife.blogspot.com/2016/03/init-py-file-packages.html?m=1 - файл __init__.py
     https://habr.com/ru/post/114585/ - классы и их устройство
+Библиотеки и модули
+    Библиотека для трехмерного отображения	mayavi				- https://pypi.org/project/mayavi/
+    mayavi docs													- https://docs.enthought.com/mayavi/mayavi/

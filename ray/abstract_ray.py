@@ -1,5 +1,6 @@
 import numpy as np
 import math as m
+from typing import List
 
 from surfaces.surface import Surface
 
@@ -25,7 +26,7 @@ class ARay():
         return list(np.add(np.multiply(t, e), r))
 
     @staticmethod
-    def find_norm_vec_and_point(e: list, r: list, surface: Surface):
+    def find_norm_vec_and_point(e: (list, np.ndarray), r: (list, np.ndarray), surface: Surface):
         # Шаг-1 ищем точку пересечения
         t = surface._ray_surface_intersection(e, r)
         if len(t) == 0:
@@ -38,7 +39,7 @@ class ARay():
         return point, nrm, t
 
     @staticmethod
-    def refract_(e: list, r: list, surface: Surface):
+    def refract_(e: (list, np.ndarray), r: (list, np.ndarray), surface: Surface):
         point, nrm, t = ARay.find_norm_vec_and_point(e, r, surface)
         if len(point) == 0 and len(nrm) == 0 and t is None:
             return [], [], None
@@ -54,8 +55,9 @@ class ARay():
         e = np.dot(1 / n2, v1 + np.dot(k, nrm))
         return list(point), list(e), t[0]
 
+    # def reflect_(e: (List[float or int], np.ndarray), r: list, surface: Surface):
     @staticmethod
-    def reflect_(e: list, r: list, surface: Surface):
+    def reflect_(e: (list, np.ndarray), r: (list, np.ndarray), surface: Surface):
         point, nrm, t = ARay.find_norm_vec_and_point(e, r, surface)
         if len(point) == 0 and len(nrm) == 0 and t is None:
             return [], [], None
@@ -66,7 +68,7 @@ class ARay():
         return list(point), list(e), t[0]
 
     @staticmethod
-    def full_internal_reflection(e: list, nrm: list, point: list, t):
+    def full_internal_reflection(e: (list, np.ndarray), nrm: (list, np.ndarray), point: (list, np.ndarray), t):
         e_n = 2 * np.dot(e, nrm)
         e = np.subtract(e, np.dot(e_n, nrm))
         e = np.dot(1 / np.linalg.norm(e), e)
