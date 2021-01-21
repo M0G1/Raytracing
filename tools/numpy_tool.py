@@ -51,6 +51,7 @@ NUMPY_UINT_TYPES = (np.uint8, np.uint16, np.uint32, np.uint64)
 NUMPY_FLOAT_TYPES = (np.float32, np.float64)
 NUMPY_COMPLEX_TYPES = (np.complex64, np.complex128)
 
+NUMPU_FLOAT_POINT_TYPES = (*NUMPY_FLOAT_TYPES, *NUMPY_COMPLEX_TYPES)
 # can be cast to REAL or COMPLEX types
 NUMPY_REAL_NUM_TYPE = (*NUMPY_INT_TYPES, *NUMPY_UINT_TYPES, *NUMPY_FLOAT_TYPES)
 NUMPY_COMPLEX_NUM_TYPE = (*NUMPY_REAL_NUM_TYPE, *NUMPY_COMPLEX_TYPES)
@@ -63,8 +64,12 @@ def is_numpy_real_num_type(np_arr: np.ndarray) -> bool:
     """
     return np_arr.dtype in NUMPY_REAL_NUM_TYPE
 
+
 def is_numpy_complex_num_type(np_arr: np.ndarray) -> bool:
     """Numbers consider real if it can be cast to some complex numpy type."""
     return np_arr.dtype in NUMPY_COMPLEX_NUM_TYPE
 
 
+def is_float_point_type(dtype: type) -> bool:
+    """check on real or complex type number"""
+    return dtype in NUMPU_FLOAT_POINT_TYPES

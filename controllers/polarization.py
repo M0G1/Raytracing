@@ -28,12 +28,17 @@
 
 import numpy as np
 
+from tools.numpy_tool import is_float_point_type
+
 
 # ============================================CHECKING==================================================================
 
-def is_2d_complex_vector(vec: (np.array, list, tuple), **kwargs):
+def is_2d_complex_vector(vec: (np.ndarray, list, tuple), **kwargs):
     """
     Check on Jones vector(two dimensional vector with complex numbers)
+
+    vec - probably Jones vector
+
     """
     if len(vec) != 2:
         return False
@@ -42,9 +47,14 @@ def is_2d_complex_vector(vec: (np.array, list, tuple), **kwargs):
     return True
 
 
-def is_stokes_vector(vec: (np.array, list, tuple), float_dtype=np.float64):
+def is_stokes_vector(vec: (np.ndarray, list, tuple), float_dtype=np.float64):
     """
-    Check on Stokes vector (four dimensional vector with real numbers)
+    Check on Stokes vector (four dimensional vector with real numbers).
+    And check condition  where vec[0] >= sum(vec[1:]).
+
+    vec - probably Stokes vector
+    float_dtype - numpy type of float data (). Using for compare numbers.
+
     """
     if len(vec) != 4:
         return False
@@ -58,7 +68,7 @@ def is_stokes_vector(vec: (np.array, list, tuple), float_dtype=np.float64):
 # ==================================TRANSFORM OF PARAMETERS POLARISATION================================================
 
 
-def jones_vector_to_stokes(vec: (np.array, list, tuple), is_need_check=True):
+def jones_vector_to_stokes(vec: (np.ndarray, list, tuple), is_need_check=True):
     """
                 /E_DX\
     Jones vec = \E_DY/
@@ -67,6 +77,7 @@ def jones_vector_to_stokes(vec: (np.array, list, tuple), is_need_check=True):
                 |1  0   0  -1|  |E_DX E_DY^* |
     Stokes =    |0  1   1   0|  |E_DX^* E_DY |
                 \0  i  -i  0/   \E_DY E_DY^*/
+    is_need_check - check vector, what it is a two dimensional complex vector(Jones vector)
 
     """
     if is_need_check:
@@ -87,7 +98,13 @@ def jones_vector_to_stokes(vec: (np.array, list, tuple), is_need_check=True):
     return np.array(np.matmul(from_jones_to_stokes_transform, some_arr), dtype=np.float64)
 
 
-def stokes_vector_to_jones(vec: (np.array, list, tuple), is_need_check=True):
+def stokes_vector_to_jones(vec: (np.ndarray, list, tuple), is_need_check=True):
+    """
+    vec - Stokes vector (four dimensional vector with real numbers) double precision is default
+            Stokes vector must have polarisation. The elements vec[1],vec[2],vec[3] must not equal zero.
+    is_need_check - check vector, what it is a four dimensional real vector(Jones vector),
+        where vec[0] >= sum(vec[1:])
+    """
     if is_need_check:
         is_stokes_vector(vec)
     from_stokes_to_jones_transform = np.array([[0.5, 0.5, 0., 0.],
@@ -109,11 +126,13 @@ def stokes_vector_to_jones(vec: (np.array, list, tuple), is_need_check=True):
 
 # =====================================ELLIPSE POLARISATION PARAMETERS==================================================
 
-def get_param_ellipse_polar_for_stokes(vec: (np.array, list, tuple), is_need_check=True, float_dtype=np.float64):
+def get_param_ellipse_polar_for_stokes(vec: (np.ndarray, list, tuple), is_need_check=True, float_dtype=np.float64):
     """
         vec - Stokes vector (four dimensional vector with real numbers) double precision is default
-        Stokes vector must have polarisation. The elements vec[1],vec[2],vec[3] must not equal zero.
-        float_dtype - numpy type of float data ()
+            Stokes vector must have polarisation. The elements vec[1],vec[2],vec[3] must not equal zero.
+        is_need_check - check vector, what it is a four dimensional real vector(Jones vector),
+            where vec[0] >= sum(vec[1:])
+        float_dtype - numpy type of float data (). Using for compare numbers.
         Return alpha, Beta
 
         alpha - polarization ellipse azimuth.   -pi/2 <= alpha <= pi/2
@@ -127,7 +146,8 @@ def get_param_ellipse_polar_for_stokes(vec: (np.array, list, tuple), is_need_che
         looking in the opposite direction of radiation propagation,
         then the polarization is called right elliptical, else left.
     """
-    if not (float_dtype in (np.float32, np.float64, np.complex64, np.complex128)):
+
+    if not is_float_point_type(float_dtype):
         float_dtype = np.float64
     if is_need_check:
         if not is_stokes_vector(vec):
@@ -153,9 +173,11 @@ def get_param_ellipse_polar_for_stokes(vec: (np.array, list, tuple), is_need_che
     return alpha, beta
 
 
-def get_param_ellipse_polar_for_jones(vec: (np.array, list, tuple), is_need_check=True, float_dtype=np.float64):
+def get_param_ellipse_polar_for_jones(vec: (np.ndarray, list, tuple), is_need_check=True, float_dtype=np.float64):
     """
         vec - Jones vector(two dimensional vector with complex numbers) double precision is default
+        is_need_check - check vector, what it is a two dimensional complex vector(Jones vector)
+        float_dtype - numpy type of float data (). Using for compare numbers.
         Return (alpha,Beta)
 
         alpha - polarization ellipse azimuth.   -pi/2 <= alpha <= pi/2
@@ -170,7 +192,7 @@ def get_param_ellipse_polar_for_jones(vec: (np.array, list, tuple), is_need_chec
         looking in the opposite direction of radiation propagation,
         then the polarization is called right elliptical, else left.
     """
-    if not (float_dtype in (np.float32, np.float64, np.complex64, np.complex128)):
+    if not is_float_point_type(float_dtype):
         float_dtype = np.float64
     if is_need_check:
         if not is_2d_complex_vector(vec):
@@ -200,15 +222,56 @@ def get_param_ellipse_polar_for_jones(vec: (np.array, list, tuple), is_need_chec
     return alpha, beta
 
 
-def get_param_ellipse_polar(vec: (np.array, list, tuple), float_dtype=np.float64):
+def get_intensity_jones(vec: (np.ndarray, list, tuple), is_need_check=True) -> float:
+    """
+    vec - Jones vector(two dimensional vector with complex numbers) double precision is default
+        Return amplitude of light ray
+    is_need_check - check vector, what it is a two dimensional complex vector(Jones vector)
+
+    """
+    if is_need_check:
+        if not is_2d_complex_vector(vec):
+            raise ValueError(f"Argument vec {vec} is not Jones vector")
+    return float(np.sum(np.absolute(vec)))
+
+
+def get_intensity_stokes(vec: (np.ndarray, list, tuple), is_need_check=True, float_dtype=np.float64) -> float:
+    """
+        vec - Stokes vector (four dimensional vector with real numbers) double precision is default.
+        is_need_check - check vector, what it is a four dimensional real vector(Jones vector),
+            where vec[0] >= sum(vec[1:])
+
+    """
+    if is_need_check:
+        if not is_stokes_vector(vec, float_dtype=float_dtype):
+            raise ValueError(f"Argument vec {vec} is not Stokes vector")
+    return vec[0]
+
+
+def get_intensity(vec: (np.ndarray, list, tuple), float_dtype=np.float64):
     """
     vec - Stokes or Jones vector
-    Stokes vector - four dimensional vector with real numbers
-        Stokes vector must have polarisation. The elements vec[1],vec[2],vec[3] must not equal zero.
-    Jones vector - two dimensional vector with complex numbers
-    float_dtype - numpy type of float data ()
+        Stokes vector - four dimensional vector with real numbers
+            Stokes vector must have polarisation. The elements vec[1],vec[2],vec[3] must not equal zero.
+        Jones vector - two dimensional vector with complex numbers
+    float_dtype - numpy type of float data (). Using for compare numbers.
+    return - intensity o light ray for Jones or Stokes vector or None if this is not one of them.
+    """
+    if is_2d_complex_vector(vec):
+        return get_intensity_jones(vec, is_need_check=False)
+    if is_stokes_vector(vec, float_dtype=float_dtype):
+        return get_intensity_stokes(vec, is_need_check=False, float_dtype=float_dtype)
 
-    return alpha beta
+
+def get_param_ellipse_polar(vec: (np.ndarray, list, tuple), float_dtype=np.float64):
+    """
+    vec - Stokes or Jones vector
+        Stokes vector - four dimensional vector with real numbers
+            Stokes vector must have polarisation. The elements vec[1],vec[2],vec[3] must not equal zero.
+        Jones vector - two dimensional vector with complex numbers
+    float_dtype - numpy type of float data (). Using for compare numbers.
+
+    return alpha beta  or "None" if this is not Jones or Stokes vector
 
     alpha - polarization ellipse azimuth.   -pi/2 <= alpha <= pi/2
     beta - angle of ellipticity.            -pi/4 <= beta <= pi/4\
@@ -221,17 +284,17 @@ def get_param_ellipse_polar(vec: (np.array, list, tuple), float_dtype=np.float64
     looking in the opposite direction of radiation propagation,
     then the polarization is called right elliptical, else left.
     """
+    if not is_float_point_type(float_dtype):
+        float_dtype = np.float64
     if is_2d_complex_vector(vec):
         return get_param_ellipse_polar_for_jones(vec, is_need_check=False, float_dtype=float_dtype)
-    if not (float_dtype in (np.float32, np.float64, np.complex64, np.complex128)):
-        float_dtype = np.float64
     if is_stokes_vector(vec, float_dtype=float_dtype):
         return get_param_ellipse_polar_for_stokes(vec, is_need_check=False, float_dtype=float_dtype)
 
 
 # =======================================GETTING STR VIEW===============================================================
 
-def get_str_view_jones(vec: (np.array, list, tuple), is_need_check=True, fp: int = 2) -> str:
+def get_str_view_jones(vec: (np.ndarray, list, tuple), is_need_check=True, fp: int = 2) -> str:
     if is_need_check:
         if not is_2d_complex_vector(vec):
             return f"This is not Jones vector {vec}"
@@ -240,26 +303,26 @@ def get_str_view_jones(vec: (np.array, list, tuple), is_need_check=True, fp: int
             complex(vec[1]).real, complex(vec[1]).imag)
 
 
-def get_str_view_stokes(vec: (np.array, list, tuple), is_need_check=True, fp: int = 2, float_dtype=np.float64) -> str:
+def get_str_view_stokes(vec: (np.ndarray, list, tuple), is_need_check=True, fp: int = 2, float_dtype=np.float64) -> str:
     if is_need_check:
         if not is_stokes_vector(vec, float_dtype=float_dtype):
             return f"This is not Stokes vector {vec}"
     return (f"Stokes vector (%.{fp}f, %.{fp}f,%.{fp}f, %.{fp}f)") % (vec[0], vec[1], vec[2], vec[3])
 
 
-def get_str_view_polar_vec(vec: (np.array, list, tuple), fp: int = 2, float_dtype=np.float64) -> str:
+def get_str_view_polar_vec(vec: (np.ndarray, list, tuple), fp: int = 2, float_dtype=np.float64) -> str:
     """
     vec - Stokes or Jones vector
-    Stokes vector - four dimensional vector with real numbers
-        Stokes vector must have polarisation. The elements vec[1],vec[2],vec[3] must not equal zero.
-    Jones vector - two dimensional vector with complex numbers
-    float_dtype - numpy type of float data ()
+        Stokes vector - four dimensional vector with real numbers
+            Stokes vector must have polarisation. The elements vec[1],vec[2],vec[3] must not equal zero.
+        Jones vector - two dimensional vector with complex numbers
+    float_dtype - numpy type of float data (). Using for compare numbers.
 
     return str view of Jones vector or Stokes vector
     """
     if is_2d_complex_vector(vec):
         return get_str_view_jones(vec, is_need_check=False, fp=fp)
-    if not (float_dtype in (np.float32, np.float64, np.complex64, np.complex128)):
+    if not is_float_point_type(float_dtype):
         float_dtype = np.float64
     if is_stokes_vector(vec, float_dtype=float_dtype):
         return get_str_view_stokes(vec, is_need_check=False, fp=fp)

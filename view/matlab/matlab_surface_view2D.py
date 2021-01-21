@@ -103,6 +103,7 @@ def draw_limited_ellipse(ellipse: LimitedSurface, color='b', alpha=0.5):
 
 
 def __cut(to_draw: iter, lim: iter, k: int) -> iter:
+
     # делаем срезы по одной осям
     xy_index_begin = []
     xy_index_end = []

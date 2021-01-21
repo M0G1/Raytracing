@@ -1,5 +1,7 @@
 from enum import Enum
 
+from surfaces.additional.polar_mat import PolarMat
+
 
 class Types(Enum):
     REFLECTING = 1
@@ -13,10 +15,12 @@ class Surface:
     # __dim = 0
 
     #  Don't usable in logic of program
-    def __init__(self, type_of_surface: Types, dimension: int):
+    def __init__(self, type_of_surface: Types, dimension: int, polarisation_matrix: PolarMat = None):
         self.__type_of_surface = type_of_surface
         self.__dim = dimension
-        self.__
+        self.__polar_mat = polarisation_matrix
+        if polarisation_matrix is None and type_of_surface == Surface.types.POLARIZING:
+            self.__polar_mat = PolarMat()
 
     @property
     def type(self):
@@ -25,6 +29,14 @@ class Surface:
     @property
     def dim(self):
         return self.__dim
+
+    @property
+    def polar_matrix(self):
+        return self.__polar_mat
+
+    @polar_matrix.setter
+    def polar_matrix(self, value: PolarMat):
+        self.__polar_mat = value
 
     # =================================== Surface object  methods ======================================================
     def is_point_belong(self, point: (list, tuple)) -> bool:

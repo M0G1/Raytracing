@@ -1,67 +1,37 @@
-from enum import IntEnum
 import numpy as np
+from typing import List, Union
 
 from ray.abstract_ray import ARay
-
 from surfaces.surface import Surface
-
-
-class Compon_Interface(IntEnum):
-    pass
-
-
-class Compon2D(Compon_Interface):
-    """
-        Components of 2 dimension RAY
-    """
-
-    E_OFFSET = 0
-    R_OFFSET = 2
-    T0_OFFSET = 4
-    T1_OFFSET = 5
-    l_OFFSET = 6
-    # For future code
-    # LAM_OFFSET.value = 6
-    # W_OFFSET.value = 7
-    RAY_OFFSET = 7
-    DIM = 2
-
-
-class Compon3D(Compon_Interface):
-    """
-        Components of  3 dimension  RAY
-    """
-    E_OFFSET = 0
-    R_OFFSET = 3
-    T0_OFFSET = 6
-    T1_OFFSET = 7
-    l_OFFSET = 8
-    # For future code
-    # LAM_OFFSET.value = 8
-    # W_OFFSET.value = 9
-    RAY_OFFSET = 9
-    DIM = 3
-
+from ray.additional.component_struct import *
 
 LOWER_BOUND_OF_T0_RAY_BEGIN = 10 ** -15
 
 
 class RaysPool(ARay):
     """
-        Class of set of rays. It have access methods: e,r,t0,t1
-         and some data manipulating ones: reflect,refract.
+        Class of list of rays. Each ray has its index in the array.
+        It have access methods: e,r,t0,t1 etc. (see more in methods)
+        And some data manipulating ones: reflect,refract.
+        Also it have a few list method "appends_rays" "erase_ray".
+
+        This class contains rays. A ray is described by an enumeration (see file "ray.additional.component_struct.py")
+         which contains the offsets from the origin (as for 1 ray) for the ray parameter.
+        For Example, direction of rays is n-dimension vector of real number.
+        It designation E_OFFSET. starting from index E_OFFSET, the direction data is located in separate
+        cells of the list.
     """
 
     @staticmethod
     def __check_type(lst):
-        if not all(isinstance(i, (float, int)) or (i is None) for i in lst):
+        if not all(isinstance(i, (float, int, complex)) or (i is None) for i in lst):
             raise TypeError("vector of direction and radius vector must consist from float or integer number")
 
     @staticmethod
-    def __check_comIndex(componentIndexes):
-        if not issubclass(componentIndexes, (Compon2D, Compon3D)):
-            raise AttributeError("componentIndexes must be the class Compon2D or Compon3D." +
-                                 " And you take %s" % str(componentIndexes))
+    def __check_comIndex(compon_index_class):
+        if not issubclass(compon_index_class, ComponInterface):
+            raise AttributeError("compon_index_class must be the class Compon2D or Compon3D." +
+                                 " And you take %s" % str(compon_index_class))
 
     def __check_index(self, index: int):
         if index < 0 or index >= self.__rays_num:
@@ -73,28 +43,17 @@ class RaysPool(ARay):
                 len(lst), self.__ComIndex.RAY_OFFSET))
         RaysPool.__check_type(lst)
 
-    # @staticmethod
-    # def _calc_new_length(length: int) -> int:
-    #     """
-    #     adds 25 percent to the number of available offset lengths
-    #     :param length:
-    #     :return:
-    #     """
-    #     if (length * 0.25 // Compon.RAY_OFFSET.value) < 1:
-    #         return length + Compon.RAY_OFFSET
-    #     return (int(1.25 * length) // Compon.RAY_OFFSET.value) * Compon.RAY_OFFSET.value
-
     # ================================================Object's=================================================
 
-    def __init__(self, rays: (list, iter), componentIndexes, default_ray_length: float = 1):
+    def __init__(self, rays: (list, iter), compon_index_class, default_ray_length: float = 1):
         """
         :param rays: iterable object with Numeric values. It is lenght must be a multiple value of RAY_OFFSET
          of class Compon2D or Compon3D
-        :param componentIndexes: class Compon2D or Compon3D with needed dimension space
+        :param compon_index_class: class Compon2D or Compon3D with needed dimension space
         """
 
-        self.__check_comIndex(componentIndexes)
-        self.__ComIndex = componentIndexes
+        self.__check_comIndex(compon_index_class)
+        self.__ComIndex = compon_index_class
         self.default_ray_length = default_ray_length
 
         self.__check_list(rays)
@@ -112,21 +71,21 @@ class RaysPool(ARay):
             for i in range(r_i, r_i + self.__ComIndex.DIM):
                 self.__pool[i] /= norm_val
 
+    def refresh_rays_num(self):
+        val = len(self.__pool) / self.__ComIndex.RAY_OFFSET
+        if not isinstance(val, int):
+            raise ValueError("ray number is not instance of integer(%s)".format(str(val.__class__.__name__)))
+        self.__rays_num = val
+
     def append_rays(self, rays: list):
         self.__check_list(rays)
         # extends list, appending at end of list all element from current list
         self.__pool.extend(rays)
 
         old_size = self.__rays_num
-        self.refresh___rays_num()
+        self.refresh_rays_num()
         for num_ray in range(old_size, self.__rays_num):
             self.normalise_e(num_ray)
-
-    def refresh___rays_num(self):
-        val = len(self.__pool) / self.__ComIndex.RAY_OFFSET
-        if not isinstance(val, int):
-            raise ValueError("ray number is not instance of integer(%s)".format(str(val.__class__.__name__)))
-        self.__rays_num = val
 
     def erase_ray(self, index: int):
         RaysPool.__check_index(self, index)
@@ -141,7 +100,7 @@ class RaysPool(ARay):
         for i in range(self.__ComIndex.RAY_OFFSET):
             # delete element at the end of list or on index - list.pop(index)
             self.__pool.pop()
-        RaysPool.refresh___rays_num(self)
+        RaysPool.refresh_rays_num(self)
 
     # ================================================Magic methods=================================================
 
@@ -155,63 +114,59 @@ class RaysPool(ARay):
                      str(self.__ComIndex.R_OFFSET), str(self.r(i)),
                      str(self.__ComIndex.T0_OFFSET), str(self.t0(i)),
                      str(self.__ComIndex.T1_OFFSET), str(self.t1(i)),
-                     str(self.__ComIndex.l_OFFSET), str(self.l(i)))
+                     str(self.__ComIndex.L_OFFSET), str(self.l(i)))
                   )
         return s
 
     def __len__(self):
         return self.__rays_num
 
-    # ================================================Getters=================================================
-
-    def get(self, i: int, needed_offset: (type(Compon2D.RAY_OFFSET), type(Compon3D.RAY_OFFSET))):
+    # ================================================ Getters =========================================================
+    def get(self, needed_offset: (Compon2D, Compon3D, ComponInterface), i: int):
         """
-        Not recomended to use
         :param i: index of ray
-        :param needed_offset:
-        :return:
+        :param needed_offset: value of
+        :return: value for i-th ray of given value offset. If it have a few values, return a vector of values
+        Example
+        direction offset is E_OFFSET in classes Compon2D Compon3D
+        if u call "get(0, Compon2D.E_OFFSET)" it return the two dimensional vector of real numbers
+        if u call "get(0, Compon3D.T0_OFFSET)" it return the real numbers
         """
         r_i = i * self.__ComIndex.RAY_OFFSET
-        next_offset = None
-        for i in self.__ComIndex:
-            if i > needed_offset:
-                next_offset = i
-        return self.__pool[r_i + needed_offset:r_i + next_offset]
+        next_offset = get_next_offset(self.__ComIndex, needed_offset)
+        if next_offset - needed_offset > 1:
+            return self.__pool[r_i + needed_offset:r_i + next_offset]
+        else:
+            return self.__pool[r_i + needed_offset]
 
-    def e(self, i: int) -> list:
-        r_i = i * self.__ComIndex.RAY_OFFSET
-        a = r_i + self.__ComIndex.E_OFFSET
-        b = r_i + self.__ComIndex.R_OFFSET
-        return self.__pool[a:b]
+    def e(self, i: int) -> Union[List[float or int], np.ndarray]:
+        return self.get(self.__ComIndex.E_OFFSET, i)
 
-    def r(self, i: int):
-        r_i = i * self.__ComIndex.RAY_OFFSET
-        a = r_i + self.__ComIndex.R_OFFSET
-        b = r_i + self.__ComIndex.T0_OFFSET
-        return self.__pool[a:b]
+    def r(self, i: int) -> Union[List[float or int], np.ndarray]:
+        return self.get(self.__ComIndex.R_OFFSET, i)
 
-    def t0(self, i: int) -> float:
-        r_i = i * self.__ComIndex.RAY_OFFSET
-        return self.__pool[r_i + self.__ComIndex.T0_OFFSET]
+    def t0(self, i: int) -> Union[float or int]:
+        return self.get(self.__ComIndex.T0_OFFSET, i)
 
-    def t1(self, i) -> float:
-        r_i = i * self.__ComIndex.RAY_OFFSET
-        return self.__pool[r_i + self.__ComIndex.T1_OFFSET]
+    def t1(self, i) -> Union[float or int]:
+        return self.get(self.__ComIndex.T1_OFFSET, i)
 
-    def l(self, i) -> float:
-        r_i = i * self.__ComIndex.RAY_OFFSET
-        return self.__pool[r_i + self.__ComIndex.l_OFFSET]
+    def l(self, i) -> Union[float or int]:
+        return self.get(self.__ComIndex.L_OFFSET, i)
+
+    def jones_vec(self, i) -> Union[List[complex or float or int], np.ndarray]:
+        return self.get(self.__ComIndex.Jo_OFFSET, i)
 
     @property
-    def componentIndexes(self):
+    def compon_index_class(self):
         return self.__ComIndex
 
-    def begin_ray(self, i: int):
-        """return the point(numpy.array) of begin of ray"""
+    def begin_ray(self, i: int) -> np.ndarray:
+        """Return the point(numpy.array) of begin of ray"""
         return np.add(self.r(i), np.dot(self.t0(i), self.e(i)))
 
-    def end_ray(self, i: int):
-        """return the point(numpy.array) of end of ray"""
+    def end_ray(self, i: int) -> np.ndarray:
+        """Return the point(numpy.array) of end of ray"""
         t1 = self.default_ray_length
         if self.t1(i) > 0:
             t1 = self.t1(i)
@@ -239,7 +194,75 @@ class RaysPool(ARay):
         if l < 0:
             raise ValueError("Negative optical path(%f)" % l)
         r_i = i * self.__ComIndex.RAY_OFFSET
-        self.__pool[r_i + self.__ComIndex.l_OFFSET] = l
+        self.__pool[r_i + self.__ComIndex.L_OFFSET] = l
+
+    # =============================================== Vector operation =================================================
+
+    def get_vector(self, needed_offset: (Compon2D, Compon3D, ComponInterface), begin: int = 0, end: int = -1):
+        """
+        eturns a vector of values for the passed offset value.
+        In this case, the indices of those rays are taken that are in the half-interval [begin,end)
+
+        :param needed_offset  Some parameter, what u want get.
+        :param begin  index of start, after(this include) what will collect data. Default = 0
+        :param end  index of finish, before(this doesn't include) what will collect data. Default = -1 (mean all rays)
+        """
+        end = end if end != -1 else len(self) - 1
+        data = []
+        next_offset = get_next_offset(self.__ComIndex, needed_offset)
+        if next_offset - needed_offset > 1:
+            for i in range(begin, end):
+                r_i = i * self.__ComIndex.RAY_OFFSET
+                data.append(self.__pool[r_i + needed_offset:r_i + next_offset])
+        else:
+            for i in range(begin, end):
+                r_i = i * self.__ComIndex.RAY_OFFSET
+                data.append(self.__pool[r_i + needed_offset])
+        return data
+
+    def get_points_for_lengths(self, t: (List[float or int], np.ndarray), begin: int = 0, end: int = -1):
+        """
+        eturn coordinates of ray for given lengths "t"
+        :param t  the values of ray length. The size of "t" must equal "end - begin".
+        :param begin  index of start, after(this include) what will collect data. Default = 0
+        :param end  index of finish, before(this doesn't include) what will collect data. Default = -1 (mean all rays)
+        """
+        if len(t) != (end - begin):
+            raise ValueError(f"Size of list t must equal 'end - begin'({end - begin}). But it have size {len(t)}")
+        r = self.get_vector(self.__ComIndex.R_OFFSET, begin, end)
+        e = np.asarray(self.get_vector(self.__ComIndex.E_OFFSET, begin, end))
+        return np.add(r, np.multiply(t, e.T).T)
+
+    def get_points_for_length(self, h: (float, int), begin: int = 0, end: int = -1) -> list:
+        """
+        eturn coordinates of ray for given length "t"
+        :param t - the value of ray length.
+        :param begin - index of start, after(this include) what will collect data. Default = 0
+        :param end - index of finish, before(this doesn't include) what will collect data. Default = -1 (mean all rays)
+        """
+        end = end if end != -1 else len(self) - 1
+        vec_size = end - begin
+        return self.get_points_for_lengths(np.full((vec_size,), h), begin, end)
+
+    def begin_ray_vector(self, begin: int = 0, end: int = -1):
+        """
+        :param return coordinates of ray start
+        :param begin - index of start, after(this include) what will collect data. Default = 0
+        :param end - index of finish, before(this doesn't include) what will collect data. Default = -1 (mean all rays)
+        """
+        t0 = self.get_vector(self.__ComIndex.T0_OFFSET, begin, end)
+        return self.get_points_for_lengths(t0, begin, end)
+
+    def end_ray_vector(self, begin: int = 0, end: int = -1):
+        """
+        Return coordinates of ray start
+        :param begin - index of start, after(this include) what will collect data. Default = 0
+        :param end - index of finish, before(this doesn't include) what will collect data. Default = -1 (mean all rays)
+        """
+        t1 = self.get_vector(self.__ComIndex.T1_OFFSET, begin, end)
+        cond = t1 < 0
+        t1[cond] = self.default_ray_length
+        return self.get_points_for_lengths(t1, begin, end)
 
     # methods of object RaysPool========================================================================================
     @staticmethod
@@ -284,11 +307,3 @@ class RaysPool(ARay):
 
     def calc_point_of_ray(self, i: int, t: float) -> list:
         return ARay.calc_point_of_ray_(self.e(i), self.r(i), t)
-
-    def r1(self, h: float) -> list:
-        """
-        :param h: length of rays
-        :return: list of points for length h:
-        """
-        return [self.calc_point_of_ray_(self.e(i), self.r(i), h)
-                for i in range(self.__rays_num)]

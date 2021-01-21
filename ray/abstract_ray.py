@@ -8,7 +8,7 @@ from surfaces.surface import Surface
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 
-class ARay():
+class ARay:
     """
         Abstract ray class with few static methods
     """

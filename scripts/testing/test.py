@@ -1,4 +1,5 @@
-from ray.rays_pool import *
+from ray.rays_pool import RaysPool
+from ray.additional.component_struct import *
 from ray.abstract_ray import ARay
 from surfaces.plane import Plane
 from tools.generators import Generator
@@ -60,7 +61,7 @@ def raypool_offset():
     print()
 
     print(issubclass(Compon3D, IntEnum))
-    print(issubclass(Compon3D, Compon_Interface))
+    print(issubclass(Compon3D, ComponInterface))
 
 
 def aray_typing_test():
@@ -74,9 +75,23 @@ def aray_typing_test():
     print(f"{p}")
     print(f"{args}")
 
+def time_():
+    import time
+
+    data = [[], []]
+    for compon in (Compon2D, Compon3D):
+        for index, fu in enumerate((get_next_offset,)):
+            for i in compon:
+                start = time.time()
+                val = fu(compon, i)
+                end = time.time()
+                data[index].append(end - start)
+                print(f"time of work {index} func is {end - start} value - {int(val)} : {str(val)}")
+
+    print(data[0], "\n", data[1])
 
 def main():
-    aray_typing_test()
+    time_()
 
 # binary_tree_test()
 

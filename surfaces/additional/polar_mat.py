@@ -59,7 +59,7 @@ class PolarMat():
 
     # =========================================== accessor methods =============================================
 
-    def add_dependence_from_param(self, param: Tuple[str], side: str, func: Callable):
+    def add_dependence_from_param(self, params: Tuple[str], side: str, func: Callable):
         """
         Add function, returned needed matrix(for Jones any 2 x 2 matrix with complex number,
         for Muller any 4 x 4 matrix with real number). It doesn't check.
@@ -70,13 +70,21 @@ class PolarMat():
             It must be uniq or to have the same mean to work correct.
         side - "left" of "right". It definite the side of multiplication of this matrix.
         func - function only with named parameters.
+
+        Example(pseudocode):
+
+        rot_mat_a_ccw = lambda a: [[cos(a),-sin(a)],
+                                    [sin(a),cos(a)]]
+        param = ("a",)
+        # add method and call "get_polar_mat"
+        # see continue of example at description of method "get_polar_mat"
         """
         if side not in (_LEFT, _RIGHT):
             raise ValueError(f"Side must be '{_LEFT}' or '{_RIGHT}' values. Given value:{side}")
-        self.depend_param[side].append(param)
+        self.depend_param[side].append(params)
         self.addit_mat_func[side].append(func)
 
-    def remove_dependence_from_param(self, param: Tuple[str], side: str, func: Callable):
+    def remove_dependence_from_param(self, params: Tuple[str], side: str, func: Callable):
         """
         Remove function, returned needed matrix(for Jones any 2 x 2 matrix with complex number,
         for Muller any 4 x 4 matrix with real number). It doesn't check.
@@ -90,7 +98,7 @@ class PolarMat():
         """
         if side not in (_LEFT, _RIGHT):
             raise ValueError(f"Side must be '{_LEFT}' or '{_RIGHT}' values. Given value:{side}")
-        self.depend_param[side].remove(param)
+        self.depend_param[side].remove(params)
         self.addit_mat_func[side].remove(func)
 
     def get_polar_mat(self, **kwargs):
@@ -99,26 +107,33 @@ class PolarMat():
         If added dependence from param it will redirect to needed function.
         Their result will matrix multiply on inner matrix on left from first added to last.
         M_n * M_n-1 * ... * M_1 * M_inner
+
+        Example(pseudocode):
+        # see previous pseudocode at description of method "add_dependence_from_param"
+        some_obj.get_polar_mat(a=some_value)
         """
 
-        def search_kwargs(param: Tuple[str], **kwargs_) -> dict:
+        def search_kwargs(params: Tuple[str], **kwargs_) -> list:
             """
-            return dictionary only with params where names matches with "param" values
-            Optimization. It it doesn't have a normal realization, please will write it.
+            return list only with params where names matches with "params" values
             """
-            return kwargs_
+            args = []
+            for param in params:
+                elem = kwargs_.get(param, None)
+                args.append(elem)
+            return args
 
         result = self.trans_mat.copy()
         n = len(self.depend_param[_LEFT])
         for i in range(n).__reversed__():
-            needed_kwargs = search_kwargs(self.depend_param[_LEFT][i], **kwargs)
-            new_mat = self.addit_mat_func[_LEFT][i](**needed_kwargs)
+            needed_args = search_kwargs(self.depend_param[_LEFT][i], **kwargs)
+            new_mat = self.addit_mat_func[_LEFT][i](*needed_args)
             result = np.dot(new_mat, result)
 
         n = len(self.depend_param[_RIGHT])
         for i in range(n).__reversed__():
-            needed_kwargs = search_kwargs(self.depend_param[_RIGHT][i], **kwargs)
-            new_mat = self.addit_mat_func[_RIGHT][i](**needed_kwargs)
+            needed_args = search_kwargs(self.depend_param[_RIGHT][i], **kwargs)
+            new_mat = self.addit_mat_func[_RIGHT][i](*needed_args)
             result = np.dot(result, new_mat)
         return result
 
@@ -132,7 +147,7 @@ class PolarMat():
         And return trans_mat and boolean value, what mean is jones matrix or not.
         """
         is_jones = PolarMat.is_matrix_jones(trans_mat)
-        if not is_jones or not PolarMat.is_matrix_muller(trans_mat):
+        if not is_jones and not PolarMat.is_matrix_muller(trans_mat):
             raise ValueError(f"trans_mat must be a Jones or Muller matrix!\n{trans_mat}\n" +
                              "Jones matrix is a 2 x 2 complex matrix." +
                              "Muller matrix is a 4 x 4 real matrix.")
@@ -140,7 +155,7 @@ class PolarMat():
 
     @staticmethod
     def is_matrix_jones(trans_mat: (List[float or int or complex], np.ndarray)):
-        trans_mat = np.ndarray(trans_mat)
+        trans_mat = np.asarray(trans_mat)
         if trans_mat.shape != (2, 2):
             return False
         elif not tools.numpy_tool.is_numpy_complex_num_type(trans_mat):
@@ -150,7 +165,7 @@ class PolarMat():
 
     @staticmethod
     def is_matrix_muller(trans_mat: (List[float or int or complex], np.ndarray)):
-        trans_mat = np.ndarray(trans_mat)
+        trans_mat = np.asarray(trans_mat)
         if trans_mat.shape != (4, 4):
             return False
         elif not tools.numpy_tool.is_numpy_real_num_type(trans_mat):

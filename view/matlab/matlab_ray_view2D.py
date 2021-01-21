@@ -99,7 +99,7 @@ def draw_deep_ray_modeling(
 
 
 def draw_ray_pool(pool: rays_pool.RaysPool, ray_const_length: float = 2, alpha: float = 1):
-    if pool.componentIndexes.DIM != 2:
+    if pool.compon_index_class.DIM != 2:
         raise AttributeError("NON-two-dimensional ray pool")
 
     for i in range(len(pool)):

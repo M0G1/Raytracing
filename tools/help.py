@@ -12,7 +12,6 @@ from surfaces.ellipse import Ellipse
 i_g_r = (3 - m.sqrt(5)) / 2
 
 
-
 def func_of_reading_surf_ray_from_strings(strings, dimension):
     d = dimension
     rays = []
