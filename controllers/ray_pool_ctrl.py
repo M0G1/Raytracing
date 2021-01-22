@@ -7,6 +7,7 @@ from ray.rays_pool import RaysPool
 def tracing_rayspool_ordered_surface(pool: RaysPool, surfaces: (tuple, iter, list), is_check: bool = False,
                                      is_set_optical_path: bool = False):
     """
+    Tracing the ray throw the surfaces.
     All rays in one pool must interact with one surface
     :param pool: object of class RaysPool
     :param surfaces: list of surfaces arranged in series.
@@ -22,9 +23,7 @@ def tracing_rayspool_ordered_surface(pool: RaysPool, surfaces: (tuple, iter, lis
     new_rays_pool = pool
     for i, surface in enumerate(surfaces):
         # may be i wanna to do some other here(searching of index)
-
         temp = None
-
         if surface.type == Surface.types.REFLECTING:
             temp = new_rays_pool.reflect(surface)
         elif surface.type == Surface.types.REFRACTING:
