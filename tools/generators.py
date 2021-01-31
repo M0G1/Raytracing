@@ -71,7 +71,7 @@ class Generator:
         # return rot_mat
 
     @staticmethod
-    def generate_rays_2d(point1: list, point2: list, intensity: float) -> rays_pool.RaysPool:
+    def generate_rays_2d(point1: (list,tuple), point2: (list,tuple), intensity: float) -> rays_pool.RaysPool:
         if len(point1) != 2 or len(point2) != 2:
             raise AttributeError("Point dimension is not 2. point1: " + str(point1) + " point2: " + str(point2))
         if (not all(isinstance(coor, (float, int)) for coor in point1)) or \

@@ -1,6 +1,6 @@
 import numpy as np
 import math as m
-from typing import List
+from typing import List,Type
 
 from surfaces.surface import Surface
 

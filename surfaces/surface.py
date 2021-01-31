@@ -1,5 +1,6 @@
 from enum import Enum
-from typing import TypeVar, Union
+from typing import TypeVar, Union, List, Tuple
+import numpy as np
 
 from surfaces.additional.polar_mat import PolarMat
 
@@ -83,17 +84,18 @@ class Surface:
         self.__polar_mat_reflect = value
 
     # =================================== Surface object  methods ======================================================
-    def is_point_belong(self, point: T[Union[float, int]]) -> bool:
+    def is_point_belong(self, point: [List[Union[float, int]], np.ndarray]) -> bool:
         pass
 
-    def norm_vec(self, point: T[Union[float, int]]) -> T[Union[float, int]]:
+    def norm_vec(self, point: [List[Union[float, int]], np.ndarray]) -> \
+            Union[List[Union[float, int]], np.ndarray, None]:
         """
         :param point: point in space
         :return: normal vector of real number for given point
         """
         return
 
-    def get_refractive_indexes(self, point: T[Union[float, int]]):
+    def get_refractive_indexes(self, point: [List[Union[float, int]], np.ndarray]):
         """
         Any surface divides the space into 2 parts.
 
@@ -118,16 +120,18 @@ class Surface:
 
     # ======================================= methods for Ray ==========================================================
 
-    def _ray_surface_intersection(self, e: T[Union[float, int]],
-                                  r: T[Union[float, int]]) -> T[Union[float, int]]:
+    def _ray_surface_intersection(self, e: [List[Union[float, int]], np.ndarray],
+                                  r: [List[Union[float, int]], np.ndarray]) \
+            -> Union[List[Union[float, int]], np.ndarray, None]:
         """Get for abstract ray presented as vector of direction and start point
         :param e vector of direction of ray.
         :param r starting point of ray
         :return: get the length of ray, where point on ray intersect the surface
         """
-        pass
 
-    def find_intersection_with_surface(self, ray) -> T[Union[float, int]]:
+    pass
+
+    def find_intersection_with_surface(self, ray) -> Union[List[Union[float, int]], np.ndarray, None]:
         """Get for ray presented as class of 1 ray.
         The length of ray must be sorted by increase
         :param ray object of class Ray. (see ray.ray.py)
@@ -144,8 +148,9 @@ class Surface:
         return ret_res[0] if ret_res is not None else None
 
     # ======================================== methods for Ray_pool ====================================================
-    def find_intersection_pool_with_surface(self, pool, index: int) -> T[Union[float, int]]:
+    def find_intersection_pool_with_surface(self, pool, index: int) -> Union[List[Union[float, int]], np.ndarray, None]:
         pass
 
-    def find_nearest_intersection_pool_with_surface(self, pool, index: int) -> T[Union[float, int]]:
+    def find_nearest_intersection_pool_with_surface(self, pool, index: int) \
+            -> Union[List[Union[float, int]], np.ndarray, None]:
         pass

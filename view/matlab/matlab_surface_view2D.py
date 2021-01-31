@@ -141,7 +141,7 @@ def draw_limits(surface: LimitedSurface, color: str = "black", alpha: float = 0.
         draw_plane(plane, color=color, alpha=alpha)
 
 
-def draw_exist_surface(surface: Surface, color: str = "blue", alpha: float = 0.5):
+def draw_exist_surface(surface: Surface, color: str = "blue", alpha: float = 1.):
     """
         draw existing surface: Plane,Sphere,Ellipse and
         LimitedSurface, where surface is limited Plane,Sphere,Ellipse

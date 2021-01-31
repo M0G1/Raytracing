@@ -11,7 +11,7 @@ _LEFT: str = "left"
 _RIGHT: str = "right"
 
 
-class PolarMat():
+class PolarMat:
     """
     class PolarMat - Polarisation matrix
     It responsibility is transform polarisation of light
@@ -63,7 +63,7 @@ class PolarMat():
         """
         Add function, returned needed matrix(for Jones any 2 x 2 matrix with complex number,
         for Muller any 4 x 4 matrix with real number). It doesn't check.
-        When call "get_polar_mat". U need give named params and they will redirect to  given function.
+        When call "get_polar_mat". U need give named params and they will redirect to given function.
         Param can be empty to change matrix, but better set "transform_mat" parameter.
 
         param - tuple of str, name of named parameters within given function.
@@ -136,6 +136,15 @@ class PolarMat():
             new_mat = self.addit_mat_func[_RIGHT][i](*needed_args)
             result = np.dot(result, new_mat)
         return result
+
+    def get_new_polar_state(self, polar_vec: (List[float or int or complex], np.ndarray), **kwargs):
+        """
+        Multiple polar matrix on polar vector with given param for ADDED FUNCTION.
+
+        polar_ver - Jones or Stokes vector
+        kwargs - parameter for added function.  See description for "add_dependence_from_param" method
+        """
+        return np.dot(self.get_polar_mat(**kwargs), polar_vec)
 
     # =========================================== static methods =======================================================
 

@@ -196,6 +196,12 @@ class RaysPool(ARay):
         r_i = i * self.__ComIndex.RAY_OFFSET
         self.__pool[r_i + self.__ComIndex.L_OFFSET] = l
 
+    def set_jones_vec(self, i: int, jo_vec: Union[List[complex or float or int], np.ndarray]):
+        r_i = i * self.__ComIndex.RAY_OFFSET
+        beg = r_i + self.__ComIndex.Jo_OFFSET
+        end = r_i + get_next_offset(self.__ComIndex, self.__ComIndex.Jo_OFFSET)
+        self.__pool[beg:end] = jo_vec
+
     # =============================================== Vector operation =================================================
 
     def get_vector(self, needed_offset: (Compon2D, Compon3D, ComponInterface), begin: int = 0, end: int = -1):
